@@ -522,7 +522,28 @@ async function insertYuzerProdutosPorEvento(supabase: any, eventoId: number, nom
   }
 }
 
+// Gera lista de todas as datas entre inicio e fim (inclusive)
+function gerarDatasNoPeriodo(dataInicioStr: string, dataFimStr: string): string[] {
+  const datas: string[] = [];
+  const inicio = new Date(dataInicioStr);
+  const fim = new Date(dataFimStr);
+  
+  // Se são iguais ou fim é antes de inicio, retorna só a data de inicio
+  if (fim <= inicio) {
+    return [dataInicioStr];
+  }
+  
+  const atual = new Date(inicio);
+  while (atual <= fim) {
+    datas.push(atual.toISOString().split('T')[0]);
+    atual.setDate(atual.getDate() + 1);
+  }
+  
+  return datas;
+}
+
 // Inserir dados de pagamento e faturamento por hora
+// CORRIGIDO: Processa cada dia separadamente para eventos multi-dias (ex: Carnaval)
 async function insertYuzerPagamentoEFaturamento(supabase: any, statsData: any, _allOrders: any[], barId: number, yuzerToken: string) {
   if (!statsData?.data || !Array.isArray(statsData.data)) {
     console.log('⚠️ Sem dados de events para pagamento/faturamento');
@@ -531,148 +552,162 @@ async function insertYuzerPagamentoEFaturamento(supabase: any, statsData: any, _
 
   for (const evento of statsData.data) {
     try {
-      // Extrair data do evento
-      const regex = /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/;
-      const match = evento.name?.match(regex);
+      // Usar a função que detecta eventos multi-dias
+      const { dataInicio: dataInicioEvento, dataFim: dataFimEvento } = extrairDatasDoNomeEvento(evento.name);
       
-      if (!match) continue;
-      
-      let [, dia, mes, ano] = match;
-      if (ano.length === 2) {
-        ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
+      if (!dataInicioEvento) {
+        console.log(`⚠️ Não foi possível extrair data do evento: ${evento.name}`);
+        continue;
       }
-      const dataEvento = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-      // Período 10h do dia até 10h do dia seguinte (10h Brasil = 13h UTC)
-      const dataInicio = `${dataEvento}T13:00:00.000Z`;
-      const dataFimDate = new Date(`${dataEvento}T13:00:00.000Z`);
-      dataFimDate.setDate(dataFimDate.getDate() + 1); // Dia seguinte
-      const dataFim = dataFimDate.toISOString();
+      
+      // Extrair apenas a parte da data (YYYY-MM-DD)
+      const dataInicioStr = dataInicioEvento.split('T')[0];
+      const dataFimStr = dataFimEvento ? dataFimEvento.split('T')[0] : dataInicioStr;
+      
+      // Gerar lista de todas as datas do evento (para festivais/multi-dias)
+      const datasDoEvento = gerarDatasNoPeriodo(dataInicioStr, dataFimStr);
+      
+      if (datasDoEvento.length > 1) {
+        console.log(`📅 Evento multi-dias detectado: ${evento.name} (${datasDoEvento.length} dias: ${dataInicioStr} a ${dataFimStr})`);
+      }
+      
+      // Processar CADA DIA do evento separadamente
+      for (const dataEvento of datasDoEvento) {
+        // Período 10h do dia até 10h do dia seguinte (10h Brasil = 13h UTC)
+        const dataInicio = `${dataEvento}T13:00:00.000Z`;
+        const dataFimDate = new Date(`${dataEvento}T13:00:00.000Z`);
+        dataFimDate.setDate(dataFimDate.getDate() + 1); // Dia seguinte
+        const dataFim = dataFimDate.toISOString();
 
-      // 1. FATURAMENTO POR HORA
-      try {
-        const fatResponse = await fetch(`https://api.eagle.yuzer.com.br/api/salesPanels/${evento.id}/dashboards/earningsAndSells/hour`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'yuzer': yuzerToken
-          },
-          body: JSON.stringify({
-            from: dataInicio,
-            to: dataFim
-          })
-        });
+        // 1. FATURAMENTO POR HORA
+        try {
+          const fatResponse = await fetch(`https://api.eagle.yuzer.com.br/api/salesPanels/${evento.id}/dashboards/earningsAndSells/hour`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'yuzer': yuzerToken
+            },
+            body: JSON.stringify({
+              from: dataInicio,
+              to: dataFim
+            })
+          });
 
-        if (fatResponse.ok) {
-          const fatData = await fatResponse.json();
-          const dadosFatHora: any[] = [];
-          
-          // Estrutura correta: { categories: [...], series: [{ data: [...] }] }
-          if (fatData.categories && fatData.series?.[0]?.data) {
-            const categories = fatData.categories;
-            const seriesData = fatData.series[0].data;
+          if (fatResponse.ok) {
+            const fatData = await fatResponse.json();
+            const dadosFatHora: any[] = [];
             
-            categories.forEach((categoria: string, index: number) => {
-              const item = seriesData[index];
-              const faturamento = item && typeof item === 'object' ? (item.total || 0) : (Number(item) || 0);
-              const vendas = item && typeof item === 'object' ? (item.sells || 0) : 0;
-              dadosFatHora.push({
+            // Estrutura correta: { categories: [...], series: [{ data: [...] }] }
+            if (fatData.categories && fatData.series?.[0]?.data) {
+              const categories = fatData.categories;
+              const seriesData = fatData.series[0].data;
+              
+              categories.forEach((categoria: string, index: number) => {
+                const item = seriesData[index];
+                const faturamento = item && typeof item === 'object' ? (item.total || 0) : (Number(item) || 0);
+                const vendas = item && typeof item === 'object' ? (item.sells || 0) : 0;
+                dadosFatHora.push({
+                  bar_id: barId,
+                  evento_id: evento.id,
+                  data_evento: dataEvento,
+                  hora: index,
+                  hora_formatada: categoria,
+                  faturamento: faturamento,
+                  vendas: vendas,
+                  raw_data: item,
+                  created_at: new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                });
+              });
+            }
+            
+            if (dadosFatHora.length > 0) {
+              const { error } = await supabase
+                .from('yuzer_fatporhora')
+                .upsert(dadosFatHora, {
+                  onConflict: 'bar_id,evento_id,data_evento,hora',
+                  ignoreDuplicates: false
+                });
+                
+              if (!error) {
+                console.log(`✅ Faturamento por hora: ${dadosFatHora.length} registros para ${dataEvento}`);
+              }
+            }
+          }
+        } catch (err) {
+          console.error(`❌ Erro no faturamento por hora ${dataEvento}:`, (err as Error).message);
+        }
+
+        // 2. DADOS DE PAGAMENTO (para cada dia!)
+        try {
+          const pagResponse = await fetch(`https://api.eagle.yuzer.com.br/api/salesPanels/${evento.id}/dashboards/payments/statistics`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'yuzer': yuzerToken
+            },
+            body: JSON.stringify({
+              from: dataInicio,
+              to: dataFim
+            })
+          });
+
+          if (pagResponse.ok) {
+            const pagData = await pagResponse.json();
+            
+            // Extrair valores por método (estrutura correta: methods array)
+            const methods = pagData.methods || [];
+            const credito = methods.find((m: any) => m.name === 'CREDIT_CARD')?.total || 0;
+            const debito = methods.find((m: any) => m.name === 'DEBIT_CARD')?.total || 0;
+            const pix = methods.find((m: any) => m.name === 'PIX')?.total || 0;
+            const dinheiro = methods.find((m: any) => m.name === 'CASH')?.total || 0;
+            const producao = methods.find((m: any) => m.name === 'PRODUCTION')?.total || 0;
+            const cancelado = methods.find((m: any) => m.name === 'CANCELLED')?.total || 0;
+            
+            const faturamentoBruto = pagData.total || 0;
+            const descontoCredito = credito * 0.035; // 3.5%
+            const descontoDebitoPix = (debito + pix) * 0.015; // 1.5%
+            const totalDescontos = descontoCredito + descontoDebitoPix;
+            const valorLiquido = faturamentoBruto - totalDescontos;
+            
+            // Só inserir se tiver faturamento
+            if (faturamentoBruto > 0) {
+              const pagamentoData = {
                 bar_id: barId,
                 evento_id: evento.id,
                 data_evento: dataEvento,
-                hora: index,
-                hora_formatada: categoria,
-                faturamento: faturamento,
-                vendas: vendas,
-                raw_data: item,
-                created_at: new Date().toISOString(),
+                faturamento_bruto: faturamentoBruto,
+                credito: credito,
+                debito: debito,
+                pix: pix,
+                dinheiro: dinheiro,
+                producao: producao,
+                desconto_credito: descontoCredito,
+                desconto_debito_pix: descontoDebitoPix,
+                total_descontos: totalDescontos,
+                aluguel_equipamentos: 0,
+                valor_liquido: valorLiquido,
+                total_cancelado: cancelado,
+                quantidade_pedidos: pagData.count || 0,
+                raw_data: pagData,
                 updated_at: new Date().toISOString()
-              });
-            });
-          }
-          
-          if (dadosFatHora.length > 0) {
-            const { error } = await supabase
-              .from('yuzer_fatporhora')
-              .upsert(dadosFatHora, {
-                onConflict: 'bar_id,evento_id,data_evento,hora',
-                ignoreDuplicates: false
-              });
+              };
               
-            if (!error) {
-              console.log(`✅ Faturamento por hora: ${dadosFatHora.length} registros inseridos para evento ${evento.name}`);
+              const { error } = await supabase
+                .from('yuzer_pagamento')
+                .upsert(pagamentoData, {
+                  onConflict: 'bar_id,evento_id,data_evento',
+                  ignoreDuplicates: false
+                });
+                
+              if (!error) {
+                console.log(`✅ Pagamento ${dataEvento}: R$ ${faturamentoBruto.toFixed(2)} bruto, R$ ${valorLiquido.toFixed(2)} líquido`);
+              }
             }
           }
+        } catch (err) {
+          console.error(`❌ Erro no pagamento ${dataEvento}:`, (err as Error).message);
         }
-      } catch (err) {
-        console.error(`❌ Erro no faturamento por hora do evento ${evento.id}:`, (err as Error).message);
-      }
-
-      // 2. DADOS DE PAGAMENTO
-      try {
-        const pagResponse = await fetch(`https://api.eagle.yuzer.com.br/api/salesPanels/${evento.id}/dashboards/payments/statistics`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'yuzer': yuzerToken
-          },
-          body: JSON.stringify({
-            from: dataInicio,
-            to: dataFim
-          })
-        });
-
-        if (pagResponse.ok) {
-          const pagData = await pagResponse.json();
-          
-          // Extrair valores por método (estrutura correta: methods array)
-          const methods = pagData.methods || [];
-          const credito = methods.find((m: any) => m.name === 'CREDIT_CARD')?.total || 0;
-          const debito = methods.find((m: any) => m.name === 'DEBIT_CARD')?.total || 0;
-          const pix = methods.find((m: any) => m.name === 'PIX')?.total || 0;
-          const dinheiro = methods.find((m: any) => m.name === 'CASH')?.total || 0;
-          const producao = methods.find((m: any) => m.name === 'PRODUCTION')?.total || 0;
-          const cancelado = methods.find((m: any) => m.name === 'CANCELLED')?.total || 0;
-          
-          const faturamentoBruto = pagData.total || 0;
-          const descontoCredito = credito * 0.035; // 3.5%
-          const descontoDebitoPix = (debito + pix) * 0.015; // 1.5%
-          const totalDescontos = descontoCredito + descontoDebitoPix;
-          const valorLiquido = faturamentoBruto - totalDescontos;
-          
-          const pagamentoData = {
-            bar_id: barId,
-            evento_id: evento.id,
-            data_evento: dataEvento,
-            faturamento_bruto: faturamentoBruto,
-            credito: credito,
-            debito: debito,
-            pix: pix,
-            dinheiro: dinheiro,
-            producao: producao,
-            desconto_credito: descontoCredito,
-            desconto_debito_pix: descontoDebitoPix,
-            total_descontos: totalDescontos,
-            aluguel_equipamentos: 0,
-            valor_liquido: valorLiquido,
-            total_cancelado: cancelado,
-            quantidade_pedidos: pagData.count || 0,
-            raw_data: pagData,
-            updated_at: new Date().toISOString()
-          };
-          
-          const { error } = await supabase
-            .from('yuzer_pagamento')
-            .upsert(pagamentoData, {
-              onConflict: 'bar_id,evento_id,data_evento',
-              ignoreDuplicates: false
-            });
-            
-          if (!error) {
-            console.log(`✅ Pagamento: R$ ${faturamentoBruto.toFixed(2)} bruto, R$ ${valorLiquido.toFixed(2)} líquido para evento ${evento.name}`);
-          }
-        }
-      } catch (err) {
-        console.error(`❌ Erro no pagamento do evento ${evento.id}:`, (err as Error).message);
       }
       
     } catch (err) {
