@@ -306,7 +306,107 @@ serve(async (req) => {
 
 ---
 
-## 7. RESERVAS (GETIN)
+## 7. YUZER (EVENTOS E INGRESSOS)
+
+### yuzer_eventos (Eventos no sistema Yuzer)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| evento_id | INTEGER | ID do evento no Yuzer |
+| nome_evento | TEXT | Nome do evento |
+| data_inicio | TIMESTAMP | Data/hora início |
+| data_fim | TIMESTAMP | Data/hora fim |
+| status | VARCHAR | Status do evento |
+
+### yuzer_produtos (Vendas de produtos no Yuzer)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| evento_id | INTEGER | ID do evento |
+| data_evento | DATE | **Data do evento (usar para filtros)** |
+| produto_id | INTEGER | ID do produto |
+| produto_nome | TEXT | Nome do produto |
+| quantidade | INTEGER | Quantidade vendida |
+| valor_total | NUMERIC | Valor total vendido |
+| categoria | VARCHAR | Categoria (se definida) |
+| eh_ingresso | BOOLEAN | Se é ingresso/entrada |
+
+### yuzer_pagamento (Faturamento do Yuzer por dia)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| evento_id | INTEGER | ID do evento |
+| data_evento | DATE | Data do evento |
+| faturamento_bruto | NUMERIC | **Faturamento bruto Yuzer** |
+| valor_liquido | NUMERIC | **Valor líquido (após taxas)** |
+| credito | NUMERIC | Vendas em crédito |
+| debito | NUMERIC | Vendas em débito |
+| pix | NUMERIC | Vendas em PIX |
+| dinheiro | NUMERIC | Vendas em dinheiro |
+
+### yuzer_fatporhora (Faturamento por hora)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| evento_id | INTEGER | ID do evento |
+| data_evento | DATE | Data do evento |
+| hora | INTEGER | Índice da hora |
+| hora_formatada | TEXT | Hora formatada (DD/MM/YYYY HH:00) |
+| faturamento | NUMERIC | Faturamento na hora |
+| vendas | INTEGER | Quantidade de vendas |
+
+### VIEW: yuzer_produtos_categorizado (Produtos com categorização automática)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| ... | | Mesmas colunas de yuzer_produtos + |
+| categoria_auto | VARCHAR | **Categoria automática: BILHETERIA, CERVEJA, DRINKS, COMIDA, NAO_ALCOOLICO, OUTROS** |
+
+### VIEW: yuzer_resumo_por_categoria (Resumo por dia e categoria)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| bar_id | INTEGER | Referência ao bar |
+| evento_id | INTEGER | ID do evento |
+| data_evento | DATE | Data do evento |
+| bilheteria | NUMERIC | **Total ingressos/couvert** |
+| cerveja | NUMERIC | **Total cervejas** |
+| drinks | NUMERIC | **Total drinks** |
+| comida | NUMERIC | **Total comidas** |
+| nao_alcoolico | NUMERIC | **Total não alcoólicos** |
+| outros | NUMERIC | **Total outros** |
+| total_bruto | NUMERIC | **Total geral** |
+| total_bebidas | NUMERIC | Cerveja + Drinks |
+| total_consumo | NUMERIC | Tudo exceto bilheteria |
+
+---
+
+## 8. SYMPLA (VENDA DE INGRESSOS ONLINE)
+
+### sympla_eventos (Eventos no Sympla)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| evento_sympla_id | VARCHAR | ID do evento no Sympla |
+| nome_evento | TEXT | Nome do evento |
+| data_inicio | TIMESTAMP | Data/hora início |
+| data_fim | TIMESTAMP | Data/hora fim |
+
+### sympla_resumo (Resumo de vendas Sympla)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| evento_sympla_id | VARCHAR | ID do evento |
+| receita_total | NUMERIC | **Receita total Sympla** |
+| checkins_realizados | INTEGER | **Check-ins feitos** |
+| ingressos_vendidos | INTEGER | Total vendidos |
+
+---
+
+## 9. RESERVAS (GETIN)
 
 ### getin_reservas (Reservas de mesas)
 | Coluna | Tipo | Descrição |
@@ -395,10 +495,31 @@ Ticket Bar = faturamento_bar / clientes
 - Para dados do dia atual, usar data >= 'hoje'
 - Para semana: usar data_inicio e data_fim
 
-### 5. Tabela Principal para Faturamento
-- Use \`eventos_base\` para faturamento diário consolidado
-- Use \`contahub_analitico\` para detalhes de produtos
-- Use \`desempenho_semanal\` para métricas semanais
+### 5. ⚠️ FONTES DE FATURAMENTO (MUITO IMPORTANTE!)
+O faturamento vem de MÚLTIPLAS FONTES:
+- **ContaHub** = PDV do bar (consumo no local)
+- **Yuzer** = Sistema de eventos e ingressos (quando usa Yuzer)
+- **Sympla** = Venda de ingressos online
+
+Para faturamento total de um dia, use \`eventos_base\` que já tem:
+- \`real_r\` = faturamento ContaHub
+- \`yuzer_liquido\` = faturamento Yuzer
+- \`sympla_liquido\` = faturamento Sympla
+
+Para detalhes por categoria (bilheteria, cerveja, drinks, comida):
+- Use a VIEW \`yuzer_resumo_por_categoria\`
+
+### 6. Tabelas por Tipo de Consulta
+| Tipo | Tabela |
+|------|--------|
+| Faturamento diário consolidado | \`eventos_base\` |
+| Faturamento por categoria | \`yuzer_resumo_por_categoria\` |
+| Produtos ContaHub | \`contahub_analitico\` |
+| Produtos Yuzer | \`yuzer_produtos_categorizado\` |
+| Métricas semanais | \`desempenho_semanal\` |
+| Clientes/comandas | \`contahub_periodo\` |
+| Ingressos Sympla | \`sympla_resumo\` |
+| Faturamento por hora | \`yuzer_fatporhora\` ou \`contahub_fatporhora\` |
 `
 
     // 2. USAR IA PARA GERAR SQL COM CONTEXTO ZYKOR
@@ -409,8 +530,14 @@ Você é especialista em PostgreSQL e conhece profundamente o banco de dados do 
 # CONTEXTO DO NEGÓCIO
 - Sistema de gestão para bares e casas noturnas
 - Cada dia de operação é um "evento" (registrado em eventos_base)
-- Principal fonte de dados: ContaHub (PDV), NIBO (Financeiro), GetIn (Reservas)
+- MÚLTIPLAS FONTES DE DADOS:
+  * **ContaHub** = PDV do bar (consumo no local, bebidas, comidas)
+  * **Yuzer** = Sistema de eventos/ingressos (bilheteria, vendas no evento)
+  * **Sympla** = Venda de ingressos online
+  * **NIBO** = Financeiro (contas a pagar/receber)
+  * **GetIn** = Reservas de mesas
 - bar_id = 3 é o Ordinário Bar (principal cliente)
+- bar_id = 4 é o Deboche Bar
 
 # VOCABULÁRIO DO NEGÓCIO
 - **real_r**: Faturamento real do dia
@@ -438,13 +565,22 @@ ${bar_id}
 
 # MELHORES PRÁTICAS
 - SEMPRE filtrar por bar_id = ${bar_id}
-- Para faturamento diário: use eventos_base
-- Para produtos vendidos: use contahub_analitico (agrupar por prd_desc)
+- Para faturamento diário TOTAL: use eventos_base (tem real_r + yuzer_liquido + sympla_liquido)
+- Para faturamento por CATEGORIA (bilheteria, cerveja, drinks, comida): use yuzer_resumo_por_categoria
+- Para produtos vendidos no bar: use contahub_analitico (agrupar por prd_desc)
+- Para produtos vendidos em eventos Yuzer: use yuzer_produtos_categorizado
 - Para métricas semanais: use desempenho_semanal
-- Para clientes: use contahub_periodo ou getin_reservas
+- Para clientes/comandas: use contahub_periodo ou getin_reservas
 - Para financeiro: use nibo_agendamentos
+- Para ingressos online: use sympla_resumo
 - Use LIMIT para evitar respostas muito grandes
 - Ordene os resultados de forma relevante
+
+# IMPORTANTE PARA FATURAMENTO
+Quando perguntar "quanto foi o faturamento de [data]", SEMPRE considere:
+1. Se o bar usa Yuzer (eventos especiais, festivais): inclua yuzer_liquido
+2. Se vende ingresso pelo Sympla: inclua sympla_liquido
+3. O campo real_r em eventos_base geralmente já tem o valor consolidado
 
 # ATALHOS COMUNS
 - "ontem": WHERE data_evento = CURRENT_DATE - 1
