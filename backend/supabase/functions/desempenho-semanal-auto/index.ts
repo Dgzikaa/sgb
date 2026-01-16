@@ -253,9 +253,12 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
 
   console.log(`📅 Período: ${startDate} até ${endDate}`)
 
-  // 1. FATURAMENTO TOTAL
-  const [contahubData, yuzerData, symplaData] = await Promise.all([
-    fetchAllData(supabase, 'contahub_pagamentos', 'liquido', {
+  // ============================================
+  // 1. FATURAMENTO TOTAL (ContaHub + Yuzer + Sympla)
+  // ContaHub: SUM(liquido) - SUM(liquido WHERE meio='Conta Assinada')
+  // ============================================
+  const [contahubPagamentos, yuzerData, symplaData] = await Promise.all([
+    fetchAllData(supabase, 'contahub_pagamentos', 'liquido, meio', {
       'gte_dt_gerencial': startDate,
       'lte_dt_gerencial': endDate,
       'eq_bar_id': barId
@@ -271,91 +274,170 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
     })
   ])
 
-  const faturamentoContahub = contahubData?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0
+  // ContaHub: liquido total - conta assinada
+  const liquidoTotal = contahubPagamentos?.reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0
+  const contaAssinada = contahubPagamentos?.filter(item => item.meio === 'Conta Assinada')
+    .reduce((sum, item) => sum + (parseFloat(item.liquido) || 0), 0) || 0
+  const faturamentoContahub = liquidoTotal - contaAssinada
+
   const faturamentoYuzer = yuzerData?.reduce((sum, item) => sum + (parseFloat(item.valor_liquido) || 0), 0) || 0
   const faturamenteSympla = symplaData?.reduce((sum, item) => sum + (parseFloat(item.valor_liquido) || 0), 0) || 0
   const faturamentoTotal = faturamentoContahub + faturamentoYuzer + faturamenteSympla
 
-  console.log(`💰 Faturamento Total: R$ ${faturamentoTotal.toFixed(2)}`)
+  console.log(`💰 Faturamento Total: R$ ${faturamentoTotal.toFixed(2)} (ContaHub: ${faturamentoContahub.toFixed(2)}, Yuzer: ${faturamentoYuzer.toFixed(2)}, Sympla: ${faturamenteSympla.toFixed(2)})`)
 
-  // 2. CUSTO ATRAÇÃO
-  const atracaoData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
-    'gte_data_competencia': startDate,
-    'lte_data_competencia': endDate
+  // ============================================
+  // 2. FATURAMENTO COUVERT e REPIQUE (contahub_periodo)
+  // ============================================
+  const contahubPeriodo = await fetchAllData(supabase, 'contahub_periodo', 'vr_couvert, vr_repique, vr_pagamentos, pessoas', {
+    'gte_dt_gerencial': startDate,
+    'lte_dt_gerencial': endDate,
+    'eq_bar_id': barId
   })
 
-  const categoriasAtracao = ['Atração', 'Atrações', 'Programação', 'Shows', 'Eventos', 'Artistas']
-  const custoAtracao = atracaoData?.filter(item => 
-    item.categoria_nome && categoriasAtracao.some(cat => 
-      item.categoria_nome.toLowerCase().includes(cat.toLowerCase())
-    )
-  ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0
+  const faturamentoCouvert = contahubPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_couvert) || 0), 0) || 0
+  const repiqueTotal = contahubPeriodo?.reduce((sum, item) => sum + (parseFloat(item.vr_repique) || 0), 0) || 0
+  
+  // Faturamento Bar = Total - Couvert
+  const faturamentoBar = faturamentoTotal - faturamentoCouvert
+  
+  // Faturamento CMvível = Bar - Repique
+  const faturamentoCmvivel = faturamentoBar - repiqueTotal
 
-  const atracaoFaturamentoPercent = faturamentoTotal > 0 ? (custoAtracao / faturamentoTotal) * 100 : 0
+  console.log(`💰 Faturamento Couvert: R$ ${faturamentoCouvert.toFixed(2)}`)
+  console.log(`💰 Faturamento Bar: R$ ${faturamentoBar.toFixed(2)}`)
+  console.log(`💰 Faturamento CMvível: R$ ${faturamentoCmvivel.toFixed(2)}`)
 
-  console.log(`🎭 Atração/Faturamento: ${atracaoFaturamentoPercent.toFixed(1)}%`)
+  // ============================================
+  // 3. TICKET MÉDIO CONTAHUB (vr_pagamentos/pessoas WHERE vr_pagamentos > 0)
+  // ============================================
+  const periodoComPagamentos = contahubPeriodo?.filter(item => parseFloat(item.vr_pagamentos) > 0) || []
+  const somaVrPagamentos = periodoComPagamentos.reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0)
+  const somaPessoas = periodoComPagamentos.reduce((sum, item) => sum + (parseInt(item.pessoas) || 0), 0)
+  const ticketMedioContahub = somaPessoas > 0 ? somaVrPagamentos / somaPessoas : 0
 
-  // 3. CMO (Custo de Mão de Obra)
-  const cmoData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
+  // TM Entrada = Couvert / Clientes
+  const clientesAtendidos = somaPessoas
+  const tmEntrada = clientesAtendidos > 0 ? faturamentoCouvert / clientesAtendidos : 0
+  
+  // TM Bar = Fat Bar / Clientes
+  const tmBar = clientesAtendidos > 0 ? faturamentoBar / clientesAtendidos : 0
+
+  console.log(`🎫 Ticket Médio ContaHub: R$ ${ticketMedioContahub.toFixed(2)}`)
+  console.log(`🎫 TM Entrada: R$ ${tmEntrada.toFixed(2)}`)
+  console.log(`🎫 TM Bar: R$ ${tmBar.toFixed(2)}`)
+  console.log(`👥 Clientes Atendidos: ${clientesAtendidos}`)
+
+  // ============================================
+  // 4. CMV PERCENTUAIS (usando CMV manual da tabela)
+  // ============================================
+  const cmvRs = semana.cmv_rs || 0
+  const cmvLimpoPercent = faturamentoCmvivel > 0 ? (cmvRs / faturamentoCmvivel) * 100 : 0
+  const cmvGlobalPercent = faturamentoTotal > 0 ? (cmvRs / faturamentoTotal) * 100 : 0
+
+  console.log(`📊 CMV R$: ${cmvRs} | CMV Limpo: ${cmvLimpoPercent.toFixed(2)}% | CMV Global: ${cmvGlobalPercent.toFixed(2)}%`)
+
+  // ============================================
+  // 5. CMO% (NIBO - categorias específicas)
+  // Categorias: FREELA ATENDIMENTO, FREELA BAR, FREELA COZINHA, FREELA LIMPEZA, 
+  // FREELA SEGURANÇA, ALIMENTAÇÃO, PRÓ-LABORE, VALE TRANSPORTE, PROVISÃO TRABALHISTA
+  // ============================================
+  const niboData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
     'gte_data_competencia': startDate,
     'lte_data_competencia': endDate,
     'eq_bar_id': barId
   })
 
   const categoriasCMO = [
-    'SALARIO FUNCIONARIOS', 'VALE TRANSPORTE', 'ALIMENTAÇÃO', 'ADICIONAIS',
     'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA',
-    'FREELA SEGURANÇA', 'PRO LABORE', 'PROVISÃO TRABALHISTA'
+    'FREELA SEGURANÇA', 'ALIMENTAÇÃO', 'PRÓ-LABORE', 'VALE TRANSPORTE', 'PROVISÃO TRABALHISTA'
   ]
 
-  const custoTotalCMO = cmoData?.filter(item => 
-    item.categoria_nome && categoriasCMO.includes(item.categoria_nome.trim())
+  const custoTotalCMO = niboData?.filter(item => 
+    item.categoria_nome && categoriasCMO.some(cat => 
+      item.categoria_nome.toUpperCase().includes(cat)
+    )
   ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0
 
-  console.log(`👷 CMO: R$ ${custoTotalCMO.toFixed(2)}`)
+  const cmoPercent = faturamentoTotal > 0 ? (custoTotalCMO / faturamentoTotal) * 100 : 0
 
-  // 4. CLIENTES ATENDIDOS
-  const [contahubPessoas, yuzerProdutos, symplaParticipantes] = await Promise.all([
-    fetchAllData(supabase, 'contahub_periodo', 'pessoas', {
-      'gte_dt_gerencial': startDate,
-      'lte_dt_gerencial': endDate,
-      'eq_bar_id': barId
-    }),
-    fetchAllData(supabase, 'yuzer_produtos', 'quantidade, produto_nome', {
-      'gte_data_evento': startDate,
-      'lte_data_evento': endDate,
-      'eq_bar_id': barId
-    }),
-    fetchAllData(supabase, 'sympla_participantes', '*', {
-      'gte_data_checkin': startDate,
-      'lte_data_checkin': endDate,
-      'eq_fez_checkin': true
-    })
-  ])
+  console.log(`👷 CMO: R$ ${custoTotalCMO.toFixed(2)} (${cmoPercent.toFixed(2)}%)`)
 
-  const pessoasContahub = contahubPessoas?.reduce((sum, item) => sum + (parseInt(item.pessoas) || 0), 0) || 0
-  const pessoasYuzer = yuzerProdutos?.filter(item => 
-    item.produto_nome && (
-      item.produto_nome.toLowerCase().includes('ingresso') || 
-      item.produto_nome.toLowerCase().includes('entrada')
+  // ============================================
+  // 6. ATRAÇÃO/FATURAMENTO (NIBO - Atrações Programação + Produção Eventos)
+  // ============================================
+  const categoriasAtracao = ['ATRAÇÕES PROGRAMAÇÃO', 'PRODUÇÃO EVENTOS', 'ATRAÇÕES', 'PROGRAMAÇÃO']
+  const custoAtracao = niboData?.filter(item => 
+    item.categoria_nome && categoriasAtracao.some(cat => 
+      item.categoria_nome.toUpperCase().includes(cat)
     )
-  ).reduce((sum, item) => sum + (parseInt(item.quantidade) || 0), 0) || 0
-  const pessoasSympla = symplaParticipantes?.length || 0
-  const clientesAtendidos = pessoasContahub + pessoasYuzer + pessoasSympla
+  ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0
 
-  console.log(`👥 Clientes Atendidos: ${clientesAtendidos}`)
+  const atracaoFaturamentoPercent = faturamentoTotal > 0 ? (custoAtracao / faturamentoTotal) * 100 : 0
 
-  // 5. TICKET MÉDIO
-  const ticketMedio = clientesAtendidos > 0 ? faturamentoTotal / clientesAtendidos : 0
+  console.log(`🎭 Atração/Faturamento: ${atracaoFaturamentoPercent.toFixed(2)}% (R$ ${custoAtracao.toFixed(2)})`)
 
-  console.log(`🎯 Ticket Médio: R$ ${ticketMedio.toFixed(2)}`)
+  // ============================================
+  // 7. RESERVAS (getin_reservations)
+  // ============================================
+  const getinReservas = await fetchAllData(supabase, 'getin_reservations', 'status, no_show', {
+    'gte_reservation_date': startDate,
+    'lte_reservation_date': endDate,
+    'eq_bar_id': barId
+  })
 
-  // =============================================
-  // 6. % CLIENTES NOVOS (usando stored procedure)
-  // =============================================
-  console.log(`🆕 Calculando % Clientes Novos...`)
-  
-  // Calcular período anterior para comparação (semana anterior)
+  const reservasTotais = getinReservas?.length || 0
+  const reservasPresentes = getinReservas?.filter(item => 
+    item.status === 'seated' || (item.status === 'confirmed' && !item.no_show)
+  ).length || 0
+
+  console.log(`📋 Reservas: ${reservasTotais} totais, ${reservasPresentes} presentes`)
+
+  // ============================================
+  // 8. NPS (tabela nps)
+  // ============================================
+  const npsData = await fetchAllData(supabase, 'nps', 'nps_geral, nps_ambiente, nps_atendimento, nps_limpeza, nps_musica, nps_comida, nps_drink, nps_preco, nps_reservas', {
+    'gte_data_pesquisa': startDate,
+    'lte_data_pesquisa': endDate,
+    'eq_bar_id': barId
+  })
+
+  const calcularMediaNps = (campo: string) => {
+    const valores = npsData?.filter(item => item[campo] !== null && item[campo] !== undefined)
+      .map(item => parseFloat(item[campo]) || 0) || []
+    return valores.length > 0 ? valores.reduce((a, b) => a + b, 0) / valores.length : null
+  }
+
+  const npsGeral = calcularMediaNps('nps_geral')
+  const npsAmbiente = calcularMediaNps('nps_ambiente')
+  const npsAtendimento = calcularMediaNps('nps_atendimento')
+  const npsLimpeza = calcularMediaNps('nps_limpeza')
+  const npsMusica = calcularMediaNps('nps_musica')
+  const npsComida = calcularMediaNps('nps_comida')
+  const npsDrink = calcularMediaNps('nps_drink')
+  const npsPreco = calcularMediaNps('nps_preco')
+  const npsReservas = calcularMediaNps('nps_reservas')
+
+  console.log(`⭐ NPS Geral: ${npsGeral?.toFixed(1) || 'N/A'} (${npsData?.length || 0} respostas)`)
+
+  // ============================================
+  // 9. AVALIAÇÕES GOOGLE (windsor_google)
+  // ============================================
+  const googleData = await fetchAllData(supabase, 'windsor_google', 'review_star_rating, review_average_rating', {
+    'gte_date': startDate,
+    'lte_date': endDate
+  })
+
+  const avaliacoes5Estrelas = googleData?.filter(item => item.review_star_rating === '5').length || 0
+  const mediaGoogle = googleData?.length > 0 
+    ? googleData.reduce((sum, item) => sum + (parseFloat(item.review_average_rating) || 0), 0) / googleData.length 
+    : null
+
+  console.log(`⭐ Avaliações Google: ${avaliacoes5Estrelas} com 5★, Média: ${mediaGoogle?.toFixed(2) || 'N/A'}`)
+
+  // ============================================
+  // 10. % CLIENTES NOVOS (stored procedure)
+  // ============================================
   const dataInicio = new Date(startDate + 'T00:00:00')
   const dataFim = new Date(endDate + 'T00:00:00')
   const inicioAnterior = new Date(dataInicio)
@@ -367,9 +449,8 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
   const fimAnteriorStr = fimAnterior.toISOString().split('T')[0]
 
   let percClientesNovos = 0
-  let clientesAtivos = 0
+  let clientesAtivosBase = 0
 
-  // Chamar stored procedure para métricas de clientes
   const { data: metricas, error: metricasError } = await supabase.rpc('calcular_metricas_clientes', {
     p_bar_id: barId,
     p_data_inicio_atual: startDate,
@@ -382,27 +463,17 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
     const resultado = metricas[0]
     const totalClientes = Number(resultado.total_atual) || 0
     const novosClientes = Number(resultado.novos_atual) || 0
-    
-    // Calcular percentual de novos
     percClientesNovos = totalClientes > 0 ? (novosClientes / totalClientes) * 100 : 0
-    
-    console.log(`🆕 Total Clientes: ${totalClientes}, Novos: ${novosClientes}`)
     console.log(`🆕 % Clientes Novos: ${percClientesNovos.toFixed(2)}%`)
-  } else {
-    console.error(`❌ Erro ao calcular métricas de clientes:`, metricasError)
   }
 
-  // =============================================
-  // 7. CLIENTES ATIVOS (2+ visitas em 90 dias)
-  // =============================================
-  console.log(`⭐ Calculando Clientes Ativos...`)
-  
-  // Calcular 90 dias antes do fim do período
+  // ============================================
+  // 11. CLIENTES ATIVOS (2+ visitas em 90 dias)
+  // ============================================
   const data90DiasAtras = new Date(dataFim)
   data90DiasAtras.setDate(dataFim.getDate() - 90)
   const data90DiasAtrasStr = data90DiasAtras.toISOString().split('T')[0]
 
-  // Chamar stored procedure para base ativa
   const { data: baseAtivaResult, error: baseAtivaError } = await supabase.rpc('get_count_base_ativa', {
     p_bar_id: barId,
     p_data_inicio: data90DiasAtrasStr,
@@ -410,23 +481,229 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
   })
 
   if (!baseAtivaError && baseAtivaResult !== null) {
-    clientesAtivos = Number(baseAtivaResult) || 0
-    console.log(`⭐ Clientes Ativos (2+ visitas em 90d): ${clientesAtivos}`)
-  } else {
-    console.error(`❌ Erro ao calcular clientes ativos:`, baseAtivaError)
+    clientesAtivosBase = Number(baseAtivaResult) || 0
+    console.log(`⭐ Clientes Ativos: ${clientesAtivosBase}`)
   }
 
-  // 8. ATUALIZAR REGISTRO COM TODOS OS DADOS
-  const dadosAtualizados = {
+  // ============================================
+  // 12. COCKPIT PRODUTOS (contahub_prodporhora, contahub_tempo, contahub_stockout)
+  // ============================================
+  console.log(`📦 Calculando Cockpit Produtos...`)
+
+  // 12.1 PRODUÇÃO POR HORA - Quantidade de itens Bar e Cozinha
+  const prodPorHora = await fetchAllData(supabase, 'contahub_prodporhora', 'grupo_descricao, quantidade', {
+    'gte_data_gerencial': startDate,
+    'lte_data_gerencial': endDate,
+    'eq_bar_id': barId
+  })
+
+  const gruposBar = ['Baldes', 'Cervejas', 'Bebidas Não Alcoólicas', 'Bebidas Prontas', 'Doses', 
+    'Dose Dupla', 'Drinks Autorais', 'Drinks Classicos', 'Happy Hour', 'Pegue e Pague', 'Garrafas', 'Vinhos', 'Espressos']
+  const gruposCozinha = ['Pratos Individuais', 'Pratos Para Compartilhar - P/ 4 Pessoas', 'Sanduíches', 'Sobremesas', 'Combos']
+
+  const qtdeItensBar = prodPorHora?.filter(item => 
+    gruposBar.some(g => item.grupo_descricao?.includes(g))
+  ).reduce((sum, item) => sum + (parseInt(item.quantidade) || 0), 0) || 0
+
+  const qtdeItensCozinha = prodPorHora?.filter(item => 
+    gruposCozinha.some(g => item.grupo_descricao?.includes(g))
+  ).reduce((sum, item) => sum + (parseInt(item.quantidade) || 0), 0) || 0
+
+  console.log(`📦 Itens produzidos - Bar: ${qtdeItensBar}, Cozinha: ${qtdeItensCozinha}`)
+
+  // 12.2 TEMPO E ATRASOS (contahub_tempo)
+  const tempoData = await fetchAllData(supabase, 'contahub_tempo', 'categoria, loc_desc, t0_t2, t1_t2, itm_qtd', {
+    'gte_data': startDate,
+    'lte_data': endDate,
+    'eq_bar_id': barId
+  })
+
+  // Separar Bar e Cozinha
+  const tempoBar = tempoData?.filter(item => 
+    item.categoria === 'bebida' || 
+    ['Bar', 'Baldes', 'Chopp', 'Pegue e Pague'].some(l => item.loc_desc?.includes(l))
+  ) || []
+  
+  const tempoCozinha = tempoData?.filter(item => 
+    item.categoria === 'comida' || 
+    ['Cozinha', 'Montados', 'Mexido'].some(l => item.loc_desc?.includes(l))
+  ) || []
+
+  // Tempo médio de saída (usando t0_t2 = tempo total desde lançamento até produção)
+  const tempoSaidaBar = tempoBar.length > 0 
+    ? tempoBar.reduce((sum, item) => sum + (parseFloat(item.t0_t2) || 0), 0) / tempoBar.length 
+    : 0
+  const tempoSaidaCozinha = tempoCozinha.length > 0 
+    ? tempoCozinha.reduce((sum, item) => sum + (parseFloat(item.t0_t2) || 0), 0) / tempoCozinha.length 
+    : 0
+
+  // Atrasos (Bar > 4min, Cozinha > 12min)
+  const atrasosBar = tempoBar.filter(item => (parseFloat(item.t0_t2) || 0) > 4).length
+  const atrasosCozinha = tempoCozinha.filter(item => (parseFloat(item.t0_t2) || 0) > 12).length
+
+  // % Atrasos
+  const percAtrasosBar = tempoBar.length > 0 ? (atrasosBar / tempoBar.length) * 100 : 0
+  const percAtrasosCozinha = tempoCozinha.length > 0 ? (atrasosCozinha / tempoCozinha.length) * 100 : 0
+
+  console.log(`⏱️ Tempo Bar: ${tempoSaidaBar.toFixed(1)}min (${atrasosBar} atrasos, ${percAtrasosBar.toFixed(1)}%)`)
+  console.log(`⏱️ Tempo Cozinha: ${tempoSaidaCozinha.toFixed(1)}min (${atrasosCozinha} atrasos, ${percAtrasosCozinha.toFixed(1)}%)`)
+
+  // 12.3 STOCKOUT (contahub_stockout)
+  const stockoutData = await fetchAllData(supabase, 'contahub_stockout', 'loc_desc, prd_venda, prd_estoque', {
+    'gte_data_consulta': startDate,
+    'lte_data_consulta': endDate,
+    'eq_bar_id': barId
+  })
+
+  // Produtos em ruptura (prd_venda = 'S' e estoque <= 0)
+  const emRuptura = stockoutData?.filter(item => item.prd_venda === 'S' && (parseFloat(item.prd_estoque) || 0) <= 0) || []
+  
+  const locaisBar = ['Bar', 'Baldes', 'Chopp', 'Shot e Dose', 'Pegue e Pague', 'Batidos', 'Preshh']
+  const locaisCozinha = ['Cozinha 1', 'Cozinha 2', 'Montados', 'Mexido']
+  const locaisDrinks = ['Bar', 'Batidos', 'Preshh']
+
+  const stockoutBar = emRuptura.filter(item => locaisBar.some(l => item.loc_desc?.includes(l))).length
+  const stockoutCozinha = emRuptura.filter(item => locaisCozinha.some(l => item.loc_desc?.includes(l))).length
+  const stockoutDrinks = emRuptura.filter(item => locaisDrinks.some(l => item.loc_desc?.includes(l))).length
+
+  console.log(`📦 Stockout - Bar: ${stockoutBar}, Cozinha: ${stockoutCozinha}, Drinks: ${stockoutDrinks}`)
+
+  // 12.4 PERCENTUAIS DE VENDA POR CATEGORIA (usando eventos_base consolidado)
+  const eventosBase = await fetchAllData(supabase, 'eventos_base', 'percent_b, percent_d, percent_c, fat_19h_percent, dia_semana, real_r', {
+    'gte_data_evento': startDate,
+    'lte_data_evento': endDate,
+    'eq_bar_id': barId,
+    'eq_ativo': true
+  })
+
+  // Médias ponderadas
+  const percBebidas = eventosBase?.length > 0 
+    ? eventosBase.reduce((sum, e) => sum + (parseFloat(e.percent_b) || 0), 0) / eventosBase.length 
+    : 0
+  const percDrinks = eventosBase?.length > 0 
+    ? eventosBase.reduce((sum, e) => sum + (parseFloat(e.percent_d) || 0), 0) / eventosBase.length 
+    : 0
+  const percComida = eventosBase?.length > 0 
+    ? eventosBase.reduce((sum, e) => sum + (parseFloat(e.percent_c) || 0), 0) / eventosBase.length 
+    : 0
+
+  console.log(`📊 % Bebidas: ${percBebidas.toFixed(1)}%, Drinks: ${percDrinks.toFixed(1)}%, Comida: ${percComida.toFixed(1)}%`)
+
+  // ============================================
+  // 13. COCKPIT VENDAS (faturamento por hora, venda balcão)
+  // ============================================
+  console.log(`💰 Calculando Cockpit Vendas...`)
+
+  // 13.1 % FATURAMENTO ATÉ 19H (usando eventos_base que já tem fat_19h_percent)
+  const percFat19h = eventosBase?.length > 0 
+    ? eventosBase.reduce((sum, e) => sum + (parseFloat(e.fat_19h_percent) || 0), 0) / eventosBase.length 
+    : 0
+
+  console.log(`💰 % Faturamento até 19h: ${percFat19h.toFixed(1)}%`)
+
+  // 13.2 VENDA BALCÃO (vendas sem mesa identificada ou tipovenda específico)
+  const vendasData = await fetchAllData(supabase, 'contahub_vendas', 'vr_pagamentos, vd_mesadesc, tipovenda', {
+    'gte_dt_gerencial': startDate,
+    'lte_dt_gerencial': endDate,
+    'eq_bar_id': barId
+  })
+
+  // Venda balcão: tipovenda contém 'balc' ou vd_mesadesc é número baixo ou específico
+  const vendaBalcao = vendasData?.filter(item => 
+    item.tipovenda?.toLowerCase().includes('balc') ||
+    item.vd_mesadesc?.toLowerCase().includes('balc') ||
+    item.vd_mesadesc === 'Insumo'
+  ).reduce((sum, item) => sum + (parseFloat(item.vr_pagamentos) || 0), 0) || 0
+
+  console.log(`💰 Venda Balcão: R$ ${vendaBalcao.toFixed(2)}`)
+
+  // 13.3 % HAPPY HOUR (calculando a partir de contahub_prodporhora)
+  const totalVendas = prodPorHora?.reduce((sum, item) => sum + (parseInt(item.quantidade) || 0), 0) || 0
+  const vendasHH = prodPorHora?.filter(item => item.grupo_descricao === 'Happy Hour')
+    .reduce((sum, item) => sum + (parseInt(item.quantidade) || 0), 0) || 0
+  const percHappyHour = totalVendas > 0 ? (vendasHH / totalVendas) * 100 : 0
+
+  console.log(`🍺 % Happy Hour: ${percHappyHour.toFixed(1)}%`)
+
+  // 13.4 QUI+SÁB+DOM (faturamento desses dias)
+  const diasFDS = ['Qui', 'Qua', 'Sex', 'Sab', 'Sáb', 'Dom', 'Quinta', 'Sexta', 'Sábado', 'Domingo']
+  const fatQuiSabDom = eventosBase?.filter(e => 
+    diasFDS.some(d => e.dia_semana?.includes(d))
+  ).reduce((sum, e) => sum + (parseFloat(e.real_r) || 0), 0) || 0
+
+  console.log(`📅 Faturamento QUI+SAB+DOM: R$ ${fatQuiSabDom.toFixed(2)}`)
+
+  // ============================================
+  // 14. ATUALIZAR REGISTRO COM TODOS OS DADOS
+  // ============================================
+  const dadosAtualizados: any = {
+    // Faturamentos
     faturamento_total: faturamentoTotal,
+    faturamento_entrada: faturamentoCouvert,
+    faturamento_bar: faturamentoBar,
+    faturamento_cmovivel: faturamentoCmvivel,
+    
+    // Clientes
     clientes_atendidos: clientesAtendidos,
-    ticket_medio: ticketMedio,
-    custo_atracao_faturamento: atracaoFaturamentoPercent,
-    cmo: custoTotalCMO,
     perc_clientes_novos: parseFloat(percClientesNovos.toFixed(2)),
-    clientes_ativos: clientesAtivos,
-    atualizado_em: new Date().toISOString(),
-    observacoes: `Atualizado automaticamente em ${new Date().toLocaleString('pt-BR')} - Automação semanal (com % novos e ativos)`
+    clientes_ativos: clientesAtivosBase,
+    
+    // Tickets
+    ticket_medio: ticketMedioContahub,
+    tm_entrada: tmEntrada,
+    tm_bar: tmBar,
+    
+    // CMV (percentuais calculados, cmv_rs é manual)
+    cmv_limpo: cmvLimpoPercent,
+    cmv_global_real: cmvGlobalPercent,
+    
+    // CMO e Atração
+    cmo: cmoPercent,
+    cmo_custo: custoTotalCMO,
+    custo_atracao_faturamento: atracaoFaturamentoPercent,
+    atracoes_eventos: custoAtracao,
+    
+    // Reservas
+    reservas_totais: reservasTotais,
+    reservas_presentes: reservasPresentes,
+    
+    // Avaliações
+    avaliacoes_5_google_trip: avaliacoes5Estrelas,
+    media_avaliacoes_google: mediaGoogle,
+    
+    // NPS (todos os campos)
+    nps_geral: npsGeral,
+    nps_ambiente: npsAmbiente,
+    nps_atendimento: npsAtendimento,
+    nps_limpeza: npsLimpeza,
+    nps_musica: npsMusica,
+    nps_comida: npsComida,
+    nps_drink: npsDrink,
+    nps_preco: npsPreco,
+    nps_reservas: npsReservas,
+    
+    // Cockpit Produtos
+    qtde_itens_bar: qtdeItensBar,
+    qtde_itens_cozinha: qtdeItensCozinha,
+    tempo_saida_bar: tempoSaidaBar,
+    tempo_saida_cozinha: tempoSaidaCozinha,
+    atrasos_bar: atrasosBar,
+    atrasos_cozinha: atrasosCozinha,
+    stockout_bar: stockoutBar,
+    stockout_comidas: stockoutCozinha,
+    stockout_drinks: stockoutDrinks,
+    perc_bebidas: percBebidas,
+    perc_drinks: percDrinks,
+    perc_comida: percComida,
+    perc_happy_hour: percHappyHour,
+    
+    // Cockpit Vendas
+    perc_faturamento_ate_19h: percFat19h,
+    venda_balcao: vendaBalcao,
+    qui_sab_dom: fatQuiSabDom,
+    
+    // Timestamp
+    updated_at: new Date().toISOString()
   }
 
   const { data: atualizada, error: updateError } = await supabase
@@ -442,7 +719,10 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
   }
 
   console.log(`✅ Semana ${numeroSemana} atualizada com sucesso!`)
-  console.log(`   📊 % Novos: ${percClientesNovos.toFixed(2)}% | Ativos: ${clientesAtivos}`)
+  console.log(`   💰 Fat Total: R$ ${faturamentoTotal.toFixed(2)} | Couvert: R$ ${faturamentoCouvert.toFixed(2)} | Bar: R$ ${faturamentoBar.toFixed(2)}`)
+  console.log(`   🎫 TM: R$ ${ticketMedioContahub.toFixed(2)} | Clientes: ${clientesAtendidos}`)
+  console.log(`   📊 CMO: ${cmoPercent.toFixed(2)}% | Atração: ${atracaoFaturamentoPercent.toFixed(2)}%`)
+  
   return atualizada
 }
 

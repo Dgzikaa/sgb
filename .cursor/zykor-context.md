@@ -398,7 +398,7 @@ Meses FRACOS:
 |-------------|-----|--------|
 | 03:00 | sync-insumos-receitas | Sync insumos |
 | 05:00 | sync-nps | Sync NPS |
-| 06:00 | desempenho-semanal (Seg) | Relatorio semanal |
+| 09:00 | desempenho-semanal-auto (DIÁRIO) | Atualiza desempenho_semanal |
 | 07:00 | contahub-sync | Sync ContaHub |
 | 07:30 | sync-eventos | Recalculo eventos |
 | 08:00 | alertas-proativos | Alertas manha |
@@ -434,6 +434,92 @@ Meses FRACOS:
 5. Copa do Mundo 2026: Ano excepcional!
 6. Aniversario bar: 31/01 - Niver Ordi.
 7. NPS Drinks/Comida: Pontos a melhorar (7.4 e 7.7).
+
+---
+
+## INDICADORES DE DESEMPENHO SEMANAL - FONTES DE DADOS
+
+### Tabela Principal: `desempenho_semanal`
+- **Cron Job**: `desempenho-semanal-automatico` - RODA TODO DIA às 9h BRT
+- **Edge Function**: `desempenho-semanal-auto`
+- **Status**: ✅ TODOS OS INDICADORES IMPLEMENTADOS E AUTOMATIZADOS (16/01/2026)
+
+### GUARDRAIL - Indicadores Estratégicos ✅
+
+| Indicador | Fonte | Status |
+|-----------|-------|--------|
+| **Faturamento Total** | `contahub_pagamentos` + `yuzer_pagamento` + `sympla_pedidos` | ✅ AUTO |
+| **Faturamento Couvert** | `contahub_periodo.vr_couvert` | ✅ AUTO |
+| **Faturamento Bar** | `faturamento_total - faturamento_couvert` | ✅ AUTO |
+| **Faturamento CMvível** | `faturamento_bar - vr_repique` | ✅ AUTO |
+| **CMV R$** | Manual | 📝 MANUAL |
+| **Ticket Médio ContaHub** | `vr_pagamentos / pessoas WHERE vr > 0` | ✅ AUTO |
+| **TM Entrada** | `couvert / clientes` | ✅ AUTO |
+| **TM Bar** | `fat_bar / clientes` | ✅ AUTO |
+| **CMV Limpo %** | `cmv_rs / cmvivel * 100` | ✅ AUTO |
+| **CMV Global %** | `cmv_rs / total * 100` | ✅ AUTO |
+| **CMV Teórico** | Manual | 📝 MANUAL |
+| **CMO %** | NIBO categorias freela/alimentação/prolabore | ✅ AUTO |
+| **Atração/Faturamento** | NIBO atrações/programação | ✅ AUTO |
+
+### OVT - Indicadores de Clientes ✅
+
+| Indicador | Fonte | Status |
+|-----------|-------|--------|
+| **% Novos Clientes** | RPC `calcular_metricas_clientes()` | ✅ AUTO |
+| **Clientes Ativos** | RPC `get_count_base_ativa()` | ✅ AUTO |
+| **Reservas Totais** | `getin_reservations` | ✅ AUTO |
+| **Reservas Presentes** | `getin_reservations` (seated/confirmed) | ✅ AUTO |
+| **Retenção 1 mês** | A implementar | 🔜 PENDENTE |
+| **Retenção 2 meses** | A implementar | 🔜 PENDENTE |
+
+### Indicadores de Qualidade ✅
+
+| Indicador | Fonte | Status |
+|-----------|-------|--------|
+| **Avaliações 5★ Google** | `windsor_google` | ✅ AUTO |
+| **Média Avaliações Google** | `windsor_google` | ✅ AUTO |
+| **NPS Geral** | `nps` | ✅ AUTO |
+| **NPS Ambiente** | `nps` | ✅ AUTO |
+| **NPS Atendimento** | `nps` | ✅ AUTO |
+| **NPS Limpeza** | `nps` | ✅ AUTO |
+| **NPS Música** | `nps` | ✅ AUTO |
+| **NPS Comida** | `nps` | ✅ AUTO |
+| **NPS Drink** | `nps` | ✅ AUTO |
+| **NPS Preço** | `nps` | ✅ AUTO |
+| **NPS Reservas** | `nps` | ✅ AUTO |
+
+### Cockpit Produtos ✅
+
+| Indicador | Fonte | Status |
+|-----------|-------|--------|
+| **StockOut Comidas** | `contahub_stockout` loc Cozinha | ✅ AUTO |
+| **StockOut Drinks** | `contahub_stockout` loc Bar/Batidos | ✅ AUTO |
+| **StockOut Bar** | `contahub_stockout` loc Bar/Baldes | ✅ AUTO |
+| **% Bebidas** | `eventos_base.percent_b` | ✅ AUTO |
+| **% Drinks** | `eventos_base.percent_d` | ✅ AUTO |
+| **% Comida** | `eventos_base.percent_c` | ✅ AUTO |
+| **% Happy Hour** | `contahub_prodporhora` grupo HH | ✅ AUTO |
+| **Qtde Itens Bar** | `contahub_prodporhora` grupos bar | ✅ AUTO |
+| **Qtde Itens Cozinha** | `contahub_prodporhora` grupos cozinha | ✅ AUTO |
+| **Atrasos Bar** | `contahub_tempo` t0_t2 > 4min | ✅ AUTO |
+| **Atrasos Cozinha** | `contahub_tempo` t0_t2 > 12min | ✅ AUTO |
+| **Tempo Saída Bar** | `contahub_tempo` média t0_t2 | ✅ AUTO |
+| **Tempo Saída Cozinha** | `contahub_tempo` média t0_t2 | ✅ AUTO |
+
+### Cockpit Vendas ✅
+
+| Indicador | Fonte | Status |
+|-----------|-------|--------|
+| **% Fat. até 19h** | `eventos_base.fat_19h_percent` | ✅ AUTO |
+| **Venda Balcão** | `contahub_vendas` tipovenda/mesadesc balcão | ✅ AUTO |
+| **QUI+SÁB+DOM** | `eventos_base` soma dias FDS | ✅ AUTO |
+
+### Cockpit Marketing - **MANUAL**
+
+Campos existem na tabela, preenchidos manualmente:
+- o_num_posts, o_alcance, o_interacao, o_compartilhamento, o_engajamento, o_num_stories, o_visu_stories
+- m_valor_investido, m_alcance, m_frequencia, m_cpm, m_cliques, m_ctr, m_custo_por_clique, m_conversas_iniciadas
 
 ---
 

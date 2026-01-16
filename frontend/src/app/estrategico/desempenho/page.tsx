@@ -6,223 +6,269 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
 import { 
-  BarChart3, 
-  Calendar, 
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  DollarSign,
+  Users,
+  Star,
+  ShoppingCart,
+  Megaphone,
+  Wallet,
+  BarChart3,
+  Calendar,
   RefreshCcw,
-  Activity,
-  Edit,
-  Save,
-  FileSpreadsheet
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { useBar } from '@/contexts/BarContext';
 import { useUser } from '@/contexts/UserContext';
 import { useToast } from '@/hooks/use-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
+// Tipos
 interface DadosSemana {
-  semana: number;
-  periodo: string;
-  faturamento_total: number;
-  faturamento_couvert: number;
-  faturamento_bar: number;
-  ticket_medio_contahub: number;
-  tm_entrada: number;
-  tm_bar: number;
-  cmv_limpo_percentual: number;
-  cmo_percentual: number;
-  atracao_percentual: number;
-  clientes_atendidos: number;
-  clientes_ativos: number;
-  reservas_totais: number;
-  reservas_presentes: number;
-  // Metas para cada indicador
-  meta_faturamento_total: number;
-  meta_faturamento_couvert: number;
-  meta_faturamento_bar: number;
-  meta_ticket_medio_contahub: number;
-  meta_tm_entrada: number;
-  meta_tm_bar: number;
-  meta_cmv_limpo_percentual: number;
-  meta_cmo_percentual: number;
-  meta_atracao_percentual: number;
-  meta_clientes_atendidos: number;
-  meta_clientes_ativos: number;
-  meta_reservas_totais: number;
-  meta_reservas_presentes: number;
-  // Campos antigos mantidos para compatibilidade
-  clientes_total: number;
-  ticket_medio: number;
-  performance_geral: number;
-  eventos_count: number;
-  meta_faturamento: number;
-  meta_clientes: number;
-}
-
-interface TotaisMensais {
-  faturamento_total: number;
-  clientes_total: number;
-  ticket_medio: number;
-  performance_media: number;
-  eventos_total: number;
-}
-
-interface DadosMes {
-  mes: number;
+  numero_semana: number;
   ano: number;
-  nome_mes: string;
+  data_inicio: string;
+  data_fim: string;
+  // Indicadores Estratégicos - GUARDRAIL
   faturamento_total: number;
-  faturamento_couvert: number;
+  faturamento_entrada: number;
   faturamento_bar: number;
-  clientes_total: number;
-  clientes_atendidos: number;
-  clientes_ativos: number;
+  faturamento_cmovivel: number;
+  cmv_rs: number;
   ticket_medio: number;
-  ticket_medio_contahub: number;
   tm_entrada: number;
   tm_bar: number;
-  cmv_limpo_percentual: number;
-  cmo_valor: number;
-  cmo_percentual: number;
-  atracao_faturamento: number;
-  atracao_percentual: number;
+  cmv_limpo: number;
+  cmv_global_real: number;
+  cmv_teorico: number;
+  cmo: number;
+  custo_atracao_faturamento: number;
+  // Indicadores Estratégicos - OVT
+  retencao_1m: number;
+  retencao_2m: number;
+  perc_clientes_novos: number;
+  clientes_atendidos: number;
+  clientes_ativos: number;
   reservas_totais: number;
   reservas_presentes: number;
-  performance_media: number;
+  // Cockpit Financeiro
+  imposto: number;
+  comissao: number;
+  cmv: number;
+  cmo_custo: number;
+  pro_labore: number;
+  ocupacao: number;
+  adm_fixo: number;
+  marketing_fixo: number;
+  escritorio_central: number;
+  adm_mkt_semana: number;
+  rh_estorno_outros_operacao: number;
+  materiais: number;
+  manutencao: number;
+  atracoes_eventos: number;
+  utensilios: number;
+  consumacao_sem_socio: number;
+  lucro_rs: number;
+  // Indicadores de Qualidade
+  avaliacoes_5_google_trip: number;
+  media_avaliacoes_google: number;
+  nps_reservas: number;
+  nota_felicidade_equipe: number;
+  // Cockpit Produtos
+  stockout_comidas: number;
+  stockout_drinks: number;
+  stockout_bar: number;
+  perc_bebidas: number;
+  perc_drinks: number;
+  perc_comida: number;
+  perc_happy_hour: number;
+  qtde_itens_bar: number;
+  atrasos_bar: number;
+  tempo_saida_bar: number;
+  qtde_itens_cozinha: number;
+  atrasos_cozinha: number;
+  tempo_saida_cozinha: number;
+  // Cockpit Vendas
+  perc_faturamento_ate_19h: number;
+  venda_balcao: number;
+  couvert_atracoes: number;
+  qui_sab_dom: number;
+  // Cockpit Marketing - Orgânico
+  o_num_posts: number;
+  o_alcance: number;
+  o_interacao: number;
+  o_compartilhamento: number;
+  o_engajamento: number;
+  o_num_stories: number;
+  o_visu_stories: number;
+  // Cockpit Marketing - Meta
+  m_valor_investido: number;
+  m_alcance: number;
+  m_frequencia: number;
+  m_cpm: number;
+  m_cliques: number;
+  m_ctr: number;
+  m_custo_por_clique: number;
+  m_conversas_iniciadas: number;
 }
 
-// 📊 CONFIGURAÇÃO PADRÃO DA PLANILHA (fallback)
-const DEFAULT_SHEETS_ID = '1WRnwl_F_tgqvQmHIyQUFtiWQVujTBk2TDL-ii0JjfAY';
+// Componente de Indicador Individual
+interface IndicadorProps {
+  label: string;
+  valor: number | null;
+  valorAnterior?: number | null;
+  formato?: 'moeda' | 'percentual' | 'numero' | 'decimal';
+  inverso?: boolean; // Se true, menor é melhor (ex: CMV)
+  sufixo?: string;
+}
+
+function Indicador({ label, valor, valorAnterior, formato = 'numero', inverso = false, sufixo = '' }: IndicadorProps) {
+  const formatarValor = (v: number | null) => {
+    if (v === null || v === undefined) return '-';
+    
+    switch (formato) {
+      case 'moeda':
+        return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v);
+      case 'percentual':
+        return `${v.toFixed(1)}%`;
+      case 'decimal':
+        return v.toFixed(2) + sufixo;
+      default:
+        return v.toLocaleString('pt-BR') + sufixo;
+    }
+  };
+
+  // Calcular variação
+  const variacao = valorAnterior && valor ? ((valor - valorAnterior) / valorAnterior) * 100 : null;
+  const temVariacao = variacao !== null && !isNaN(variacao) && isFinite(variacao);
+  
+  // Determinar se a variação é positiva (considerando se é inverso)
+  const variacaoPositiva = inverso ? (variacao && variacao < 0) : (variacao && variacao > 0);
+  const variacaoNegativa = inverso ? (variacao && variacao > 0) : (variacao && variacao < 0);
+
+  return (
+    <div className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+      <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+          {formatarValor(valor)}
+        </span>
+        {temVariacao && (
+          <div className={cn(
+            "flex items-center gap-0.5 text-xs font-medium px-1.5 py-0.5 rounded",
+            variacaoPositiva && "text-emerald-700 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/30",
+            variacaoNegativa && "text-rose-700 bg-rose-50 dark:text-rose-400 dark:bg-rose-900/30",
+            !variacaoPositiva && !variacaoNegativa && "text-gray-500 bg-gray-100 dark:text-gray-400 dark:bg-gray-800"
+          )}>
+            {variacaoPositiva && <TrendingUp className="w-3 h-3" />}
+            {variacaoNegativa && <TrendingDown className="w-3 h-3" />}
+            {!variacaoPositiva && !variacaoNegativa && <Minus className="w-3 h-3" />}
+            <span>{Math.abs(variacao!).toFixed(1)}%</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Componente de Seção Colapsável
+interface SecaoProps {
+  titulo: string;
+  icone: React.ReactNode;
+  corGradiente: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}
+
+function Secao({ titulo, icone, corGradiente, children, defaultOpen = true }: SecaoProps) {
+  const [aberto, setAberto] = useState(defaultOpen);
+
+  return (
+    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+      <CardHeader 
+        className={cn("py-3 px-4 cursor-pointer", corGradiente)}
+        onClick={() => setAberto(!aberto)}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {icone}
+            <CardTitle className="text-sm font-semibold text-white">{titulo}</CardTitle>
+          </div>
+          {aberto ? (
+            <ChevronUp className="w-4 h-4 text-white/80" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-white/80" />
+          )}
+        </div>
+      </CardHeader>
+      <AnimatePresence>
+        {aberto && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CardContent className="p-0 divide-y divide-gray-100 dark:divide-gray-700">
+              {children}
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  );
+}
 
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
   const { user } = useUser();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('sheets');
-  const [loading, setLoading] = useState(true);
-  const [loadingMensal, setLoadingMensal] = useState(false);
-  const [anoAtual, setAnoAtual] = useState(() => new Date().getFullYear());
-  const [dadosSemanas, setDadosSemanas] = useState<DadosSemana[]>([]);
-  const [totaisAnuais, setTotaisAnuais] = useState<TotaisMensais | null>(null);
-  const [dadosMensais, setDadosMensais] = useState<DadosMes[]>([]);
-  const [sheetsId, setSheetsId] = useState<string>(DEFAULT_SHEETS_ID);
   
-  // Estados para modal de edição
-  const [modalAberto, setModalAberto] = useState(false);
-  const [semanaEditando, setSemanaEditando] = useState<DadosSemana | null>(null);
-  const [valoresEditados, setValoresEditados] = useState<Partial<DadosSemana>>({});
+  const [activeTab, setActiveTab] = useState<'semanal' | 'mensal'>('semanal');
+  const [loading, setLoading] = useState(true);
+  const [semanaAtual, setSemanaAtual] = useState<number>(2); // Semana atual
+  const [anoAtual, setAnoAtual] = useState<number>(2026);
+  const [dadosSemana, setDadosSemana] = useState<DadosSemana | null>(null);
+  const [dadosSemanaAnterior, setDadosSemanaAnterior] = useState<DadosSemana | null>(null);
+  const [totalSemanas, setTotalSemanas] = useState<number>(53);
 
-  const mesesNomes = useMemo(() => [
-    'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
-    'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
-  ], []);
+  // Formatar data
+  const formatarData = (dataStr: string) => {
+    if (!dataStr) return '';
+    const data = new Date(dataStr + 'T12:00:00');
+    return data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+  };
 
-  // Carregar dados mensais consolidados (fevereiro 2025 até atual)
-  const carregarDadosMensais = useCallback(async () => {
+  // Carregar dados da semana
+  const carregarDados = useCallback(async () => {
     if (!selectedBar || !user) return;
-
-    setLoadingMensal(true);
     
+    setLoading(true);
     try {
-      const dadosMensaisTemp: DadosMes[] = [];
-      const anoAtualNum = new Date().getFullYear();
-      const mesAtualNum = new Date().getMonth() + 1;
-
-      // Buscar dados de fevereiro 2025 até o mês atual
-      for (let ano = 2025; ano <= anoAtualNum; ano++) {
-        const mesInicio = ano === 2025 ? 2 : 1; // Começar em fevereiro para 2025
-        const mesFim = ano === anoAtualNum ? mesAtualNum : 12;
-
-        for (let mes = mesInicio; mes <= mesFim; mes++) {
-          try {
-            const response = await fetch(`/api/estrategico/desempenho?mes=${mes}&ano=${ano}`, {
-              headers: {
-                'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
-              }
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success && data.totais_mensais) {
-                dadosMensaisTemp.push({
-                  mes,
-                  ano,
-                  nome_mes: mesesNomes[mes - 1],
-                  faturamento_total: data.totais_mensais.faturamento_total || 0,
-                  faturamento_couvert: 0, // Será calculado se necessário
-                  faturamento_bar: 0, // Será calculado se necessário
-                  clientes_total: data.totais_mensais.clientes_total || 0,
-                  clientes_atendidos: 0, // Será calculado se necessário
-                  clientes_ativos: 0, // Será calculado se necessário
-                  ticket_medio: data.totais_mensais.ticket_medio || 0,
-                  ticket_medio_contahub: 0, // Será calculado se necessário
-                  tm_entrada: 0, // Será calculado se necessário
-                  tm_bar: 0, // Será calculado se necessário
-                  cmv_limpo_percentual: 0, // Será calculado se necessário
-                  cmo_valor: 0, // Será calculado se necessário
-                  cmo_percentual: 0, // Será calculado se necessário
-                  atracao_faturamento: 0, // Será calculado se necessário
-                  atracao_percentual: 0, // Será calculado se necessário
-                  reservas_totais: 0, // Será calculado se necessário
-                  reservas_presentes: 0, // Será calculado se necessário
-                  performance_media: data.totais_mensais.performance_media || 0
-                });
-              }
-            }
-          } catch (error) {
-            console.error(`Erro ao carregar dados de ${mes}/${ano}:`, error);
+      const response = await fetch(
+        `/api/estrategico/desempenho/semana?semana=${semanaAtual}&ano=${anoAtual}`,
+        {
+          headers: {
+            'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
           }
         }
-      }
+      );
 
-      // Ordenar por ano e mês decrescente (mais recente primeiro)
-      dadosMensaisTemp.sort((a, b) => {
-        if (a.ano !== b.ano) return b.ano - a.ano;
-        return b.mes - a.mes;
-      });
+      if (!response.ok) throw new Error('Erro ao carregar dados');
       
-      setDadosMensais(dadosMensaisTemp);
-    } catch (error) {
-      console.error('Erro ao carregar dados mensais:', error);
-      toast({
-        title: "Erro ao carregar dados mensais",
-        description: "Não foi possível carregar os dados mensais",
-        variant: "destructive"
-      });
-    } finally {
-      setLoadingMensal(false);
-    }
-  }, [selectedBar, user, mesesNomes, toast]);
-
-  // Carregar dados da API
-  const carregarDados = useCallback(async () => {
-    try {
-      setLoading(true);
-      
-      if (!selectedBar || !user) {
-        setLoading(false);
-        return;
-      }
-
-      // Para visualização semanal, não passar parâmetro 'mes'
-      const response = await fetch(`/api/estrategico/desempenho?ano=${anoAtual}`, {
-        headers: {
-          'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Erro ao carregar dados de desempenho');
-      }
-
       const data = await response.json();
-      setDadosSemanas(data.semanas || []);
-      setTotaisAnuais(data.totais_mensais || null);
-      
+      setDadosSemana(data.semana || null);
+      setDadosSemanaAnterior(data.semanaAnterior || null);
+      setTotalSemanas(data.totalSemanas || 53);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -233,706 +279,279 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-  }, [anoAtual, selectedBar, user, toast]);
+  }, [selectedBar, user, semanaAtual, anoAtual, toast]);
 
-  const navegarAno = (direcao: 'anterior' | 'proximo') => {
-    // Limpar dados mensais ao mudar de ano
-    setDadosMensais([]);
-    
+  // Navegação
+  const navegarSemana = (direcao: 'anterior' | 'proxima') => {
     if (direcao === 'anterior') {
-      setAnoAtual(prev => prev - 1);
+      if (semanaAtual === 1) {
+        setSemanaAtual(53);
+        setAnoAtual(prev => prev - 1);
+      } else {
+        setSemanaAtual(prev => prev - 1);
+      }
     } else {
-      setAnoAtual(prev => prev + 1);
+      if (semanaAtual === 53) {
+        setSemanaAtual(1);
+        setAnoAtual(prev => prev + 1);
+      } else {
+        setSemanaAtual(prev => prev + 1);
+      }
     }
-  };
-
-  const formatarMoeda = (valor: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(valor);
-  };
-
-  // Função para abrir modal de edição
-  const abrirModalEdicao = useCallback((semana: DadosSemana) => {
-    setSemanaEditando(semana);
-    setValoresEditados({
-      cmv_limpo_percentual: semana.cmv_limpo_percentual,
-      meta_faturamento_total: semana.meta_faturamento_total,
-      meta_faturamento_couvert: semana.meta_faturamento_couvert,
-      meta_faturamento_bar: semana.meta_faturamento_bar,
-      meta_ticket_medio_contahub: semana.meta_ticket_medio_contahub,
-      meta_tm_entrada: semana.meta_tm_entrada,
-      meta_tm_bar: semana.meta_tm_bar,
-      meta_cmv_limpo_percentual: semana.meta_cmv_limpo_percentual,
-      meta_cmo_percentual: semana.meta_cmo_percentual,
-      meta_atracao_percentual: semana.meta_atracao_percentual,
-      meta_clientes_atendidos: semana.meta_clientes_atendidos,
-      meta_clientes_ativos: semana.meta_clientes_ativos,
-      meta_reservas_totais: semana.meta_reservas_totais,
-      meta_reservas_presentes: semana.meta_reservas_presentes
-    });
-    setModalAberto(true);
-  }, []);
-
-  // Função para salvar valores editados
-  const salvarValoresEditados = useCallback(async () => {
-    if (!semanaEditando) return;
-
-    try {
-      // Atualizar localmente primeiro
-      setDadosSemanas(prev => prev.map(s => 
-        s.semana === semanaEditando.semana 
-          ? { ...s, ...valoresEditados }
-          : s
-      ));
-
-      toast({
-        title: "Valores atualizados",
-        description: `Valores da semana ${semanaEditando.semana} foram atualizados com sucesso.`,
-      });
-
-      setModalAberto(false);
-      setSemanaEditando(null);
-      setValoresEditados({});
-    } catch (error) {
-      console.error('Erro ao salvar valores:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao salvar os valores. Tente novamente.",
-        variant: "destructive",
-      });
-    }
-  }, [semanaEditando, valoresEditados, toast]);
-
-  const getPerformanceColor = (performance: number) => {
-    if (performance >= 90) return 'text-emerald-600 dark:text-emerald-400';
-    if (performance >= 70) return 'text-amber-600 dark:text-amber-400';
-    return 'text-rose-600 dark:text-rose-400';
-  };
-
-  const getPerformanceBadge = (performance: number) => {
-    if (performance >= 90) return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800';
-    if (performance >= 70) return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800';
-    return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-900/20 dark:text-rose-300 dark:border-rose-800';
   };
 
   useEffect(() => {
-    setPageTitle('📈 Desempenho');
+    setPageTitle('📊 Desempenho');
   }, [setPageTitle]);
 
-  // Buscar configuração da planilha de desempenho para o bar selecionado
   useEffect(() => {
-    const buscarConfigSheets = async () => {
-      if (!selectedBar) return;
-      
-      try {
-        const response = await fetch(`/api/configuracoes/sheets-config?bar_id=${selectedBar.id}&tipo=desempenho`);
-        if (response.ok) {
-          const data = await response.json();
-          if (data.spreadsheet_id) {
-            setSheetsId(data.spreadsheet_id);
-          } else {
-            setSheetsId(DEFAULT_SHEETS_ID);
-          }
-        }
-      } catch (error) {
-        console.error('Erro ao buscar configuração de sheets:', error);
-        setSheetsId(DEFAULT_SHEETS_ID);
-      }
-    };
-    
-    buscarConfigSheets();
-  }, [selectedBar?.id]);
+    carregarDados();
+  }, [carregarDados]);
 
-  useEffect(() => {
-    if (selectedBar && user) {
-      carregarDados();
-    }
-  }, [selectedBar, user, anoAtual]);
-
-  // Carregar dados mensais quando mudar para aba mensal ou ano
-  useEffect(() => {
-    if (activeTab === 'mensal' && selectedBar && user && dadosMensais.length === 0) {
-      carregarDadosMensais();
-    }
-  }, [activeTab, selectedBar, user, anoAtual, dadosMensais.length, carregarDadosMensais]);
-
-
-
-  if (loading) {
+  // Verificar seleção de bar
+  if (!selectedBar) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <RefreshCcw className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados de desempenho...</p>
-        </div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+        <Card className="bg-white dark:bg-gray-800 p-8 text-center max-w-md">
+          <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Selecione um Bar
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Escolha um bar no seletor acima para visualizar os indicadores de desempenho.
+          </p>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-white dark:bg-gray-900">
-      {/* Botão Abrir no Google Sheets - Posição fixa no canto superior direito */}
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${sheetsId}/edit?gid=972882162`, '_blank')}
-        className="absolute top-4 right-4 z-50 gap-2 shadow-lg bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
-      >
-        <FileSpreadsheet className="h-4 w-4" />
-        Abrir no Google Sheets
-      </Button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Header com navegação */}
+      <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'semanal' | 'mensal')}>
+              <TabsList className="bg-gray-100 dark:bg-gray-700">
+                <TabsTrigger value="semanal" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
+                  <Calendar className="w-4 h-4 mr-2" />
+                  Semanal
+                </TabsTrigger>
+                <TabsTrigger value="mensal" className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-600">
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Mensal
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
 
-      {/* Google Sheets em tela cheia */}
-      <div className="w-full h-full">
-        <iframe
-          src={`https://docs.google.com/spreadsheets/d/${sheetsId}/edit?gid=972882162&widget=true&headers=false&rm=minimal`}
-          className="w-full h-full border-0"
-          title="Planilha de Desempenho - Tab Desemp ContaHub"
-          loading="eager"
-        />
-      </div>
-
-      {/* Tabs ocultas - mantidas para possível uso futuro */}
-      <div className="hidden">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="sheets">Planilha Google</TabsTrigger>
-            <TabsTrigger value="semanal">Análise Semanal</TabsTrigger>
-            <TabsTrigger value="mensal">Análise Mensal</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="sheets"></TabsContent>
-
-          {/* Visão Semanal */}
-          <TabsContent value="semanal" className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
-                <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg">
-                    <BarChart3 className="h-5 w-5 text-white" />
+            {/* Navegação de Semana */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navegarSemana('anterior')}
+                className="h-10 w-10"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </Button>
+              
+              <div className="min-w-[200px] text-center">
+                <div className="text-lg font-bold text-gray-900 dark:text-white">
+                  Semana {semanaAtual.toString().padStart(2, '0')}
+                </div>
+                {dadosSemana && (
+                  <div className="text-sm text-gray-500 dark:text-gray-400">
+                    {formatarData(dadosSemana.data_inicio)} a {formatarData(dadosSemana.data_fim)}/{anoAtual}
                   </div>
-                  Eventos por Semana - {anoAtual}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-auto max-h-[600px] relative">
-                  <table className="w-full min-w-[1600px] relative">
-                    <thead className="sticky top-0 z-20">
-                      <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <th className="sticky left-0 z-30 text-left py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px] bg-gray-50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-700">Semana</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Total</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Couvert</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Bar</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Ticket Médio</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">TM Entrada</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">TM Bar</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">CMV %</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">CMO %</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">Atração %</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Cli. Atendidos</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Cli. Ativos</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Reservas</th>
-                        <th className="text-center py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {dadosSemanas.map((semana, index) => (
-                        <tr key={semana.semana} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-blue-900/20 dark:hover:to-indigo-900/20 hover:scale-[1.02] transition-all duration-300 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
-                          <td className="sticky left-0 z-10 py-3 px-3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></div>
-                              <div className="flex flex-col">
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">{semana.semana}</span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{semana.periodo}</span>
-                              </div>
-                            </div>
-                          </td>
-                          
-                          {/* Faturamento Total */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.faturamento_total || 0) >= (semana.meta_faturamento_total || 263000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {formatarMoeda(semana.faturamento_total || 0)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap whitespace-nowrap">
-                                Meta: {formatarMoeda(semana.meta_faturamento_total || 263000)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Faturamento Couvert */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.faturamento_couvert || 0) >= (semana.meta_faturamento_couvert || 38000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {formatarMoeda(semana.faturamento_couvert || 0)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {formatarMoeda(semana.meta_faturamento_couvert || 38000)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Faturamento Bar */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.faturamento_bar || 0) >= (semana.meta_faturamento_bar || 225000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {formatarMoeda(semana.faturamento_bar || 0)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {formatarMoeda(semana.meta_faturamento_bar || 225000)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Ticket Médio */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.ticket_medio_contahub || 0) >= (semana.meta_ticket_medio_contahub || 103) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {formatarMoeda(semana.ticket_medio_contahub || 0)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {formatarMoeda(semana.meta_ticket_medio_contahub || 103)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* TM Entrada */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.tm_entrada || 0) >= (semana.meta_tm_entrada || 15.5) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {formatarMoeda(semana.tm_entrada || 0)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {formatarMoeda(semana.meta_tm_entrada || 15.5)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* TM Bar */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.tm_bar || 0) >= (semana.meta_tm_bar || 77.5) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {formatarMoeda(semana.tm_bar || 0)}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {formatarMoeda(semana.meta_tm_bar || 77.5)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* CMV % */}
-                          <td className="py-3 px-3 text-right">
-                            <div className="flex flex-col items-end">
-                              <Badge className={`font-bold px-2 py-1 text-xs ${(semana.cmv_limpo_percentual || 0) <= (semana.meta_cmv_limpo_percentual || 33) ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
-                                {(semana.cmv_limpo_percentual || 0).toFixed(1)}%
-                              </Badge>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {(semana.meta_cmv_limpo_percentual || 33).toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* CMO % */}
-                          <td className="py-3 px-3 text-right">
-                            <div className="flex flex-col items-end">
-                              <Badge className={`font-bold px-2 py-1 text-xs ${(semana.cmo_percentual || 0) <= (semana.meta_cmo_percentual || 20) ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
-                                {(semana.cmo_percentual || 0).toFixed(1)}%
-                              </Badge>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {(semana.meta_cmo_percentual || 20).toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Atração % */}
-                          <td className="py-3 px-3 text-right">
-                            <div className="flex flex-col items-end">
-                              <Badge className={`font-bold px-2 py-1 text-xs ${(semana.atracao_percentual || 0) <= (semana.meta_atracao_percentual || 17) ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
-                                {(semana.atracao_percentual || 0).toFixed(1)}%
-                              </Badge>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {(semana.meta_atracao_percentual || 17).toFixed(1)}%
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Clientes Atendidos */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.clientes_atendidos || 0) >= (semana.meta_clientes_atendidos || 2645) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {(semana.clientes_atendidos || 0).toLocaleString()}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {(semana.meta_clientes_atendidos || 2645).toLocaleString()}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Clientes Ativos */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <span className={`text-sm font-bold ${(semana.clientes_ativos || 0) >= (semana.meta_clientes_ativos || 3000) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {(semana.clientes_ativos || 0).toLocaleString()}
-                              </span>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {(semana.meta_clientes_ativos || 3000).toLocaleString()}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Reservas */}
-                          <td className="py-3 px-3 text-right font-bold text-sm">
-                            <div className="flex flex-col items-end">
-                              <div className="flex items-center gap-1">
-                                <span className={`text-sm font-bold ${(semana.reservas_presentes || 0) >= (semana.meta_reservas_presentes || 650) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                  {(semana.reservas_presentes || 0).toLocaleString()}
-                                </span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">/</span>
-                                <span className={`text-sm font-bold ${(semana.reservas_totais || 0) >= (semana.meta_reservas_totais || 800) ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                                  {(semana.reservas_totais || 0).toLocaleString()}
-                                </span>
-                              </div>
-                              <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 whitespace-nowrap">
-                                Meta: {(semana.meta_reservas_presentes || 650).toLocaleString()}/{(semana.meta_reservas_totais || 800).toLocaleString()}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          {/* Ações */}
-                          <td className="py-3 px-3 text-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => abrirModalEdicao(semana)}
-                              className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                            >
-                              <Edit className="h-4 w-4 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400" />
-                            </Button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-            </motion.div>
-          </TabsContent>
-
-          {/* Visão Mensal */}
-          <TabsContent value="mensal" className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-            >
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-              <CardHeader className="border-b border-gray-200 dark:border-gray-700 p-4">
-                <CardTitle className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-lg">
-                    <Calendar className="h-5 w-5 text-white" />
-                  </div>
-                  Comparativo dos Meses - Fevereiro 2025 até {mesesNomes[new Date().getMonth()]} {new Date().getFullYear()}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="overflow-auto max-h-[600px] relative">
-                  <table className="w-full min-w-[1600px] relative">
-                    <thead className="sticky top-0 z-20">
-                      <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                        <th className="sticky left-0 z-30 text-left py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px] bg-gray-50 dark:bg-gray-800/50 border-r border-gray-200 dark:border-gray-700">Mês</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Total</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Couvert</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Fat. Bar</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Ticket Médio</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">TM Entrada</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">TM Bar</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">CMV %</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">CMO %</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[80px]">Atração %</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Cli. Atendidos</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Cli. Ativos</th>
-                        <th className="text-right py-3 px-3 font-semibold text-gray-900 dark:text-white text-sm min-w-[120px]">Reservas</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {loadingMensal ? (
-                        <tr>
-                          <td colSpan={13} className="py-12 text-center">
-                            <div className="flex flex-col items-center justify-center">
-                              <RefreshCcw className="h-8 w-8 animate-spin text-violet-600 dark:text-violet-400 mb-4" />
-                              <p className="text-gray-600 dark:text-gray-400 font-medium">Carregando dados mensais...</p>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : dadosMensais.length === 0 ? (
-                        <tr>
-                          <td colSpan={13} className="py-12 text-center">
-                            <div className="flex flex-col items-center justify-center">
-                              <Calendar className="h-8 w-8 text-gray-400 dark:text-gray-600 mb-4" />
-                              <p className="text-gray-600 dark:text-gray-400 font-medium">Nenhum dado mensal encontrado</p>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : (
-                        dadosMensais.map((dadoMes, index) => (
-                          <tr key={`${dadoMes.mes}-${dadoMes.ano}`} className={`border-b border-gray-100 dark:border-gray-700 hover:bg-gradient-to-r hover:from-violet-50 hover:to-purple-50 dark:hover:from-violet-900/20 dark:hover:to-purple-900/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'}`}>
-                            <td className="sticky left-0 z-10 py-3 px-3 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700">
-                              <div className="flex items-center gap-2">
-                                <div className="w-1 h-6 bg-gradient-to-b from-violet-500 to-purple-600 rounded-full"></div>
-                                <span className="font-semibold text-gray-900 dark:text-white text-sm">{dadoMes.nome_mes} {dadoMes.ano}</span>
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-right font-bold text-gray-900 dark:text-white text-sm">{formatarMoeda(dadoMes.faturamento_total || 0)}</td>
-                            <td className="py-3 px-3 text-right font-bold text-gray-900 dark:text-white text-sm">{formatarMoeda(dadoMes.faturamento_couvert || 0)}</td>
-                            <td className="py-3 px-3 text-right font-bold text-gray-900 dark:text-white text-sm">{formatarMoeda(dadoMes.faturamento_bar || 0)}</td>
-                            <td className="py-3 px-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(dadoMes.ticket_medio_contahub || 0)}</td>
-                            <td className="py-3 px-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(dadoMes.tm_entrada || 0)}</td>
-                            <td className="py-3 px-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{formatarMoeda(dadoMes.tm_bar || 0)}</td>
-                            <td className="py-3 px-3 text-right">
-                              <Badge className={`font-bold px-2 py-1 text-xs ${(dadoMes.cmv_limpo_percentual || 0) <= 33 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
-                                {(dadoMes.cmv_limpo_percentual || 0).toFixed(1)}%
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <Badge className={`font-bold px-2 py-1 text-xs ${(dadoMes.cmo_percentual || 0) <= 20 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
-                                {(dadoMes.cmo_percentual || 0).toFixed(1)}%
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 text-right">
-                              <Badge className={`font-bold px-2 py-1 text-xs ${(dadoMes.atracao_percentual || 0) <= 17 ? 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800' : 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800'}`}>
-                                {(dadoMes.atracao_percentual || 0).toFixed(1)}%
-                              </Badge>
-                            </td>
-                            <td className="py-3 px-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{(dadoMes.clientes_atendidos || 0).toLocaleString()}</td>
-                            <td className="py-3 px-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">{(dadoMes.clientes_ativos || 0).toLocaleString()}</td>
-                            <td className="py-3 px-3 text-right font-semibold text-gray-700 dark:text-gray-300 text-sm">
-                              {(dadoMes.reservas_presentes || 0).toLocaleString()}/{(dadoMes.reservas_totais || 0).toLocaleString()}
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                      {dadosMensais.length > 0 && !loadingMensal && (
-                        <tr className="border-t-2 border-gray-300 dark:border-gray-600 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
-                          <td className="sticky left-0 z-10 py-3 px-3 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 border-r border-gray-200 dark:border-gray-700">
-                            <div className="flex items-center gap-2">
-                              <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-blue-600 rounded-full"></div>
-                              <span className="font-bold text-gray-900 dark:text-white text-sm">TOTAL GERAL</span>
-                            </div>
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {formatarMoeda(dadosMensais.reduce((sum, m) => sum + (m.faturamento_total || 0), 0))}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {formatarMoeda(dadosMensais.reduce((sum, m) => sum + (m.faturamento_couvert || 0), 0))}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {formatarMoeda(dadosMensais.reduce((sum, m) => sum + (m.faturamento_bar || 0), 0))}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {formatarMoeda((dadosMensais.reduce((sum, m) => sum + (m.ticket_medio_contahub || 0), 0)) / dadosMensais.length)}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {formatarMoeda((dadosMensais.reduce((sum, m) => sum + (m.tm_entrada || 0), 0)) / dadosMensais.length)}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {formatarMoeda((dadosMensais.reduce((sum, m) => sum + (m.tm_bar || 0), 0)) / dadosMensais.length)}
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <Badge className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold px-2 py-1 text-xs border-0">
-                              {((dadosMensais.reduce((sum, m) => sum + (m.cmv_limpo_percentual || 0), 0)) / dadosMensais.length).toFixed(1)}%
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <Badge className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold px-2 py-1 text-xs border-0">
-                              {((dadosMensais.reduce((sum, m) => sum + (m.cmo_percentual || 0), 0)) / dadosMensais.length).toFixed(1)}%
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-3 text-right">
-                            <Badge className="bg-gradient-to-r from-indigo-500 to-blue-600 text-white font-bold px-2 py-1 text-xs border-0">
-                              {((dadosMensais.reduce((sum, m) => sum + (m.atracao_percentual || 0), 0)) / dadosMensais.length).toFixed(1)}%
-                            </Badge>
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {dadosMensais.reduce((sum, m) => sum + (m.clientes_atendidos || 0), 0).toLocaleString()}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {dadosMensais.reduce((sum, m) => sum + (m.clientes_ativos || 0), 0).toLocaleString()}
-                          </td>
-                          <td className="py-3 px-3 text-right font-bold text-sm text-gray-900 dark:text-white">
-                            {dadosMensais.reduce((sum, m) => sum + (m.reservas_presentes || 0), 0).toLocaleString()}/{dadosMensais.reduce((sum, m) => sum + (m.reservas_totais || 0), 0).toLocaleString()}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-            </motion.div>
-          </TabsContent>
-
-        </Tabs>
-      </div>
-
-      {/* Modal de Edição */}
-      <Dialog open={modalAberto} onOpenChange={setModalAberto}>
-          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>
-                Editar Valores - {semanaEditando?.semana}
-              </DialogTitle>
-            </DialogHeader>
-            
-            {semanaEditando && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                {/* CMV % */}
-                <div className="space-y-2">
-                  <Label htmlFor="cmv">CMV % (Realizado)</Label>
-                  <Input
-                    id="cmv"
-                    type="number"
-                    step="0.1"
-                    value={valoresEditados.cmv_limpo_percentual || 0}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      cmv_limpo_percentual: parseFloat(e.target.value) || 0
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                {/* Metas */}
-                <div className="space-y-2">
-                  <Label htmlFor="meta_faturamento_total">Meta Faturamento Total</Label>
-                  <Input
-                    id="meta_faturamento_total"
-                    type="number"
-                    step="1000"
-                    value={valoresEditados.meta_faturamento_total || 263000}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_faturamento_total: parseFloat(e.target.value) || 263000
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_faturamento_couvert">Meta Faturamento Couvert</Label>
-                  <Input
-                    id="meta_faturamento_couvert"
-                    type="number"
-                    step="1000"
-                    value={valoresEditados.meta_faturamento_couvert || 38000}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_faturamento_couvert: parseFloat(e.target.value) || 38000
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_faturamento_bar">Meta Faturamento Bar</Label>
-                  <Input
-                    id="meta_faturamento_bar"
-                    type="number"
-                    step="1000"
-                    value={valoresEditados.meta_faturamento_bar || 225000}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_faturamento_bar: parseFloat(e.target.value) || 225000
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_cmv">Meta CMV %</Label>
-                  <Input
-                    id="meta_cmv"
-                    type="number"
-                    step="0.1"
-                    value={valoresEditados.meta_cmv_limpo_percentual || 33}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_cmv_limpo_percentual: parseFloat(e.target.value) || 33
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_cmo">Meta CMO %</Label>
-                  <Input
-                    id="meta_cmo"
-                    type="number"
-                    step="0.1"
-                    value={valoresEditados.meta_cmo_percentual || 20}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_cmo_percentual: parseFloat(e.target.value) || 20
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_atracao">Meta Atração %</Label>
-                  <Input
-                    id="meta_atracao"
-                    type="number"
-                    step="0.1"
-                    value={valoresEditados.meta_atracao_percentual || 17}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_atracao_percentual: parseFloat(e.target.value) || 17
-                    }))}
-                    className="w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="meta_clientes_atendidos">Meta Clientes Atendidos</Label>
-                  <Input
-                    id="meta_clientes_atendidos"
-                    type="number"
-                    value={valoresEditados.meta_clientes_atendidos || 2645}
-                    onChange={(e) => setValoresEditados(prev => ({
-                      ...prev,
-                      meta_clientes_atendidos: parseInt(e.target.value) || 2645
-                    }))}
-                    className="w-full"
-                  />
-                </div>
+                )}
               </div>
-            )}
-
-            <div className="flex justify-end gap-3 pt-4 border-t">
-              <button
-                onClick={() => setModalAberto(false)}
-                className="border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg font-medium transition-colors flex flex-row items-center justify-center gap-2"
+              
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => navegarSemana('proxima')}
+                className="h-10 w-10"
               >
-                <span className="whitespace-nowrap">Cancelar</span>
-              </button>
-              <button
-                onClick={salvarValoresEditados}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex flex-row items-center justify-center gap-2"
-              >
-                <Save className="h-4 w-4 flex-shrink-0" />
-                <span className="whitespace-nowrap">Salvar</span>
-              </button>
+                <ChevronRight className="h-5 w-5" />
+              </Button>
             </div>
-          </DialogContent>
-        </Dialog>
+
+            {/* Botão Refresh */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={carregarDados}
+              disabled={loading}
+              className="gap-2"
+            >
+              <RefreshCcw className={cn("h-4 w-4", loading && "animate-spin")} />
+              Atualizar
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Conteúdo */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-64 rounded-xl" />
+            ))}
+          </div>
+        ) : !dadosSemana ? (
+          <Card className="bg-white dark:bg-gray-800 p-8 text-center">
+            <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              Sem dados para esta semana
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400">
+              Não há dados de desempenho registrados para a Semana {semanaAtual} de {anoAtual}.
+            </p>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* GUARDRAIL - Indicadores Estratégicos */}
+            <Secao
+              titulo="GUARDRAIL - Estratégicos"
+              icone={<DollarSign className="w-4 h-4 text-white" />}
+              corGradiente="bg-gradient-to-r from-emerald-600 to-emerald-700"
+            >
+              <Indicador label="Faturamento Total" valor={dadosSemana.faturamento_total} valorAnterior={dadosSemanaAnterior?.faturamento_total} formato="moeda" />
+              <Indicador label="Faturamento Couvert" valor={dadosSemana.faturamento_entrada} valorAnterior={dadosSemanaAnterior?.faturamento_entrada} formato="moeda" />
+              <Indicador label="Faturamento Bar" valor={dadosSemana.faturamento_bar} valorAnterior={dadosSemanaAnterior?.faturamento_bar} formato="moeda" />
+              <Indicador label="Faturamento CMvível" valor={dadosSemana.faturamento_cmovivel} valorAnterior={dadosSemanaAnterior?.faturamento_cmovivel} formato="moeda" />
+              <Indicador label="CMV R$" valor={dadosSemana.cmv_rs} valorAnterior={dadosSemanaAnterior?.cmv_rs} formato="moeda" inverso />
+              <Indicador label="Ticket Médio ContaHub" valor={dadosSemana.ticket_medio} valorAnterior={dadosSemanaAnterior?.ticket_medio} formato="moeda" />
+              <Indicador label="TM Entrada" valor={dadosSemana.tm_entrada} valorAnterior={dadosSemanaAnterior?.tm_entrada} formato="moeda" />
+              <Indicador label="TM Bar" valor={dadosSemana.tm_bar} valorAnterior={dadosSemanaAnterior?.tm_bar} formato="moeda" />
+              <Indicador label="CMV Limpo %" valor={dadosSemana.cmv_limpo} valorAnterior={dadosSemanaAnterior?.cmv_limpo} formato="percentual" inverso />
+              <Indicador label="CMV Global Real" valor={dadosSemana.cmv_global_real} valorAnterior={dadosSemanaAnterior?.cmv_global_real} formato="percentual" inverso />
+              <Indicador label="CMV Teórico" valor={dadosSemana.cmv_teorico} valorAnterior={dadosSemanaAnterior?.cmv_teorico} formato="percentual" inverso />
+              <Indicador label="CMO %" valor={dadosSemana.cmo} valorAnterior={dadosSemanaAnterior?.cmo} formato="percentual" inverso />
+              <Indicador label="Atração/Faturamento" valor={dadosSemana.custo_atracao_faturamento} valorAnterior={dadosSemanaAnterior?.custo_atracao_faturamento} formato="percentual" inverso />
+            </Secao>
+
+            {/* OVT - Indicadores Estratégicos */}
+            <Secao
+              titulo="OVT - Clientes"
+              icone={<Users className="w-4 h-4 text-white" />}
+              corGradiente="bg-gradient-to-r from-blue-600 to-blue-700"
+            >
+              <Indicador label="Retenção 1 mês" valor={dadosSemana.retencao_1m} valorAnterior={dadosSemanaAnterior?.retencao_1m} formato="percentual" />
+              <Indicador label="Retenção 2 meses" valor={dadosSemana.retencao_2m} valorAnterior={dadosSemanaAnterior?.retencao_2m} formato="percentual" />
+              <Indicador label="% Novos Clientes" valor={dadosSemana.perc_clientes_novos} valorAnterior={dadosSemanaAnterior?.perc_clientes_novos} formato="percentual" />
+              <Indicador label="Visitas" valor={dadosSemana.clientes_atendidos} valorAnterior={dadosSemanaAnterior?.clientes_atendidos} />
+              <Indicador label="Clientes Ativos" valor={dadosSemana.clientes_ativos} valorAnterior={dadosSemanaAnterior?.clientes_ativos} />
+              <Indicador label="Reservas Totais" valor={dadosSemana.reservas_totais} valorAnterior={dadosSemanaAnterior?.reservas_totais} />
+              <Indicador label="Reservas Presentes" valor={dadosSemana.reservas_presentes} valorAnterior={dadosSemanaAnterior?.reservas_presentes} />
+            </Secao>
+
+            {/* Indicadores de Qualidade */}
+            <Secao
+              titulo="Qualidade"
+              icone={<Star className="w-4 h-4 text-white" />}
+              corGradiente="bg-gradient-to-r from-amber-500 to-amber-600"
+            >
+              <Indicador label="Avaliações 5★ Google/Trip" valor={dadosSemana.avaliacoes_5_google_trip} valorAnterior={dadosSemanaAnterior?.avaliacoes_5_google_trip} />
+              <Indicador label="Média Avaliações Google" valor={dadosSemana.media_avaliacoes_google} valorAnterior={dadosSemanaAnterior?.media_avaliacoes_google} formato="decimal" />
+              <Indicador label="NPS Reservas" valor={dadosSemana.nps_reservas} valorAnterior={dadosSemanaAnterior?.nps_reservas} />
+              <Indicador label="NPS Felicidade Equipe" valor={dadosSemana.nota_felicidade_equipe} valorAnterior={dadosSemanaAnterior?.nota_felicidade_equipe} />
+            </Secao>
+
+            {/* Cockpit Financeiro */}
+            <Secao
+              titulo="Cockpit Financeiro"
+              icone={<Wallet className="w-4 h-4 text-white" />}
+              corGradiente="bg-gradient-to-r from-violet-600 to-violet-700"
+              defaultOpen={false}
+            >
+              <Indicador label="Imposto" valor={dadosSemana.imposto} valorAnterior={dadosSemanaAnterior?.imposto} formato="moeda" inverso />
+              <Indicador label="Comissão" valor={dadosSemana.comissao} valorAnterior={dadosSemanaAnterior?.comissao} formato="moeda" inverso />
+              <Indicador label="CMV" valor={dadosSemana.cmv} valorAnterior={dadosSemanaAnterior?.cmv} formato="moeda" inverso />
+              <Indicador label="CMO Custo" valor={dadosSemana.cmo_custo} valorAnterior={dadosSemanaAnterior?.cmo_custo} formato="moeda" inverso />
+              <Indicador label="Pró-Labore" valor={dadosSemana.pro_labore} valorAnterior={dadosSemanaAnterior?.pro_labore} formato="moeda" inverso />
+              <Indicador label="Ocupação" valor={dadosSemana.ocupacao} valorAnterior={dadosSemanaAnterior?.ocupacao} formato="moeda" inverso />
+              <Indicador label="Adm Fixo" valor={dadosSemana.adm_fixo} valorAnterior={dadosSemanaAnterior?.adm_fixo} formato="moeda" inverso />
+              <Indicador label="Marketing Fixo" valor={dadosSemana.marketing_fixo} valorAnterior={dadosSemanaAnterior?.marketing_fixo} formato="moeda" inverso />
+              <Indicador label="Escritório Central" valor={dadosSemana.escritorio_central} valorAnterior={dadosSemanaAnterior?.escritorio_central} formato="moeda" inverso />
+              <Indicador label="Adm e Mkt da Semana" valor={dadosSemana.adm_mkt_semana} valorAnterior={dadosSemanaAnterior?.adm_mkt_semana} formato="moeda" inverso />
+              <Indicador label="RH+Estorno+Outros" valor={dadosSemana.rh_estorno_outros_operacao} valorAnterior={dadosSemanaAnterior?.rh_estorno_outros_operacao} formato="moeda" inverso />
+              <Indicador label="Materiais" valor={dadosSemana.materiais} valorAnterior={dadosSemanaAnterior?.materiais} formato="moeda" inverso />
+              <Indicador label="Manutenção" valor={dadosSemana.manutencao} valorAnterior={dadosSemanaAnterior?.manutencao} formato="moeda" inverso />
+              <Indicador label="Atrações/Eventos" valor={dadosSemana.atracoes_eventos} valorAnterior={dadosSemanaAnterior?.atracoes_eventos} formato="moeda" inverso />
+              <Indicador label="Utensílios" valor={dadosSemana.utensilios} valorAnterior={dadosSemanaAnterior?.utensilios} formato="moeda" inverso />
+              <Indicador label="Consumação (sem sócio)" valor={dadosSemana.consumacao_sem_socio} valorAnterior={dadosSemanaAnterior?.consumacao_sem_socio} formato="moeda" />
+              <Indicador label="Lucro (R$)" valor={dadosSemana.lucro_rs} valorAnterior={dadosSemanaAnterior?.lucro_rs} formato="moeda" />
+            </Secao>
+
+            {/* Cockpit Produtos */}
+            <Secao
+              titulo="Cockpit Produtos"
+              icone={<ShoppingCart className="w-4 h-4 text-white" />}
+              corGradiente="bg-gradient-to-r from-orange-500 to-orange-600"
+              defaultOpen={false}
+            >
+              <Indicador label="StockOut Comidas" valor={dadosSemana.stockout_comidas} valorAnterior={dadosSemanaAnterior?.stockout_comidas} inverso />
+              <Indicador label="StockOut Drinks" valor={dadosSemana.stockout_drinks} valorAnterior={dadosSemanaAnterior?.stockout_drinks} inverso />
+              <Indicador label="StockOut Bar" valor={dadosSemana.stockout_bar} valorAnterior={dadosSemanaAnterior?.stockout_bar} inverso />
+              <Indicador label="% Bebidas" valor={dadosSemana.perc_bebidas} valorAnterior={dadosSemanaAnterior?.perc_bebidas} formato="percentual" />
+              <Indicador label="% Drinks" valor={dadosSemana.perc_drinks} valorAnterior={dadosSemanaAnterior?.perc_drinks} formato="percentual" />
+              <Indicador label="% Comida" valor={dadosSemana.perc_comida} valorAnterior={dadosSemanaAnterior?.perc_comida} formato="percentual" />
+              <Indicador label="% Happy Hour" valor={dadosSemana.perc_happy_hour} valorAnterior={dadosSemanaAnterior?.perc_happy_hour} formato="percentual" />
+              <Indicador label="Qtde Itens Bar" valor={dadosSemana.qtde_itens_bar} valorAnterior={dadosSemanaAnterior?.qtde_itens_bar} />
+              <Indicador label="Atrasos Bar" valor={dadosSemana.atrasos_bar} valorAnterior={dadosSemanaAnterior?.atrasos_bar} inverso />
+              <Indicador label="Tempo Saída Bar" valor={dadosSemana.tempo_saida_bar} valorAnterior={dadosSemanaAnterior?.tempo_saida_bar} formato="decimal" sufixo=" min" inverso />
+              <Indicador label="Qtde Itens Cozinha" valor={dadosSemana.qtde_itens_cozinha} valorAnterior={dadosSemanaAnterior?.qtde_itens_cozinha} />
+              <Indicador label="Atrasos Cozinha" valor={dadosSemana.atrasos_cozinha} valorAnterior={dadosSemanaAnterior?.atrasos_cozinha} inverso />
+              <Indicador label="Tempo Saída Cozinha" valor={dadosSemana.tempo_saida_cozinha} valorAnterior={dadosSemanaAnterior?.tempo_saida_cozinha} formato="decimal" sufixo=" min" inverso />
+            </Secao>
+
+            {/* Cockpit Vendas + Marketing */}
+            <Secao
+              titulo="Vendas & Marketing"
+              icone={<Megaphone className="w-4 h-4 text-white" />}
+              corGradiente="bg-gradient-to-r from-pink-500 to-pink-600"
+              defaultOpen={false}
+            >
+              {/* Vendas */}
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Vendas</span>
+              </div>
+              <Indicador label="% Fat. até 19h" valor={dadosSemana.perc_faturamento_ate_19h} valorAnterior={dadosSemanaAnterior?.perc_faturamento_ate_19h} formato="percentual" />
+              <Indicador label="Venda Balcão" valor={dadosSemana.venda_balcao} valorAnterior={dadosSemanaAnterior?.venda_balcao} formato="moeda" />
+              <Indicador label="Couvert / Atrações" valor={dadosSemana.couvert_atracoes} valorAnterior={dadosSemanaAnterior?.couvert_atracoes} formato="moeda" />
+              <Indicador label="QUI+SÁB+DOM" valor={dadosSemana.qui_sab_dom} valorAnterior={dadosSemanaAnterior?.qui_sab_dom} formato="moeda" />
+              
+              {/* Marketing Orgânico */}
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Marketing Orgânico</span>
+              </div>
+              <Indicador label="Nº de Posts" valor={dadosSemana.o_num_posts} valorAnterior={dadosSemanaAnterior?.o_num_posts} />
+              <Indicador label="Alcance" valor={dadosSemana.o_alcance} valorAnterior={dadosSemanaAnterior?.o_alcance} />
+              <Indicador label="Interação" valor={dadosSemana.o_interacao} valorAnterior={dadosSemanaAnterior?.o_interacao} />
+              <Indicador label="Compartilhamento" valor={dadosSemana.o_compartilhamento} valorAnterior={dadosSemanaAnterior?.o_compartilhamento} />
+              <Indicador label="Engajamento" valor={dadosSemana.o_engajamento} valorAnterior={dadosSemanaAnterior?.o_engajamento} formato="percentual" />
+              <Indicador label="Nº Stories" valor={dadosSemana.o_num_stories} valorAnterior={dadosSemanaAnterior?.o_num_stories} />
+              <Indicador label="Visu Stories" valor={dadosSemana.o_visu_stories} valorAnterior={dadosSemanaAnterior?.o_visu_stories} />
+              
+              {/* Marketing Pago */}
+              <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
+                <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Marketing Pago (Meta)</span>
+              </div>
+              <Indicador label="Valor Investido" valor={dadosSemana.m_valor_investido} valorAnterior={dadosSemanaAnterior?.m_valor_investido} formato="moeda" />
+              <Indicador label="Alcance" valor={dadosSemana.m_alcance} valorAnterior={dadosSemanaAnterior?.m_alcance} />
+              <Indicador label="Frequência" valor={dadosSemana.m_frequencia} valorAnterior={dadosSemanaAnterior?.m_frequencia} formato="decimal" />
+              <Indicador label="CPM" valor={dadosSemana.m_cpm} valorAnterior={dadosSemanaAnterior?.m_cpm} formato="moeda" inverso />
+              <Indicador label="Cliques" valor={dadosSemana.m_cliques} valorAnterior={dadosSemanaAnterior?.m_cliques} />
+              <Indicador label="CTR" valor={dadosSemana.m_ctr} valorAnterior={dadosSemanaAnterior?.m_ctr} formato="percentual" />
+              <Indicador label="Custo por Clique" valor={dadosSemana.m_custo_por_clique} valorAnterior={dadosSemanaAnterior?.m_custo_por_clique} formato="moeda" inverso />
+              <Indicador label="Conversas Iniciadas" valor={dadosSemana.m_conversas_iniciadas} valorAnterior={dadosSemanaAnterior?.m_conversas_iniciadas} />
+            </Secao>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
