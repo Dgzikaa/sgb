@@ -533,7 +533,171 @@ serve(async (req) => {
 
 ---
 
-## 11. AGENTE IA
+## 11. ESTOQUE E RUPTURAS
+
+### contahub_stockout (Rupturas de estoque - produtos em falta)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| data_stockout | DATE | Data da ruptura |
+| codigo_produto | TEXT | Código do produto |
+| nome_produto | TEXT | Nome do produto em falta |
+| categoria | TEXT | Categoria do produto |
+| horario_inicial | TEXT | Hora que começou a faltar |
+| horario_final | TEXT | Hora que voltou (ou NULL) |
+| tempo_ruptura_min | INTEGER | Tempo em minutos sem produto |
+
+### cmv_semanal (CMV calculado por semana)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| data_inicio | DATE | Início da semana |
+| data_fim | DATE | Fim da semana |
+| cmv_percentual | NUMERIC | CMV percentual (meta menor que 34%) |
+| custo_total | NUMERIC | Custo total |
+| faturamento | NUMERIC | Faturamento da semana |
+| cmv_teorico | NUMERIC | CMV teórico percentual |
+| cmv_limpo | NUMERIC | CMV limpo percentual |
+
+---
+
+## 12. CALENDÁRIO E PLANEJAMENTO
+
+### calendario_operacional (Planejamento de eventos futuros)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| data | DATE | Data planejada |
+| dia_semana | TEXT | Dia da semana |
+| status | VARCHAR | Status (confirmado, planejado, cancelado) |
+| artista | TEXT | Artista ou banda confirmado |
+| genero | TEXT | Gênero musical |
+| meta_faturamento | NUMERIC | Meta para o dia |
+| observacoes | TEXT | Notas e observações |
+
+---
+
+## 13. METAS E OKRs
+
+### organizador_okrs (OKRs definidos)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| periodo | TEXT | Período (trimestre) |
+| objetivo | TEXT | Objetivo estratégico |
+| key_result | TEXT | Key Result mensurável |
+| meta_valor | NUMERIC | Valor da meta |
+| atual_valor | NUMERIC | Valor atual |
+| status | VARCHAR | Status (on_track, at_risk, off_track) |
+
+### organizador_visao (Visão do negócio)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| tipo | TEXT | Tipo (missao, visao, valores, big_bets) |
+| conteudo | TEXT | Conteúdo |
+
+---
+
+## 14. REDES SOCIAIS (WINDSOR e INSTAGRAM)
+
+### windsor_instagram_followers (Seguidores Instagram)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| date | DATE | Data da medição |
+| followers_count | INTEGER | Total de seguidores |
+| follows_count | INTEGER | Seguindo |
+| media_count | INTEGER | Posts no perfil |
+
+### windsor_instagram_followers_daily (Variação diária)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| date | DATE | Data |
+| followers_gained | INTEGER | Seguidores ganhos no dia |
+| followers_lost | INTEGER | Seguidores perdidos |
+| net_change | INTEGER | Variação líquida |
+
+### windsor_instagram_stories (Métricas de Stories)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| date | DATE | Data |
+| impressions | INTEGER | Impressões |
+| reach | INTEGER | Alcance |
+| replies | INTEGER | Respostas |
+| taps_forward | INTEGER | Avançou |
+| taps_back | INTEGER | Voltou |
+| exits | INTEGER | Saiu |
+
+### windsor_google (Google Business Profile)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| date | DATE | Data |
+| views | INTEGER | Visualizações do perfil |
+| searches | INTEGER | Buscas |
+| actions_website | INTEGER | Cliques no site |
+| actions_phone | INTEGER | Cliques no telefone |
+| actions_directions | INTEGER | Cliques em rotas |
+
+---
+
+## 15. CRM E CAMPANHAS
+
+### crm_campanhas (Campanhas de marketing)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| nome | TEXT | Nome da campanha |
+| tipo | VARCHAR | Tipo (email, whatsapp, sms) |
+| status | VARCHAR | Status |
+| data_inicio | DATE | Início |
+| data_fim | DATE | Fim |
+| total_enviados | INTEGER | Total enviados |
+| aberturas | INTEGER | Aberturas |
+| cliques | INTEGER | Cliques |
+
+### crm_segmentacao (Segmentos de clientes)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| nome | TEXT | Nome do segmento |
+| criterios | JSONB | Critérios de segmentação |
+| total_clientes | INTEGER | Clientes no segmento |
+
+---
+
+## 16. EVENTOS EXTERNOS E CONCORRÊNCIA
+
+### eventos_concorrencia (Eventos concorrentes na cidade)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Bar de referência |
+| data | DATE | Data do evento |
+| nome_evento | TEXT | Nome do evento |
+| local | TEXT | Local (ex: Mané Garrincha) |
+| tipo | VARCHAR | Tipo (show, jogo, festival) |
+| impacto_esperado | VARCHAR | alto, medio, baixo |
+| artista_principal | TEXT | Artista principal |
+| observacoes | TEXT | Observações |
+
+---
+
+## 17. AGENTE IA
 
 ### agente_insights (Insights gerados)
 | Coluna | Tipo | Descrição |
@@ -634,6 +798,16 @@ Para detalhes por categoria (bilheteria, cerveja, drinks, comida):
 | Pesquisa de felicidade | \`pesquisa_felicidade\` |
 | Resumo mensal de feedbacks | \`feedback_resumo_mensal\` |
 | Resumo semanal de feedbacks | \`feedback_resumo_semanal\` |
+| CMV semanal | \`cmv_semanal\` |
+| Rupturas de estoque | \`contahub_stockout\` |
+| Seguidores Instagram | \`windsor_instagram_followers\` |
+| Stories Instagram | \`windsor_instagram_stories\` |
+| Google Business | \`windsor_google\` |
+| Calendário planejado | \`calendario_operacional\` |
+| OKRs e metas | \`organizador_okrs\` |
+| Visão do negócio | \`organizador_visao\` |
+| Campanhas CRM | \`crm_campanhas\` |
+| Eventos concorrentes | \`eventos_concorrencia\` |
 `
 
     // 2. USAR IA PARA GERAR SQL COM CONTEXTO ZYKOR
@@ -717,6 +891,29 @@ Para perguntas sobre feedbacks, use:
 - Filtrar por \`prioridade = 1\` para feedbacks urgentes
 - Comentários negativos: \`avaliacao_resumo IN ('detrator', 'insatisfeito')\`
 - Comentários positivos: \`avaliacao_resumo IN ('promotor', 'satisfeito', 'muito_satisfeito')\`
+
+# IMPORTANTE PARA REDES SOCIAIS
+Para perguntas sobre Instagram, seguidores, stories, alcance:
+- \`windsor_instagram_followers\`: total de seguidores ao longo do tempo
+- \`windsor_instagram_followers_daily\`: variação diária de seguidores
+- \`windsor_instagram_stories\`: métricas de stories (impressões, alcance, respostas)
+- \`windsor_google\`: dados do Google Business Profile
+
+# IMPORTANTE PARA ESTOQUE E CMV
+- \`contahub_stockout\`: produtos que ficaram em falta durante o dia
+- \`cmv_semanal\`: CMV calculado por semana (meta é menor que 34%)
+- Para verificar rupturas: WHERE data_stockout = [data]
+- Para ver produtos que faltaram muito: GROUP BY nome_produto ORDER BY SUM(tempo_ruptura_min) DESC
+
+# IMPORTANTE PARA CALENDÁRIO E PLANEJAMENTO
+- \`calendario_operacional\`: eventos futuros planejados (artistas confirmados, metas)
+- \`eventos_concorrencia\`: eventos externos na cidade que podem impactar o bar
+- Use para perguntas como "quem toca amanhã?", "tem show na cidade hoje?"
+
+# IMPORTANTE PARA OKRs E METAS ESTRATÉGICAS
+- \`organizador_okrs\`: objetivos e key results definidos
+- \`organizador_visao\`: missão, visão, valores e big bets do negócio
+- Use para perguntas sobre metas do trimestre, objetivos estratégicos
 
 # RESPONDA EM JSON
 {

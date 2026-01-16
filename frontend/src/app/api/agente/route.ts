@@ -229,6 +229,18 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
 
   // Padrões de intenção (ordem importa - mais específico primeiro)
   const patterns: [string, RegExp][] = [
+    // Redes Sociais / Instagram
+    ['instagram', /instagram|seguidores|stories|stories|alcance|engajamento|redes sociais|post|curtida|follower/],
+    
+    // Estoque / Rupturas
+    ['estoque', /estoque|ruptura|stockout|faltou|acabou|falta de|sem produto|produto.*faltando|produto.*faltou/],
+    
+    // Calendário / Agenda
+    ['calendario', /quem toca|agenda|programacao|evento.*amanha|amanha.*evento|proximo evento|artista.*confirmado|proxima semana.*evento/],
+    
+    // Feedback / NPS
+    ['feedback', /feedback|nps|satisfacao|reclamacao|elogio|critica|avaliacao|cliente.*falou|o que.*cliente|comentario/],
+    
     // Comparativos entre dias
     ['comparativo_dias', /sexta.*sabado|sabado.*sexta|segunda.*terca|melhor dia|pior dia/],
     
@@ -285,19 +297,30 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
     intent = 'tendencia';
   }
 
-  // Extrair entidades de tempo
-  if (/hoje/.test(messageLower)) entities.periodo = 'hoje';
-  else if (/ontem/.test(messageLower)) entities.periodo = 'ontem';
-  else if (/essa semana|esta semana|semana atual/.test(messageLower)) entities.periodo = 'semana_atual';
-  else if (/semana passada|ultima semana/.test(messageLower)) entities.periodo = 'semana_passada';
-  else if (/esse mes|este mes|mes atual/.test(messageLower)) entities.periodo = 'mes_atual';
-  else if (/mes passado|ultimo mes/.test(messageLower)) entities.periodo = 'mes_passado';
+  // Extrair entidades de tempo - PRIORIZAR data específica primeiro
+  const hoje = new Date();
   
-  // Detectar data específica (DD/MM/YYYY, DD.MM.YYYY, DD-MM-YYYY, DD/MM/YY, etc.)
-  const dataRegex = /(\d{1,2})[\.\/\-](\d{1,2})[\.\/\-](\d{2,4})/;
-  const dataMatch = message.match(dataRegex);
-  if (dataMatch) {
-    const [, dia, mes, anoRaw] = dataMatch;
+  // 1. DETECTAR DATA ESPECÍFICA PRIMEIRO (DD/MM/YYYY, DD.MM.YYYY, DD-MM-YYYY, DD/MM/YY, DD/MM, etc.)
+  // Formato com ano
+  const dataRegexComAno = /(\d{1,2})[\.\/\-](\d{1,2})[\.\/\-](\d{2,4})/;
+  const dataMatchComAno = message.match(dataRegexComAno);
+  
+  // Formato sem ano (DD/MM) - assume ano atual
+  const dataRegexSemAno = /(\d{1,2})[\.\/\-](\d{1,2})(?![\.\/\-\d])/;
+  const dataMatchSemAno = message.match(dataRegexSemAno);
+  
+  // Formato "dia X de mes" ou "X de mes"
+  const mesesNomes: Record<string, number> = {
+    'janeiro': 1, 'fevereiro': 2, 'marco': 3, 'abril': 4, 'maio': 5, 'junho': 6,
+    'julho': 7, 'agosto': 8, 'setembro': 9, 'outubro': 10, 'novembro': 11, 'dezembro': 12,
+    'jan': 1, 'fev': 2, 'mar': 3, 'abr': 4, 'mai': 5, 'jun': 6,
+    'jul': 7, 'ago': 8, 'set': 9, 'out': 10, 'nov': 11, 'dez': 12
+  };
+  const dataRegexPorExtenso = /(?:dia\s+)?(\d{1,2})\s+(?:de\s+)?([a-z]+)(?:\s+(?:de\s+)?(\d{4}))?/i;
+  const dataMatchPorExtenso = messageLower.match(dataRegexPorExtenso);
+  
+  if (dataMatchComAno) {
+    const [, dia, mes, anoRaw] = dataMatchComAno;
     let ano = anoRaw;
     if (ano.length === 2) {
       ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
@@ -305,7 +328,74 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
     const dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
     entities.periodo = 'data_especifica';
     entities.data = dataFormatada;
-    console.log(`[Agente] Data específica detectada: ${dataFormatada}`);
+    console.log(`[Agente] Data específica detectada (com ano): ${dataFormatada}`);
+  } else if (dataMatchSemAno && !dataMatchComAno) {
+    const [, dia, mes] = dataMatchSemAno;
+    const ano = hoje.getFullYear();
+    const dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+    entities.periodo = 'data_especifica';
+    entities.data = dataFormatada;
+    console.log(`[Agente] Data específica detectada (sem ano): ${dataFormatada}`);
+  } else if (dataMatchPorExtenso) {
+    const [, dia, mesNome, anoRaw] = dataMatchPorExtenso;
+    const mesNum = mesesNomes[mesNome.toLowerCase()];
+    if (mesNum) {
+      const ano = anoRaw ? parseInt(anoRaw) : hoje.getFullYear();
+      const dataFormatada = `${ano}-${String(mesNum).padStart(2, '0')}-${dia.padStart(2, '0')}`;
+      entities.periodo = 'data_especifica';
+      entities.data = dataFormatada;
+      console.log(`[Agente] Data por extenso detectada: ${dataFormatada}`);
+    }
+  }
+  
+  // 2. DETECTAR DATAS RELATIVAS
+  if (!entities.periodo) {
+    // Anteontem
+    if (/anteontem/.test(messageLower)) {
+      const anteontem = new Date(hoje);
+      anteontem.setDate(anteontem.getDate() - 2);
+      entities.periodo = 'data_especifica';
+      entities.data = anteontem.toISOString().split('T')[0];
+      console.log(`[Agente] Anteontem detectado: ${entities.data}`);
+    }
+    // Há X dias
+    else if (/ha\s*(\d+)\s*dias?/.test(messageLower)) {
+      const match = messageLower.match(/ha\s*(\d+)\s*dias?/);
+      if (match) {
+        const diasAtras = parseInt(match[1]);
+        const dataCalculada = new Date(hoje);
+        dataCalculada.setDate(dataCalculada.getDate() - diasAtras);
+        entities.periodo = 'data_especifica';
+        entities.data = dataCalculada.toISOString().split('T')[0];
+        console.log(`[Agente] Há ${diasAtras} dias detectado: ${entities.data}`);
+      }
+    }
+    // Dia da semana passada (ex: "sexta passada", "terça passada")
+    else if (/(segunda|terca|quarta|quinta|sexta|sabado|domingo)\s+passad[ao]/.test(messageLower)) {
+      const diaMatch = messageLower.match(/(segunda|terca|quarta|quinta|sexta|sabado|domingo)\s+passad[ao]/);
+      if (diaMatch) {
+        const diasMap: Record<string, number> = {
+          'domingo': 0, 'segunda': 1, 'terca': 2, 'quarta': 3, 
+          'quinta': 4, 'sexta': 5, 'sabado': 6
+        };
+        const diaSemanaAlvo = diasMap[diaMatch[1]];
+        const dataCalculada = new Date(hoje);
+        const diaAtual = dataCalculada.getDay();
+        let diasRetroceder = diaAtual - diaSemanaAlvo;
+        if (diasRetroceder <= 0) diasRetroceder += 7;
+        dataCalculada.setDate(dataCalculada.getDate() - diasRetroceder);
+        entities.periodo = 'data_especifica';
+        entities.data = dataCalculada.toISOString().split('T')[0];
+        console.log(`[Agente] ${diaMatch[1]} passada detectado: ${entities.data}`);
+      }
+    }
+    // Detecções simples de período
+    else if (/hoje/.test(messageLower)) entities.periodo = 'hoje';
+    else if (/ontem/.test(messageLower)) entities.periodo = 'ontem';
+    else if (/essa semana|esta semana|semana atual/.test(messageLower)) entities.periodo = 'semana_atual';
+    else if (/semana passada|ultima semana/.test(messageLower)) entities.periodo = 'semana_passada';
+    else if (/esse mes|este mes|mes atual/.test(messageLower)) entities.periodo = 'mes_atual';
+    else if (/mes passado|ultimo mes/.test(messageLower)) entities.periodo = 'mes_passado';
   }
 
   return { intent, entities };
@@ -799,6 +889,136 @@ async function fetchDataForIntent(
       };
     }
 
+    case 'instagram': {
+      // Buscar métricas do Instagram
+      const { data: seguidores } = await supabase
+        .from('windsor_instagram_followers')
+        .select('*')
+        .eq('bar_id', barId)
+        .order('date', { ascending: false })
+        .limit(7);
+
+      const { data: stories } = await supabase
+        .from('windsor_instagram_stories')
+        .select('*')
+        .eq('bar_id', barId)
+        .order('date', { ascending: false })
+        .limit(7);
+
+      const ultimoRegistro = seguidores?.[0];
+      const penultimoRegistro = seguidores?.[1];
+      const variacaoSeguidores = ultimoRegistro && penultimoRegistro
+        ? (ultimoRegistro.followers_count || 0) - (penultimoRegistro.followers_count || 0)
+        : 0;
+
+      return {
+        seguidoresAtual: ultimoRegistro?.followers_count || 0,
+        variacaoSeguidores,
+        mediaCount: ultimoRegistro?.media_count || 0,
+        stories: stories || [],
+        historicoSeguidores: seguidores || []
+      };
+    }
+
+    case 'estoque': {
+      // Buscar rupturas de estoque
+      const dataConsulta = entities.data || ontem.toISOString().split('T')[0];
+      
+      const { data: rupturas } = await supabase
+        .from('contahub_stockout')
+        .select('*')
+        .eq('bar_id', barId)
+        .gte('data_stockout', dataConsulta)
+        .order('tempo_ruptura_min', { ascending: false });
+
+      // Agrupar por produto
+      const produtosAfetados: Record<string, { nome: string; tempoTotal: number; vezes: number }> = {};
+      rupturas?.forEach(r => {
+        const key = r.nome_produto || r.codigo_produto;
+        if (!produtosAfetados[key]) {
+          produtosAfetados[key] = { nome: key, tempoTotal: 0, vezes: 0 };
+        }
+        produtosAfetados[key].tempoTotal += r.tempo_ruptura_min || 0;
+        produtosAfetados[key].vezes += 1;
+      });
+
+      return {
+        totalRupturas: rupturas?.length || 0,
+        produtosMaisAfetados: Object.values(produtosAfetados).sort((a, b) => b.tempoTotal - a.tempoTotal).slice(0, 5),
+        rupturas: rupturas || [],
+        dataConsulta
+      };
+    }
+
+    case 'calendario': {
+      // Buscar eventos futuros do calendário operacional
+      const hojeCalendario = new Date().toISOString().split('T')[0];
+      
+      const { data: eventosFuturos } = await supabase
+        .from('calendario_operacional')
+        .select('*')
+        .eq('bar_id', barId)
+        .gte('data', hojeCalendario)
+        .order('data', { ascending: true })
+        .limit(10);
+
+      // Buscar eventos concorrentes na cidade
+      const { data: eventosConcorrentes } = await supabase
+        .from('eventos_concorrencia')
+        .select('*')
+        .eq('bar_id', barId)
+        .gte('data', hojeCalendario)
+        .order('data', { ascending: true })
+        .limit(5);
+
+      return {
+        eventosFuturos: eventosFuturos || [],
+        eventosConcorrentes: eventosConcorrentes || [],
+        proximoEvento: eventosFuturos?.[0] || null
+      };
+    }
+
+    case 'feedback': {
+      // Buscar feedbacks consolidados
+      const { data: feedbacks } = await supabase
+        .from('feedback_consolidado')
+        .select('*')
+        .eq('bar_id', barId)
+        .order('data', { ascending: false })
+        .limit(20);
+
+      // Buscar resumo semanal
+      const { data: resumoSemanal } = await supabase
+        .from('feedback_resumo_semanal')
+        .select('*')
+        .eq('bar_id', barId)
+        .order('semana', { ascending: false })
+        .limit(4);
+
+      // Contar por tipo
+      const porTipo: Record<string, number> = {};
+      const positivos = feedbacks?.filter(f => 
+        ['promotor', 'satisfeito', 'muito_satisfeito'].includes(f.avaliacao_resumo || '')
+      ).length || 0;
+      const negativos = feedbacks?.filter(f => 
+        ['detrator', 'insatisfeito'].includes(f.avaliacao_resumo || '')
+      ).length || 0;
+
+      feedbacks?.forEach(f => {
+        const tipo = f.tipo_feedback || 'outro';
+        porTipo[tipo] = (porTipo[tipo] || 0) + 1;
+      });
+
+      return {
+        feedbacks: feedbacks || [],
+        resumoSemanal: resumoSemanal || [],
+        totalFeedbacks: feedbacks?.length || 0,
+        positivos,
+        negativos,
+        porTipo
+      };
+    }
+
     default: {
       // Buscar resumo geral - apenas eventos até hoje (não futuros)
       const hojeDefault = new Date().toISOString().split('T')[0];
@@ -1280,12 +1500,163 @@ function formatResponse(
       };
     }
 
+    case 'instagram': {
+      const seguidores = data.seguidoresAtual as number;
+      const variacao = data.variacaoSeguidores as number;
+      const posts = data.mediaCount as number;
+
+      return {
+        success: true,
+        response: `📱 **Instagram @ordinariobar**\n\n👥 **Seguidores:** ${formatNumber(seguidores)}\n${variacao !== 0 ? `📊 **Variação:** ${variacao >= 0 ? '+' : ''}${formatNumber(variacao)} (último dia)` : ''}\n📸 **Posts:** ${formatNumber(posts)}\n\nPara mais detalhes de stories e engajamento, acesse o painel de redes sociais.`,
+        agent: 'Analista de Redes Sociais',
+        metrics: [
+          { label: 'Seguidores', value: formatNumber(seguidores), trend: 'neutral' },
+          { label: 'Variação', value: `${variacao >= 0 ? '+' : ''}${formatNumber(variacao)}`, trend: variacao >= 0 ? 'up' : 'down' },
+          { label: 'Posts', value: formatNumber(posts), trend: 'neutral' }
+        ],
+        suggestions: ['Ver stories', 'Engajamento da semana', 'Comparar com mês passado']
+      };
+    }
+
+    case 'estoque': {
+      const totalRupturas = data.totalRupturas as number;
+      const produtosMaisAfetados = data.produtosMaisAfetados as { nome: string; tempoTotal: number; vezes: number }[];
+      const dataConsulta = data.dataConsulta as string;
+
+      if (totalRupturas === 0) {
+        return {
+          success: true,
+          response: `✅ **Nenhuma ruptura de estoque registrada** para ${dataConsulta}.\n\nTodos os produtos estavam disponíveis durante a operação!`,
+          agent: 'Analista de Estoque',
+          suggestions: ['Ver histórico de rupturas', 'Produtos mais vendidos', 'CMV semanal']
+        };
+      }
+
+      const lista = produtosMaisAfetados.slice(0, 3).map((p, i) => 
+        `${i + 1}. **${p.nome}** - ${p.tempoTotal} min (${p.vezes}x)`
+      ).join('\n');
+
+      return {
+        success: true,
+        response: `⚠️ **Rupturas de Estoque** (${dataConsulta})\n\nTotal: **${totalRupturas} ocorrências**\n\n🔴 **Produtos mais afetados:**\n${lista}\n\nAtenção: rupturas impactam diretamente o faturamento!`,
+        agent: 'Analista de Estoque',
+        metrics: [
+          { label: 'Rupturas', value: String(totalRupturas), trend: totalRupturas > 5 ? 'down' : 'neutral' },
+          { label: 'Produtos afetados', value: String(produtosMaisAfetados.length), trend: 'down' }
+        ],
+        insight: totalRupturas > 5 
+          ? { type: 'warning', text: 'Muitas rupturas! Revisar estoque e fornecedores.' }
+          : { type: 'info', text: 'Monitore os produtos críticos para evitar rupturas.' },
+        suggestions: ['Ver CMV', 'Produtos mais vendidos', 'Histórico de rupturas']
+      };
+    }
+
+    case 'calendario': {
+      const eventosFuturos = data.eventosFuturos as { data: string; artista: string; genero: string; status: string }[];
+      const eventosConcorrentes = data.eventosConcorrentes as { data: string; nome_evento: string; local: string }[];
+      const proximo = data.proximoEvento as { data: string; artista: string; genero: string } | null;
+
+      if (!proximo && eventosFuturos.length === 0) {
+        return {
+          success: true,
+          response: `📅 **Calendário**\n\nNão há eventos confirmados no calendário.\n\nAcesse o planejamento comercial para adicionar eventos.`,
+          agent: 'Assistente de Agenda',
+          suggestions: ['Ver faturamento', 'Histórico de eventos', 'Artistas top']
+        };
+      }
+
+      let resposta = `📅 **Próximos Eventos**\n\n`;
+      if (proximo) {
+        const [ano, mes, dia] = proximo.data.split('-');
+        resposta += `🎵 **Próximo:** ${dia}/${mes} - ${proximo.artista || 'A confirmar'}\n`;
+      }
+
+      if (eventosFuturos.length > 1) {
+        resposta += `\n**Esta semana:**\n`;
+        eventosFuturos.slice(0, 5).forEach(e => {
+          const [ano, mes, dia] = e.data.split('-');
+          resposta += `• ${dia}/${mes}: ${e.artista || 'A confirmar'} (${e.genero || '-'})\n`;
+        });
+      }
+
+      if (eventosConcorrentes.length > 0) {
+        resposta += `\n⚠️ **Eventos concorrentes na cidade:**\n`;
+        eventosConcorrentes.slice(0, 3).forEach(e => {
+          const [ano, mes, dia] = e.data.split('-');
+          resposta += `• ${dia}/${mes}: ${e.nome_evento} @ ${e.local}\n`;
+        });
+      }
+
+      return {
+        success: true,
+        response: resposta,
+        agent: 'Assistente de Agenda',
+        suggestions: ['Ver artistas top', 'Faturamento por evento', 'Histórico do artista']
+      };
+    }
+
+    case 'feedback': {
+      const totalFeedbacks = data.totalFeedbacks as number;
+      const positivos = data.positivos as number;
+      const negativos = data.negativos as number;
+      const porTipo = data.porTipo as Record<string, number>;
+      const feedbacks = data.feedbacks as { tipo_feedback: string; comentario: string; avaliacao_resumo: string }[];
+
+      if (totalFeedbacks === 0) {
+        return {
+          success: true,
+          response: `📋 **Feedbacks**\n\nNenhum feedback encontrado no período.\n\nContinue coletando feedbacks de clientes e artistas!`,
+          agent: 'Analista de Satisfação',
+          suggestions: ['Ver NPS geral', 'Histórico de feedbacks', 'Pesquisa de felicidade']
+        };
+      }
+
+      const nps = totalFeedbacks > 0 ? ((positivos - negativos) / totalFeedbacks * 100).toFixed(0) : 0;
+
+      let resposta = `📋 **Feedbacks Recentes** (${totalFeedbacks} respostas)\n\n`;
+      resposta += `✅ Positivos: ${positivos} | ❌ Negativos: ${negativos}\n`;
+      resposta += `📊 **NPS aproximado:** ${nps}%\n\n`;
+
+      // Mostrar por tipo
+      if (Object.keys(porTipo).length > 0) {
+        resposta += `**Por tipo:**\n`;
+        Object.entries(porTipo).forEach(([tipo, qtd]) => {
+          const tipoLabel: Record<string, string> = {
+            'artista': '🎵 Artistas',
+            'cliente': '👥 Clientes',
+            'funcionario_nps': '👨‍💼 Func. NPS',
+            'funcionario_felicidade': '😊 Felicidade'
+          };
+          resposta += `• ${tipoLabel[tipo] || tipo}: ${qtd}\n`;
+        });
+      }
+
+      // Mostrar último feedback negativo se houver
+      const ultimoNegativo = feedbacks.find(f => ['detrator', 'insatisfeito'].includes(f.avaliacao_resumo || ''));
+      if (ultimoNegativo && ultimoNegativo.comentario) {
+        resposta += `\n⚠️ **Último feedback negativo:**\n"${ultimoNegativo.comentario.substring(0, 100)}..."`;
+      }
+
+      return {
+        success: true,
+        response: resposta,
+        agent: 'Analista de Satisfação',
+        metrics: [
+          { label: 'Total', value: String(totalFeedbacks), trend: 'neutral' },
+          { label: 'Positivos', value: String(positivos), trend: 'up' },
+          { label: 'Negativos', value: String(negativos), trend: negativos > positivos ? 'down' : 'neutral' },
+          { label: 'NPS', value: `${nps}%`, trend: Number(nps) >= 50 ? 'up' : 'down' }
+        ],
+        suggestions: ['Ver feedbacks de artistas', 'NPS por dia', 'Pesquisa de felicidade']
+      };
+    }
+
     default: {
       return {
         success: true,
-        response: `Entendi sua pergunta. Para ajudar melhor, posso analisar:\n\n• **Faturamento** - vendas e receitas\n• **Clientes** - público e ticket médio\n• **CMV** - custos de mercadoria\n• **Metas** - progresso mensal\n• **Produtos** - mais vendidos\n\nSobre o que você quer saber?`,
+        response: `Entendi sua pergunta. Para ajudar melhor, posso analisar:\n\n• **Faturamento** - vendas e receitas\n• **Clientes** - público e ticket médio\n• **CMV** - custos de mercadoria\n• **Metas** - progresso mensal\n• **Produtos** - mais vendidos\n• **Instagram** - seguidores e engajamento\n• **Estoque** - rupturas e produtos\n• **Feedbacks** - NPS e satisfação\n• **Calendário** - próximos eventos\n\nSobre o que você quer saber?`,
         agent: 'Assistente Zykor',
-        suggestions: ['Faturamento da semana', 'Como está a meta?', 'CMV atual']
+        suggestions: ['Faturamento da semana', 'Como está a meta?', 'CMV atual', 'Feedbacks recentes']
       };
     }
   }
@@ -1354,13 +1725,56 @@ async function salvarHistorico(
   }
 }
 
+// ===== FUNÇÃO PARA CHAMAR AGENTE SQL EXPERT (FALLBACK) =====
+async function chamarAgenteSQLExpert(pergunta: string, barId: number): Promise<AgentResponse | null> {
+  try {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    
+    const response = await fetch(`${supabaseUrl}/functions/v1/agente-sql-expert`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${supabaseAnonKey}`
+      },
+      body: JSON.stringify({
+        bar_id: barId,
+        pergunta: pergunta,
+        tipo: 'consulta'
+      })
+    });
+
+    if (!response.ok) {
+      console.error('[Agente] Erro ao chamar agente-sql-expert:', await response.text());
+      return null;
+    }
+
+    const data = await response.json();
+    
+    if (data.success && data.sql?.explicacao) {
+      // Formatar resposta do agente SQL para o formato esperado
+      return {
+        success: true,
+        response: `🔍 **Análise Avançada**\n\n${data.sql.explicacao}${data.execucao?.resultado ? `\n\n**Resultado:** ${JSON.stringify(data.execucao.resultado, null, 2).substring(0, 500)}` : ''}`,
+        agent: 'Agente SQL Expert',
+        suggestions: data.sql.sugestoes_adicionais ? [data.sql.sugestoes_adicionais] : ['Ver faturamento', 'Analisar clientes', 'CMV semanal']
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.error('[Agente] Erro ao chamar agente-sql-expert:', error);
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   const startTime = Date.now();
   let cacheHit = false;
   
   try {
     const body = await request.json();
-    const { message, barId = 3, context = {}, sessionId } = body;
+    const { message, barId = 3, context = {}, sessionId, useSQLExpert = false } = body;
     const chatContext = context as ChatContext;
 
     if (!message) {
@@ -1380,6 +1794,23 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Se forçar uso do SQL Expert, chamar direto
+    if (useSQLExpert) {
+      const sqlExpertResponse = await chamarAgenteSQLExpert(message, barId);
+      if (sqlExpertResponse) {
+        const responseTime = Date.now() - startTime;
+        return NextResponse.json({
+          ...sqlExpertResponse,
+          _meta: {
+            responseTime,
+            cacheHit: false,
+            intent: 'sql_expert',
+            timestamp: new Date().toISOString()
+          }
+        });
+      }
+    }
+
     // Classificar intenção
     let { intent, entities } = classifyIntent(message);
 
@@ -1389,6 +1820,37 @@ export async function POST(request: NextRequest) {
       if (inferredIntent) {
         intent = inferredIntent;
         console.log(`[Agente] Intenção inferida do contexto: ${inferredIntent}`);
+      }
+    }
+
+    // Se continuar "geral" e a mensagem for complexa (mais de 30 chars), usar SQL Expert
+    if (intent === 'geral' && message.length > 30) {
+      console.log(`[Agente] Intent geral com mensagem complexa, tentando SQL Expert...`);
+      const sqlExpertResponse = await chamarAgenteSQLExpert(message, barId);
+      if (sqlExpertResponse) {
+        const responseTime = Date.now() - startTime;
+        
+        // Salvar resposta no histórico
+        if (sessionId) {
+          await salvarHistorico(supabase, {
+            bar_id: barId,
+            session_id: sessionId,
+            role: 'assistant',
+            content: sqlExpertResponse.response,
+            agent_used: sqlExpertResponse.agent,
+            suggestions: sqlExpertResponse.suggestions
+          });
+        }
+        
+        return NextResponse.json({
+          ...sqlExpertResponse,
+          _meta: {
+            responseTime,
+            cacheHit: false,
+            intent: 'sql_expert_fallback',
+            timestamp: new Date().toISOString()
+          }
+        });
       }
     }
 
