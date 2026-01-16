@@ -271,15 +271,11 @@ export default function DesempenhoPage() {
       setTotalSemanas(data.totalSemanas || 53);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
-      toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar os dados de desempenho",
-        variant: "destructive"
-      });
     } finally {
       setLoading(false);
     }
-  }, [selectedBar, user, semanaAtual, anoAtual, toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedBar?.id, user?.id, semanaAtual, anoAtual]);
 
   // Navegação
   const navegarSemana = (direcao: 'anterior' | 'proxima') => {
