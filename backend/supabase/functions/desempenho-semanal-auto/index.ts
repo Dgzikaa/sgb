@@ -338,9 +338,7 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
   console.log(`📊 CMV R$: ${cmvRs} | CMV Limpo: ${cmvLimpoPercent.toFixed(2)}% | CMV Global: ${cmvGlobalPercent.toFixed(2)}%`)
 
   // ============================================
-  // 5. CMO% (NIBO - categorias específicas)
-  // Categorias: FREELA ATENDIMENTO, FREELA BAR, FREELA COZINHA, FREELA LIMPEZA, 
-  // FREELA SEGURANÇA, ALIMENTAÇÃO, PRÓ-LABORE, VALE TRANSPORTE, PROVISÃO TRABALHISTA
+  // 5. BUSCAR TODOS OS DADOS DO NIBO
   // ============================================
   const niboData = await fetchAllData(supabase, 'nibo_agendamentos', 'valor, categoria_nome', {
     'gte_data_competencia': startDate,
@@ -348,33 +346,44 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
     'eq_bar_id': barId
   })
 
+  // Função auxiliar para somar categorias do NIBO
+  const somarCategoriasNibo = (categorias: string[]) => {
+    return niboData?.filter(item => 
+      item.categoria_nome && categorias.some(cat => 
+        item.categoria_nome.toUpperCase().includes(cat.toUpperCase())
+      )
+    ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0
+  }
+
+  // CMO% - Categorias de mão de obra
   const categoriasCMO = [
     'FREELA ATENDIMENTO', 'FREELA BAR', 'FREELA COZINHA', 'FREELA LIMPEZA',
-    'FREELA SEGURANÇA', 'ALIMENTAÇÃO', 'PRÓ-LABORE', 'VALE TRANSPORTE', 'PROVISÃO TRABALHISTA'
+    'FREELA SEGURANÇA', 'ALIMENTAÇÃO', 'PRO LABORE', 'VALE TRANSPORTE', 
+    'PROVISÃO TRABALHISTA', 'SALARIO FUNCIONARIOS', 'RECURSOS HUMANOS'
   ]
-
-  const custoTotalCMO = niboData?.filter(item => 
-    item.categoria_nome && categoriasCMO.some(cat => 
-      item.categoria_nome.toUpperCase().includes(cat)
-    )
-  ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0
-
+  const custoTotalCMO = somarCategoriasNibo(categoriasCMO)
   const cmoPercent = faturamentoTotal > 0 ? (custoTotalCMO / faturamentoTotal) * 100 : 0
-
   console.log(`👷 CMO: R$ ${custoTotalCMO.toFixed(2)} (${cmoPercent.toFixed(2)}%)`)
 
-  // ============================================
-  // 6. ATRAÇÃO/FATURAMENTO (NIBO - Atrações Programação + Produção Eventos)
-  // ============================================
-  const categoriasAtracao = ['ATRAÇÕES PROGRAMAÇÃO', 'PRODUÇÃO EVENTOS', 'ATRAÇÕES', 'PROGRAMAÇÃO']
-  const custoAtracao = niboData?.filter(item => 
-    item.categoria_nome && categoriasAtracao.some(cat => 
-      item.categoria_nome.toUpperCase().includes(cat)
-    )
-  ).reduce((sum, item) => sum + Math.abs(parseFloat(item.valor) || 0), 0) || 0
+  // COCKPIT FINANCEIRO - Todas as categorias
+  const imposto = somarCategoriasNibo(['IMPOSTO'])
+  const comissao = somarCategoriasNibo(['COMISSÃO 10%', 'COMISSAO'])
+  const cmvNibo = somarCategoriasNibo(['CUSTO COMIDA', 'CUSTO BEBIDAS', 'CUSTO DRINKS', 'CUSTO OUTROS'])
+  const proLabore = somarCategoriasNibo(['PRO LABORE'])
+  const ocupacao = somarCategoriasNibo(['ALUGUEL', 'CONDOMÍNIO', 'IPTU', 'LUZ', 'ÁGUA', 'GÁS', 'INTERNET'])
+  const admFixo = somarCategoriasNibo(['ADMINISTRATIVO ORDINÁRIO', 'CONTRATOS', 'CONSULTORIA'])
+  const marketingFixo = somarCategoriasNibo(['MARKETING'])
+  const escritorioCentral = somarCategoriasNibo(['ESCRITÓRIO CENTRAL'])
+  const rhEstornoOutros = somarCategoriasNibo(['RECURSOS HUMANOS', 'ESTORNO', 'OUTRAS DESPESAS', 'OUTROS OPERAÇÃO'])
+  const materiais = somarCategoriasNibo(['MATERIAIS OPERAÇÃO', 'MATERIAIS DE LIMPEZA'])
+  const manutencao = somarCategoriasNibo(['MANUTENÇÃO'])
+  const utensilios = somarCategoriasNibo(['UTENSÍLIOS'])
 
+  console.log(`💰 Cockpit Financeiro - Imposto: ${imposto}, CMV Nibo: ${cmvNibo}, Marketing: ${marketingFixo}`)
+
+  // ATRAÇÃO/FATURAMENTO
+  const custoAtracao = somarCategoriasNibo(['ATRAÇÕES PROGRAMAÇÃO', 'PRODUÇÃO EVENTOS'])
   const atracaoFaturamentoPercent = faturamentoTotal > 0 ? (custoAtracao / faturamentoTotal) * 100 : 0
-
   console.log(`🎭 Atração/Faturamento: ${atracaoFaturamentoPercent.toFixed(2)}% (R$ ${custoAtracao.toFixed(2)})`)
 
   // ============================================
@@ -428,7 +437,7 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
     'lte_date': endDate
   })
 
-  const avaliacoes5Estrelas = googleData?.filter(item => item.review_star_rating === '5').length || 0
+  const avaliacoes5Estrelas = googleData?.filter(item => item.review_star_rating === 'FIVE').length || 0
   const mediaGoogle = googleData?.length > 0 
     ? googleData.reduce((sum, item) => sum + (parseFloat(item.review_average_rating) || 0), 0) / googleData.length 
     : null
@@ -662,6 +671,20 @@ async function recalcularDesempenhoSemana(supabase: any, barId: number, ano: num
     cmo_custo: custoTotalCMO,
     custo_atracao_faturamento: atracaoFaturamentoPercent,
     atracoes_eventos: custoAtracao,
+    
+    // Cockpit Financeiro (do NIBO)
+    imposto: imposto,
+    comissao: comissao,
+    cmv: cmvNibo,
+    pro_labore: proLabore,
+    ocupacao: ocupacao,
+    adm_fixo: admFixo,
+    marketing_fixo: marketingFixo,
+    escritorio_central: escritorioCentral,
+    rh_estorno_outros_operacao: rhEstornoOutros,
+    materiais: materiais,
+    manutencao: manutencao,
+    utensilios: utensilios,
     
     // Reservas
     reservas_totais: reservasTotais,
