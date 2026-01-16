@@ -808,6 +808,15 @@ Para detalhes por categoria (bilheteria, cerveja, drinks, comida):
 | Visão do negócio | \`organizador_visao\` |
 | Campanhas CRM | \`crm_campanhas\` |
 | Eventos concorrentes | \`eventos_concorrencia\` |
+| **ANALYTICS AVANÇADOS** |
+| Score preditivo | \`analytics_score_preditivo\` |
+| Análise de artistas | \`analytics_artistas\` |
+| Comparação YoY | \`analytics_comparacao_yoy\` |
+| Faturamento por hora | \`analytics_faturamento_hora\` |
+| Picos de horário | \`analytics_pico_horario\` |
+| Alertas | \`analytics_alertas\` |
+| Metas 2026 | \`analytics_metas_2026\` |
+| Cruzamento completo | \`analytics_cruzamento_completo\` |
 `
 
     // 2. USAR IA PARA GERAR SQL COM CONTEXTO ZYKOR
@@ -914,6 +923,43 @@ Para perguntas sobre Instagram, seguidores, stories, alcance:
 - \`organizador_okrs\`: objetivos e key results definidos
 - \`organizador_visao\`: missão, visão, valores e big bets do negócio
 - Use para perguntas sobre metas do trimestre, objetivos estratégicos
+
+# IMPORTANTE - VIEWS DE ANALYTICS AVANÇADOS (USE SEMPRE QUE POSSÍVEL!)
+
+### Score Preditivo
+- \`analytics_score_preditivo\`: Score de 0-100 prevendo potencial de sucesso
+- Campos: score_total, classificacao (EXCELENTE, BOM, REGULAR, BAIXO, RISCO)
+- Use para: "qual o potencial do evento?", "esse dia vai ser bom?"
+
+### Análise de Artistas
+- \`analytics_artistas\`: Análise histórica completa de cada artista
+- Campos: faturamento_medio, roi_artista, tendencia, classificacao, recomendacao
+- Use para: "melhor artista?", "artistas em queda?", "quem escalar mais?"
+
+### Comparação YoY
+- \`analytics_comparacao_yoy\`: Comparação ano a ano
+- Campos: variacao_faturamento_yoy, status_yoy
+- Use para: "crescimento vs ano passado?", "janeiro 2026 vs 2025?"
+
+### Faturamento por Hora
+- \`analytics_faturamento_hora\`: Performance por hora
+- Campos: periodo (ABERTURA, PICO, POS_PICO, FECHAMENTO), performance_hora
+- Use para: "melhor horário?", "quando fatura mais?"
+
+### Alertas
+- \`analytics_alertas\`: Sistema de alertas automáticos
+- Campos: tipo_alerta, prioridade, descricao, acao_sugerida
+- Use para: "tem algum problema?", "alertas?", "o que preciso resolver?"
+
+### Metas 2026
+- \`analytics_metas_2026\`: Metas vs realizado
+- Campos: valor_meta, valor_realizado, percentual_atingimento, status
+- Use para: "como estão as metas?", "vamos bater a meta?"
+
+### Cruzamento Completo
+- \`analytics_cruzamento_completo\`: Visão 360° com todos os dados cruzados
+- Tem: faturamento + público + NPS + artista + categorias + hora + concorrência
+- Use para análises complexas que cruzam múltiplos dados
 
 # RESPONDA EM JSON
 {

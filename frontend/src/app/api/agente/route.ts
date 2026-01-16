@@ -229,6 +229,15 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
 
   // Padrões de intenção (ordem importa - mais específico primeiro)
   const patterns: [string, RegExp][] = [
+    // ANALYTICS AVANÇADOS (prioridade alta)
+    ['analytics_score', /score|previsao|potencial|vai ser bom|vai bombar|chance|probabilidade|expectativa/],
+    ['analytics_artista', /melhor artista|artistas em queda|ranking artista|escalar.*artista|roi.*artista|crescendo.*artista|desempenho.*artista|qual artista/],
+    ['analytics_yoy', /ano passado|comparar.*ano|mesmo.*periodo|yoy|crescimento.*anual|vs 2025|vs 2024/],
+    ['analytics_alertas', /alerta|problema|urgente|preciso resolver|o que.*errado|cuidado|atencao|critico/],
+    ['analytics_metas', /meta 2026|metas do ano|atingimento.*anual|vamos bater|percentual.*meta|gap|quanto falta.*ano/],
+    ['analytics_hora', /que hora|horario.*pico|pico.*faturamento|fatura.*hora|melhor.*horario|quando.*mais/],
+    ['analytics_completo', /analise completa|visao 360|cruzar.*dados|correlacao|tudo sobre|analise profunda/],
+    
     // Redes Sociais / Instagram
     ['instagram', /instagram|seguidores|stories|stories|alcance|engajamento|redes sociais|post|curtida|follower/],
     
@@ -1019,6 +1028,150 @@ async function fetchDataForIntent(
       };
     }
 
+    case 'analytics_score': {
+      // Score preditivo de eventos
+      const { data: scores } = await supabase
+        .from('analytics_score_preditivo')
+        .select('*')
+        .eq('bar_id', barId)
+        .gte('data_evento', hoje.toISOString().split('T')[0])
+        .order('data_evento', { ascending: true })
+        .limit(10);
+
+      return {
+        proximosEventos: scores || [],
+        intent: 'analytics_score'
+      };
+    }
+
+    case 'analytics_artista': {
+      // Análise de artistas
+      const { data: artistas } = await supabase
+        .from('analytics_artistas')
+        .select('*')
+        .eq('bar_id', barId)
+        .order('faturamento_total', { ascending: false })
+        .limit(20);
+
+      const topPerformers = artistas?.filter(a => a.classificacao === 'TOP_PERFORMER') || [];
+      const emQueda = artistas?.filter(a => a.tendencia === 'CAINDO') || [];
+      const crescendo = artistas?.filter(a => a.tendencia === 'CRESCENDO') || [];
+      const trazerDeVolta = artistas?.filter(a => a.recomendacao === 'TRAZER DE VOLTA') || [];
+
+      return {
+        artistas: artistas || [],
+        topPerformers,
+        emQueda,
+        crescendo,
+        trazerDeVolta,
+        intent: 'analytics_artista'
+      };
+    }
+
+    case 'analytics_yoy': {
+      // Comparação ano a ano
+      const { data: comparacaoYoy } = await supabase
+        .from('analytics_comparacao_yoy')
+        .select('*')
+        .eq('bar_id', barId)
+        .eq('tipo_comparacao', 'mensal')
+        .order('ano', { ascending: false })
+        .order('mes', { ascending: false })
+        .limit(12);
+
+      return {
+        comparacao: comparacaoYoy || [],
+        intent: 'analytics_yoy'
+      };
+    }
+
+    case 'analytics_alertas': {
+      // Alertas e problemas
+      const { data: alertas } = await supabase
+        .from('analytics_alertas')
+        .select('*')
+        .eq('bar_id', barId)
+        .limit(20);
+
+      const criticos = alertas?.filter(a => a.prioridade === 'CRITICO') || [];
+      const altos = alertas?.filter(a => a.prioridade === 'ALTO') || [];
+      const medios = alertas?.filter(a => a.prioridade === 'MEDIO') || [];
+
+      return {
+        alertas: alertas || [],
+        criticos,
+        altos,
+        medios,
+        totalAlertas: alertas?.length || 0,
+        intent: 'analytics_alertas'
+      };
+    }
+
+    case 'analytics_metas': {
+      // Metas 2026 vs Realizado
+      const { data: metas } = await supabase
+        .from('analytics_metas_2026')
+        .select('*')
+        .eq('bar_id', barId)
+        .order('tipo', { ascending: false })
+        .order('mes', { ascending: true });
+
+      const metasAnuais = metas?.filter(m => m.tipo === 'anual') || [];
+      const metasMensais = metas?.filter(m => m.tipo === 'mensal') || [];
+      const mesAtual = hoje.getMonth() + 1;
+      const metaMesAtual = metasMensais.find(m => m.mes === mesAtual);
+
+      return {
+        metas: metas || [],
+        metasAnuais,
+        metasMensais,
+        metaMesAtual,
+        intent: 'analytics_metas'
+      };
+    }
+
+    case 'analytics_hora': {
+      // Faturamento por hora e picos
+      const { data: picos } = await supabase
+        .from('analytics_pico_horario')
+        .select('*')
+        .order('ranking_hora_dia', { ascending: true })
+        .limit(50);
+
+      // Agrupar por dia da semana
+      const picosPorDia: Record<string, unknown[]> = {};
+      picos?.forEach(p => {
+        const dia = p.dia_semana || 'Outros';
+        if (!picosPorDia[dia]) picosPorDia[dia] = [];
+        picosPorDia[dia].push(p);
+      });
+
+      return {
+        picos: picos || [],
+        picosPorDia,
+        intent: 'analytics_hora'
+      };
+    }
+
+    case 'analytics_completo': {
+      // Visão 360 - últimos eventos
+      const dataLimite = new Date(hoje);
+      dataLimite.setDate(dataLimite.getDate() - 30);
+      
+      const { data: cruzamento } = await supabase
+        .from('analytics_cruzamento_completo')
+        .select('*')
+        .eq('bar_id', barId)
+        .gte('data_evento', dataLimite.toISOString().split('T')[0])
+        .order('data_evento', { ascending: false })
+        .limit(10);
+
+      return {
+        eventos: cruzamento || [],
+        intent: 'analytics_completo'
+      };
+    }
+
     default: {
       // Buscar resumo geral - apenas eventos até hoje (não futuros)
       const hojeDefault = new Date().toISOString().split('T')[0];
@@ -1648,6 +1801,256 @@ function formatResponse(
           { label: 'NPS', value: `${nps}%`, trend: Number(nps) >= 50 ? 'up' : 'down' }
         ],
         suggestions: ['Ver feedbacks de artistas', 'NPS por dia', 'Pesquisa de felicidade']
+      };
+    }
+
+    case 'analytics_score': {
+      const eventos = data.proximosEventos as Array<{
+        data_evento: string;
+        artista: string;
+        score_total: number;
+        classificacao: string;
+        nome: string;
+      }>;
+
+      if (eventos.length === 0) {
+        return {
+          success: true,
+          response: `📊 **Score Preditivo**\n\nNão há eventos futuros com score calculado.\n\nAgenda eventos no calendário para ver previsões!`,
+          agent: 'Analista Preditivo',
+          suggestions: ['Ver calendário', 'Adicionar evento', 'Análise de artistas']
+        };
+      }
+
+      const lista = eventos.slice(0, 5).map(e => {
+        const emoji = e.classificacao === 'EXCELENTE' ? '🟢' : 
+                     e.classificacao === 'BOM' ? '🔵' :
+                     e.classificacao === 'REGULAR' ? '🟡' : '🔴';
+        return `${emoji} **${e.data_evento}** - ${e.artista || 'TBD'}\n   Score: **${e.score_total}/100** (${e.classificacao})`;
+      }).join('\n\n');
+
+      return {
+        success: true,
+        response: `📊 **Score Preditivo - Próximos Eventos**\n\n${lista}\n\n💡 *Score baseado em histórico do dia, artista, NPS e concorrência*`,
+        agent: 'Analista Preditivo',
+        metrics: eventos.slice(0, 4).map(e => ({
+          label: e.data_evento,
+          value: `${e.score_total}`,
+          trend: e.score_total >= 70 ? 'up' : e.score_total >= 50 ? 'neutral' : 'down'
+        })),
+        suggestions: ['Análise de artistas', 'Eventos concorrentes', 'Histórico do dia']
+      };
+    }
+
+    case 'analytics_artista': {
+      const topPerformers = data.topPerformers as Array<{ artista: string; faturamento_medio: number; roi_artista: number }>;
+      const emQueda = data.emQueda as Array<{ artista: string; variacao_percentual: number }>;
+      const crescendo = data.crescendo as Array<{ artista: string; variacao_percentual: number }>;
+      const trazerDeVolta = data.trazerDeVolta as Array<{ artista: string; dias_desde_ultimo_show: number }>;
+
+      let resposta = `🎤 **Análise de Artistas**\n\n`;
+
+      if (topPerformers.length > 0) {
+        resposta += `⭐ **Top Performers:**\n`;
+        resposta += topPerformers.slice(0, 3).map((a, i) => 
+          `${i + 1}. ${a.artista} - R$ ${formatNumber(a.faturamento_medio || 0)}/show (ROI: ${(a.roi_artista || 0).toFixed(1)}x)`
+        ).join('\n') + '\n\n';
+      }
+
+      if (crescendo.length > 0) {
+        resposta += `📈 **Em Crescimento:**\n`;
+        resposta += crescendo.slice(0, 2).map(a => 
+          `• ${a.artista} (+${(a.variacao_percentual || 0).toFixed(0)}%)`
+        ).join('\n') + '\n\n';
+      }
+
+      if (emQueda.length > 0) {
+        resposta += `📉 **Atenção (em queda):**\n`;
+        resposta += emQueda.slice(0, 2).map(a => 
+          `• ${a.artista} (${(a.variacao_percentual || 0).toFixed(0)}%)`
+        ).join('\n') + '\n\n';
+      }
+
+      if (trazerDeVolta.length > 0) {
+        resposta += `🔄 **Trazer de volta:**\n`;
+        resposta += trazerDeVolta.slice(0, 2).map(a => 
+          `• ${a.artista} (há ${a.dias_desde_ultimo_show} dias)`
+        ).join('\n');
+      }
+
+      return {
+        success: true,
+        response: resposta,
+        agent: 'Analista Artístico',
+        suggestions: ['Top 10 artistas', 'Artistas novos', 'Comparar cachês']
+      };
+    }
+
+    case 'analytics_yoy': {
+      const comparacao = data.comparacao as Array<{
+        mes_nome: string;
+        ano: number;
+        faturamento_total: number;
+        variacao_faturamento_yoy: number;
+        status_yoy: string;
+      }>;
+
+      if (comparacao.length === 0) {
+        return {
+          success: true,
+          response: `📊 **Comparação Ano a Ano**\n\nAinda não há dados suficientes para comparação YoY.`,
+          agent: 'Analista de Crescimento'
+        };
+      }
+
+      const lista = comparacao.slice(0, 6).map(c => {
+        const emoji = (c.status_yoy || '').includes('CRESCIMENTO') ? '📈' : 
+                     (c.status_yoy || '').includes('QUEDA') ? '📉' : '➡️';
+        const variacao = c.variacao_faturamento_yoy ? `${c.variacao_faturamento_yoy >= 0 ? '+' : ''}${c.variacao_faturamento_yoy.toFixed(1)}%` : 'N/A';
+        return `${emoji} **${c.mes_nome} ${c.ano}**: R$ ${formatNumber(c.faturamento_total || 0)} (${variacao})`;
+      }).join('\n');
+
+      return {
+        success: true,
+        response: `📊 **Comparação Ano a Ano (YoY)**\n\n${lista}`,
+        agent: 'Analista de Crescimento',
+        suggestions: ['Crescimento semanal', 'Metas 2026', 'Tendência']
+      };
+    }
+
+    case 'analytics_alertas': {
+      const criticos = data.criticos as Array<{ tipo_alerta: string; descricao: string; acao_sugerida: string }>;
+      const altos = data.altos as Array<{ tipo_alerta: string; descricao: string; acao_sugerida: string }>;
+      const totalAlertas = data.totalAlertas as number;
+
+      if (totalAlertas === 0) {
+        return {
+          success: true,
+          response: `✅ **Sem Alertas!**\n\nTudo está funcionando bem. Não há problemas identificados que precisem de atenção imediata.`,
+          agent: 'Monitor de Alertas',
+          suggestions: ['Ver metas', 'Análise de artistas', 'Score preditivo']
+        };
+      }
+
+      let resposta = `🚨 **Alertas e Problemas** (${totalAlertas} no total)\n\n`;
+
+      if (criticos.length > 0) {
+        resposta += `🔴 **CRÍTICOS:**\n`;
+        resposta += criticos.slice(0, 2).map(a => 
+          `• ${a.descricao}\n  💡 *${a.acao_sugerida}*`
+        ).join('\n') + '\n\n';
+      }
+
+      if (altos.length > 0) {
+        resposta += `🟠 **ALTOS:**\n`;
+        resposta += altos.slice(0, 3).map(a => 
+          `• ${a.descricao}`
+        ).join('\n');
+      }
+
+      return {
+        success: true,
+        response: resposta,
+        agent: 'Monitor de Alertas',
+        metrics: [
+          { label: 'Críticos', value: String(criticos.length), trend: criticos.length > 0 ? 'down' : 'up' },
+          { label: 'Altos', value: String(altos.length), trend: 'neutral' },
+          { label: 'Total', value: String(totalAlertas), trend: 'neutral' }
+        ],
+        insight: criticos.length > 0 
+          ? { type: 'warning', text: 'Existem alertas críticos que precisam de atenção imediata!' }
+          : { type: 'info', text: 'Monitore os alertas altos para evitar problemas maiores.' },
+        suggestions: ['Resolver alertas', 'Ver detalhes', 'Histórico de problemas']
+      };
+    }
+
+    case 'analytics_metas': {
+      const metasAnuais = data.metasAnuais as Array<{ tipo_meta: string; valor_meta: number; valor_realizado: number; percentual_atingimento: number }>;
+      const metaMesAtual = data.metaMesAtual as { mes: number; valor_meta: number; valor_realizado: number; percentual_atingimento: number; status: string } | null;
+
+      let resposta = `🎯 **Metas 2026**\n\n`;
+
+      // Meta anual de faturamento
+      const metaAnualFat = metasAnuais.find(m => m.tipo_meta === 'faturamento');
+      if (metaAnualFat) {
+        const progresso = metaAnualFat.percentual_atingimento || 0;
+        const barra = '█'.repeat(Math.min(10, Math.round(progresso / 10))) + '░'.repeat(10 - Math.min(10, Math.round(progresso / 10)));
+        resposta += `💰 **Faturamento Anual:**\n`;
+        resposta += `${barra} ${progresso.toFixed(1)}%\n`;
+        resposta += `R$ ${formatNumber(metaAnualFat.valor_realizado || 0)} / R$ ${formatNumber(metaAnualFat.valor_meta || 0)}\n\n`;
+      }
+
+      // Meta do mês atual
+      if (metaMesAtual) {
+        const statusEmoji = metaMesAtual.status === 'ATINGIDO' ? '✅' : 
+                           metaMesAtual.status === 'PROXIMO' ? '🔵' :
+                           metaMesAtual.status === 'ATENCAO' ? '🟡' : '🔴';
+        resposta += `📅 **Mês Atual (${metaMesAtual.mes}):**\n`;
+        resposta += `${statusEmoji} ${metaMesAtual.status}\n`;
+        resposta += `R$ ${formatNumber(metaMesAtual.valor_realizado || 0)} / R$ ${formatNumber(metaMesAtual.valor_meta || 0)} (${(metaMesAtual.percentual_atingimento || 0).toFixed(1)}%)`;
+      }
+
+      return {
+        success: true,
+        response: resposta,
+        agent: 'Analista de Metas',
+        suggestions: ['Quanto falta?', 'Comparar com 2025', 'Projeção anual']
+      };
+    }
+
+    case 'analytics_hora': {
+      const picosPorDia = data.picosPorDia as Record<string, Array<{ hora: number; media_faturamento: number }>>;
+
+      let resposta = `⏰ **Horários de Pico**\n\n`;
+
+      Object.entries(picosPorDia).forEach(([dia, picos]) => {
+        if (picos.length > 0) {
+          const top3 = picos.slice(0, 3).map(p => `${p.hora}h (R$ ${formatNumber(p.media_faturamento || 0)})`).join(', ');
+          resposta += `📍 **${dia}:** ${top3}\n`;
+        }
+      });
+
+      resposta += `\n💡 *Dica: Concentre promoções e equipe nos horários de pico!*`;
+
+      return {
+        success: true,
+        response: resposta,
+        agent: 'Analista de Performance',
+        suggestions: ['Faturamento por hora ontem', 'Comparar sábado vs sexta', 'Otimizar equipe']
+      };
+    }
+
+    case 'analytics_completo': {
+      const eventos = data.eventos as Array<{
+        data_evento: string;
+        artista: string;
+        faturamento: number;
+        publico: number;
+        nps_geral: number;
+        performance_evento: string;
+        artista_tendencia: string;
+      }>;
+
+      if (eventos.length === 0) {
+        return {
+          success: true,
+          response: `📊 **Análise Completa**\n\nNão há dados suficientes para uma análise cruzada.`,
+          agent: 'Analista Estratégico'
+        };
+      }
+
+      const lista = eventos.slice(0, 5).map(e => {
+        const perf = e.performance_evento === 'EXCELENTE' ? '🟢' : 
+                    e.performance_evento === 'BOM' ? '🔵' :
+                    e.performance_evento === 'REGULAR' ? '🟡' : '🔴';
+        return `${perf} **${e.data_evento}** - ${e.artista || 'N/A'}\n   Fat: R$ ${formatNumber(e.faturamento || 0)} | Pub: ${e.publico || 0} | NPS: ${(e.nps_geral || 0).toFixed(1)}`;
+      }).join('\n\n');
+
+      return {
+        success: true,
+        response: `📊 **Análise 360° - Últimos Eventos**\n\n${lista}\n\n*Visão cruzada: faturamento + público + NPS + artista*`,
+        agent: 'Analista Estratégico',
+        suggestions: ['Score preditivo', 'Análise de artistas', 'Alertas']
       };
     }
 
