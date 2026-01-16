@@ -223,20 +223,20 @@ export default function AgenteDashboard() {
       </CardHeader>
 
       <CardContent className="pt-4">
-        {/* Métricas Rápidas */}
-        <div className="grid grid-cols-4 gap-3 mb-4">
+        {/* Métricas Rápidas - Responsivo */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
           {metricas.map((metrica, idx) => (
             <motion.div
               key={metrica.nome}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-900"
+              className="text-center p-2 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-900"
             >
               <div className="flex justify-center mb-1">
                 <metrica.icon className={`w-4 h-4 ${getStatusColor(metrica.status)}`} />
               </div>
-              <div className={`text-lg font-bold ${getStatusColor(metrica.status)}`}>
+              <div className={`text-base sm:text-lg font-bold ${getStatusColor(metrica.status)} truncate`}>
                 {loading ? '...' : metrica.valor}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">

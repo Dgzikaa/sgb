@@ -292,6 +292,21 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
   else if (/semana passada|ultima semana/.test(messageLower)) entities.periodo = 'semana_passada';
   else if (/esse mes|este mes|mes atual/.test(messageLower)) entities.periodo = 'mes_atual';
   else if (/mes passado|ultimo mes/.test(messageLower)) entities.periodo = 'mes_passado';
+  
+  // Detectar data específica (DD/MM/YYYY, DD.MM.YYYY, DD-MM-YYYY, DD/MM/YY, etc.)
+  const dataRegex = /(\d{1,2})[\.\/\-](\d{1,2})[\.\/\-](\d{2,4})/;
+  const dataMatch = message.match(dataRegex);
+  if (dataMatch) {
+    const [, dia, mes, anoRaw] = dataMatch;
+    let ano = anoRaw;
+    if (ano.length === 2) {
+      ano = parseInt(ano) < 50 ? `20${ano}` : `19${ano}`;
+    }
+    const dataFormatada = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
+    entities.periodo = 'data_especifica';
+    entities.data = dataFormatada;
+    console.log(`[Agente] Data específica detectada: ${dataFormatada}`);
+  }
 
   return { intent, entities };
 }
@@ -327,27 +342,36 @@ async function fetchDataForIntent(
       let dataInicio = inicioSemana.toISOString().split('T')[0];
       let dataFim = hoje.toISOString().split('T')[0];
       
-      if (entities.periodo === 'ontem') {
+      // Priorizar data específica se informada
+      if (entities.periodo === 'data_especifica' && entities.data) {
+        dataInicio = entities.data;
+        dataFim = entities.data;
+        console.log(`[Agente] Buscando faturamento para data específica: ${entities.data}`);
+      } else if (entities.periodo === 'ontem') {
         dataInicio = ontem.toISOString().split('T')[0];
         dataFim = ontem.toISOString().split('T')[0];
+      } else if (entities.periodo === 'hoje') {
+        dataInicio = hoje.toISOString().split('T')[0];
+        dataFim = hoje.toISOString().split('T')[0];
       } else if (entities.periodo === 'mes_atual') {
         dataInicio = inicioMes.toISOString().split('T')[0];
       }
 
       const { data: eventosRaw } = await supabase
         .from('eventos_base')
-        .select('data_evento, real_r, m1_r, cl_real, nome')
+        .select('data_evento, real_r, m1_r, cl_real, nome, yuzer_liquido, sympla_liquido')
         .eq('bar_id', barId)
         .eq('ativo', true)
         .gte('data_evento', dataInicio)
         .lte('data_evento', dataFim)
         .order('data_evento', { ascending: false });
 
-      const eventos = eventosRaw as EventoBase[] | null;
+      const eventos = eventosRaw as (EventoBase & { yuzer_liquido?: number; sympla_liquido?: number })[] | null;
       const total = eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
       const metaTotal = eventos?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
       const clientesTotal = eventos?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
       const diasComDados = eventos?.filter(e => (e.real_r || 0) > 0).length || 0;
+      const nomeEvento = eventos?.[0]?.nome || '';
 
       return {
         faturamento: total,
@@ -356,8 +380,10 @@ async function fetchDataForIntent(
         clientes: clientesTotal,
         ticketMedio: clientesTotal > 0 ? total / clientesTotal : 0,
         diasComDados,
+        nomeEvento,
         eventos,
-        periodo: entities.periodo || 'semana_atual'
+        periodo: entities.periodo || 'semana_atual',
+        dataConsultada: entities.data || dataInicio
       };
     }
 
@@ -365,30 +391,62 @@ async function fetchDataForIntent(
       let dataInicio = ontem.toISOString().split('T')[0];
       let dataFim = ontem.toISOString().split('T')[0];
       
-      if (entities.periodo === 'semana_atual') {
+      // Priorizar data específica se informada
+      if (entities.periodo === 'data_especifica' && entities.data) {
+        dataInicio = entities.data;
+        dataFim = entities.data;
+        console.log(`[Agente] Buscando clientes para data específica: ${entities.data}`);
+      } else if (entities.periodo === 'semana_atual') {
         dataInicio = inicioSemana.toISOString().split('T')[0];
+        dataFim = hoje.toISOString().split('T')[0];
+      } else if (entities.periodo === 'hoje') {
+        dataInicio = hoje.toISOString().split('T')[0];
         dataFim = hoje.toISOString().split('T')[0];
       }
 
+      // Buscar dados de eventos_base
       const { data: eventosClientesRaw } = await supabase
         .from('eventos_base')
-        .select('data_evento, cl_real, real_r, nome')
+        .select('data_evento, cl_real, real_r, nome, yuzer_liquido, yuzer_ingressos, sympla_liquido, sympla_checkins, te_real, tb_real')
         .eq('bar_id', barId)
         .eq('ativo', true)
         .gte('data_evento', dataInicio)
         .lte('data_evento', dataFim)
         .order('data_evento', { ascending: false });
 
-      const eventosClientes = eventosClientesRaw as EventoBase[] | null;
-      const clientesTotal = eventosClientes?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
+      const eventosClientes = eventosClientesRaw as (EventoBase & { 
+        yuzer_liquido?: number; 
+        yuzer_ingressos?: number;
+        sympla_liquido?: number;
+        sympla_checkins?: number;
+        te_real?: number;
+        tb_real?: number;
+      })[] | null;
+      
+      // Calcular totais (considerar múltiplas fontes)
+      const clientesTotal = eventosClientes?.reduce((acc, e) => {
+        // Priorizar cl_real, depois yuzer_ingressos, depois sympla_checkins
+        const clientes = (e.cl_real || 0) > 0 ? e.cl_real : 
+                        (e.yuzer_ingressos || 0) > 0 ? e.yuzer_ingressos :
+                        (e.sympla_checkins || 0);
+        return acc + (clientes || 0);
+      }, 0) || 0;
+      
       const faturamento = eventosClientes?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
+      const ticketEntrada = eventosClientes?.[0]?.te_real || 0;
+      const ticketBar = eventosClientes?.[0]?.tb_real || 0;
+      const nomeEvento = eventosClientes?.[0]?.nome || '';
 
       return {
         clientes: clientesTotal,
         faturamento,
         ticketMedio: clientesTotal > 0 ? faturamento / clientesTotal : 0,
+        ticketEntrada,
+        ticketBar,
+        nomeEvento,
         eventos: eventosClientes,
-        periodo: entities.periodo || 'ontem'
+        periodo: entities.periodo || 'ontem',
+        dataConsultada: entities.data || dataInicio
       };
     }
 
@@ -821,21 +879,79 @@ function formatResponse(
       const clientes = data.clientes as number;
       const fat = data.faturamento as number;
       const ticket = data.ticketMedio as number;
+      const ticketEntrada = data.ticketEntrada as number || 0;
+      const ticketBar = data.ticketBar as number || 0;
+      const nomeEvento = data.nomeEvento as string || '';
       const periodo = data.periodo as string;
+      const dataConsultada = data.dataConsultada as string || '';
 
-      const periodoLabel = periodo === 'ontem' ? 'ontem' : 
-                          periodo === 'semana_atual' ? 'essa semana' : 'no período';
+      // Formatar período de forma mais descritiva
+      let periodoLabel = 'ontem';
+      if (periodo === 'data_especifica' && dataConsultada) {
+        const [ano, mes, dia] = dataConsultada.split('-');
+        periodoLabel = `em ${dia}/${mes}/${ano}`;
+      } else if (periodo === 'semana_atual') {
+        periodoLabel = 'essa semana';
+      } else if (periodo === 'hoje') {
+        periodoLabel = 'hoje';
+      }
+
+      // Construir resposta mais rica
+      let resposta = '';
+      if (clientes > 0) {
+        resposta = `${periodoLabel.charAt(0).toUpperCase() + periodoLabel.slice(1)} tivemos **${formatNumber(clientes)} clientes**!`;
+      } else if (fat > 0) {
+        // Tem faturamento mas não tem clientes (dado pode vir do Yuzer que não tem PAX)
+        resposta = `${periodoLabel.charAt(0).toUpperCase() + periodoLabel.slice(1)} o faturamento foi de **${formatCurrency(fat)}**.`;
+        if (nomeEvento) {
+          resposta += `\n\n📌 **Evento:** ${nomeEvento}`;
+        }
+        resposta += `\n\n⚠️ *Dados de público não disponíveis para esta data (evento especial sem registro de PAX).*`;
+      } else {
+        resposta = `Não encontrei dados para ${periodoLabel}. Verifique se a data está correta ou se o bar estava aberto.`;
+      }
+
+      if (clientes > 0 && fat > 0) {
+        resposta += `\n\nO faturamento foi de ${formatCurrency(fat)} com ticket médio de **${formatCurrency(ticket)}**.`;
+        if (nomeEvento) {
+          resposta += `\n\n📌 **Evento:** ${nomeEvento}`;
+        }
+      }
+
+      // Adicionar tickets específicos se disponíveis
+      if (ticketEntrada > 0 || ticketBar > 0) {
+        resposta += `\n\n🎫 Ticket entrada: ${formatCurrency(ticketEntrada)} | 🍺 Ticket bar: ${formatCurrency(ticketBar)}`;
+      }
+
+      const metrics: { label: string; value: string; trend: 'up' | 'down' | 'neutral' }[] = [];
+      
+      if (clientes > 0) {
+        metrics.push({ label: 'Clientes', value: formatNumber(clientes), trend: 'neutral' });
+      }
+      metrics.push({ label: 'Faturamento', value: formatCurrency(fat), trend: fat > 0 ? 'up' : 'neutral' });
+      if (clientes > 0) {
+        metrics.push({ label: 'Ticket Médio', value: formatCurrency(ticket), trend: ticket >= 100 ? 'up' : 'neutral' });
+      }
+      if (ticketEntrada > 0) {
+        metrics.push({ label: 'Ticket Entrada', value: formatCurrency(ticketEntrada), trend: 'neutral' });
+      }
+      if (ticketBar > 0) {
+        metrics.push({ label: 'Ticket Bar', value: formatCurrency(ticketBar), trend: 'neutral' });
+      }
 
       return {
         success: true,
-        response: `${periodoLabel.charAt(0).toUpperCase() + periodoLabel.slice(1)} tivemos **${formatNumber(clientes)} clientes**!\n\nO faturamento foi de ${formatCurrency(fat)} com ticket médio de **${formatCurrency(ticket)}**.`,
+        response: resposta,
         agent: 'Analista de Clientes',
-        metrics: [
-          { label: 'Clientes', value: formatNumber(clientes), trend: 'neutral' },
-          { label: 'Faturamento', value: formatCurrency(fat), trend: 'neutral' },
-          { label: 'Ticket Médio', value: formatCurrency(ticket), trend: ticket >= 100 ? 'up' : 'neutral' }
-        ],
-        suggestions: ['Ver clientes VIP', 'Analisar retenção', 'Horário de pico']
+        metrics,
+        suggestions: clientes > 0 
+          ? ['Ver clientes VIP', 'Analisar retenção', 'Horário de pico']
+          : ['Ver faturamento por hora', 'Produtos vendidos', 'Comparar com outros dias'],
+        data: {
+          faturamento: fat,
+          publico: clientes,
+          ticketMedio: ticket
+        }
       };
     }
 

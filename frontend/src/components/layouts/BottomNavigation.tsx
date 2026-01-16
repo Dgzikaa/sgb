@@ -41,10 +41,20 @@ interface MobileHamburgerMenuProps {
   onClose: () => void;
 }
 
+// Mapeamento de permissões (igual ao sidebar desktop)
+const PERMISSION_MAPPINGS: Record<string, string[]> = {
+  home: ['home'],
+  gestao: ['gestao', 'tempo', 'planejamento'],
+  relatorios: ['relatorios', 'dashboard_financeiro_mensal', 'marketing_360'],
+  operacoes: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos'],
+  ferramentas: ['operacoes', 'checklists', 'terminal_producao', 'receitas_insumos', 'financeiro_agendamento'],
+  configuracoes: ['configuracoes'],
+};
+
 // Menu hambúrguer overlay completo (igual ao sidebar desktop)
 function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
   const pathname = usePathname();
-  const { isRole } = usePermissions();
+  const { hasPermission, user, loading: userLoading } = usePermissions();
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
 
   const isActive = (href: string) => {
@@ -58,17 +68,27 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
     );
   };
 
+  // Helper para verificar permissões (igual ao sidebar desktop)
+  const hasAnyMappedPermission = (permissionKey: string) => {
+    if (!permissionKey) return true; // Se não tem permissão definida, permite
+    if (hasPermission('todos')) return true;
+    
+    const mappedPermissions = PERMISSION_MAPPINGS[permissionKey] || [permissionKey];
+    return mappedPermissions.some(perm => hasPermission(perm));
+  };
+
   // Estrutura completa do menu (igual ao sidebar)
-  const menuSections = [
+  const allMenuSections = [
     {
       icon: Target,
       label: 'Estratégico',
       href: '/estrategico',
       color: 'text-blue-600 dark:text-blue-400',
+      permission: 'gestao',
       subItems: [
-        { icon: TrendingUp, label: 'Visão Geral', href: '/estrategico/visao-geral' },
-        { icon: BarChart3, label: 'Desempenho', href: '/estrategico/desempenho' },
-        { icon: Calendar, label: 'Planejamento Comercial', href: '/estrategico/planejamento-comercial' },
+        { icon: TrendingUp, label: 'Visão Geral', href: '/estrategico/visao-geral', permission: 'home' },
+        { icon: BarChart3, label: 'Desempenho', href: '/estrategico/desempenho', permission: 'gestao' },
+        { icon: Calendar, label: 'Planejamento Comercial', href: '/estrategico/planejamento-comercial', permission: 'gestao' },
       ],
     },
     {
@@ -76,11 +96,12 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
       label: 'Analítico',
       href: '/analitico',
       color: 'text-indigo-600 dark:text-indigo-400',
+      permission: 'relatorios',
       subItems: [
-        { icon: Clock, label: 'Eventos', href: '/analitico/eventos' },
-        { icon: Users, label: 'Clientes', href: '/analitico/clientes' },
-        { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos' },
-        { icon: Sparkles, label: 'Retrospectiva 2025', href: '/retrospectiva-2025' },
+        { icon: Clock, label: 'Eventos', href: '/analitico/eventos', permission: 'relatorios' },
+        { icon: Users, label: 'Clientes', href: '/analitico/clientes', permission: 'relatorios' },
+        { icon: Users, label: 'Clientes Ativos', href: '/relatorios/clientes-ativos', permission: 'relatorios' },
+        { icon: Sparkles, label: 'Retrospectiva 2025', href: '/retrospectiva-2025', permission: 'home' },
       ],
     },
     {
@@ -88,30 +109,46 @@ function MobileHamburgerMenu({ isOpen, onClose }: MobileHamburgerMenuProps) {
       label: 'Ferramentas',
       href: '/ferramentas',
       color: 'text-green-600 dark:text-green-400',
+      permission: 'ferramentas',
       subItems: [
-        { icon: Megaphone, label: 'Central Comercial', href: '/ferramentas/comercial' },
-        { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos' },
-        { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque' },
-        { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento' },
-        { icon: Users, label: 'NPS', href: '/ferramentas/nps' },
-        { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal' },
-        { icon: Users, label: 'Simulação de CMO', href: '/ferramentas/simulacao-cmo' },
-        { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout' },
-        { icon: TrendingUp, label: 'CFP - Finanças', href: '/fp' },
+        { icon: Megaphone, label: 'Central Comercial', href: '/ferramentas/comercial', permission: 'operacoes' },
+        { icon: Package, label: 'Produção e Insumos', href: '/ferramentas/producao-insumos', permission: 'receitas_insumos' },
+        { icon: Package, label: 'Contagem de Estoque', href: '/ferramentas/contagem-estoque', permission: 'operacoes' },
+        { icon: Calendar, label: 'Agendamento', href: '/ferramentas/agendamento', permission: 'financeiro_agendamento' },
+        { icon: Users, label: 'NPS', href: '/ferramentas/nps', permission: 'home' },
+        { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal', permission: 'relatorios' },
+        { icon: Users, label: 'Simulação de CMO', href: '/ferramentas/simulacao-cmo', permission: 'gestao' },
+        { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout', permission: 'operacoes' },
+        { icon: TrendingUp, label: 'CFP - Finanças', href: '/fp', permission: 'home' },
+        { icon: Sparkles, label: 'Agente IA', href: '/ferramentas/agente', permission: 'home' },
       ],
     },
-  ];
-
-  // Adicionar Configurações se for admin
-  if (isRole('admin')) {
-    menuSections.push({
+    {
       icon: Settings,
       label: 'Configurações',
       href: '/configuracoes',
       color: 'text-gray-600 dark:text-gray-400',
+      permission: 'configuracoes',
       subItems: [],
-    });
-  }
+    },
+  ];
+
+  // Filtrar menu por permissões do usuário
+  const menuSections = allMenuSections.filter(section => {
+    // Verifica se tem permissão para a seção
+    const hasMainPermission = hasAnyMappedPermission(section.permission || '');
+    
+    // Filtra subitems por permissão
+    if (section.subItems.length > 0) {
+      section.subItems = section.subItems.filter(subItem => 
+        hasAnyMappedPermission(subItem.permission || '')
+      );
+      // Mostra seção se tem pelo menos um subitem visível OU tem permissão principal
+      return section.subItems.length > 0 || hasMainPermission;
+    }
+    
+    return hasMainPermission;
+  });
 
   if (!isOpen) return null;
 

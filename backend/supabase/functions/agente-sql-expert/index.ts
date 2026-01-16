@@ -426,7 +426,114 @@ serve(async (req) => {
 
 ---
 
-## 8. AGENTE IA
+## 10. FEEDBACKS CONSOLIDADOS
+
+### feedback_artistas (Feedbacks de artistas/bandas)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| artista_nome | TEXT | Nome do artista/banda |
+| data_feedback | DATE | Data do feedback |
+| camarim_satisfacao | VARCHAR | Satisfação com camarim |
+| camarim_localizacao | VARCHAR | Opinião sobre localização |
+| banheiro_satisfacao | VARCHAR | Satisfação com banheiro |
+| fechamento_cego_necessario | BOOLEAN | Se precisa de fechamento |
+| seguranca_necessaria | BOOLEAN | Se precisa mais segurança |
+| feedback_texto | TEXT | Texto do feedback |
+| sugestoes | TEXT | Sugestões dadas |
+| elogios | TEXT | Elogios recebidos |
+| problemas_identificados | TEXT | Problemas identificados |
+| coletado_por | VARCHAR | Quem coletou |
+| prioridade | INTEGER | Prioridade (1-3) |
+| status | VARCHAR | Status (pendente, analisado, etc) |
+
+### nps (NPS coletado por funcionários sobre clientes)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| data_pesquisa | DATE | Data da pesquisa |
+| funcionario_nome | TEXT | Nome do funcionário |
+| setor | TEXT | Setor |
+| nps_geral | NUMERIC | NPS geral (0-10) |
+| nps_ambiente | NUMERIC | NPS ambiente |
+| nps_atendimento | NUMERIC | NPS atendimento |
+| nps_limpeza | NUMERIC | NPS limpeza |
+| nps_musica | NUMERIC | NPS música |
+| nps_comida | NUMERIC | NPS comida |
+| nps_drink | NUMERIC | NPS drink |
+| nps_preco | NUMERIC | NPS preço |
+| comentarios | TEXT | Comentários dos clientes |
+
+### nps_reservas (Voz do Cliente - NPS das reservas)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | BIGINT PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| data_pesquisa | DATE | Data da pesquisa |
+| nota | NUMERIC | Nota NPS (0-10) |
+| dia_semana | TEXT | Dia da semana |
+| comentarios | TEXT | Comentário do cliente |
+
+### pesquisa_felicidade (Pesquisa de felicidade dos funcionários)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| id | INTEGER PK | ID único |
+| bar_id | INTEGER FK | Referência ao bar |
+| data_pesquisa | DATE | Data da pesquisa |
+| funcionario_nome | TEXT | Nome do funcionário |
+| setor | TEXT | Setor |
+| eu_comigo_engajamento | INTEGER | Engajamento (0-5) |
+| eu_com_empresa_pertencimento | INTEGER | Pertencimento (0-5) |
+| eu_com_colega_relacionamento | INTEGER | Relacionamento (0-5) |
+| eu_com_gestor_lideranca | INTEGER | Liderança (0-5) |
+| justica_reconhecimento | INTEGER | Reconhecimento (0-5) |
+| media_geral | NUMERIC | Média geral (0-5) |
+
+### VIEW: feedback_consolidado (TODOS os feedbacks unificados)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| tipo_feedback | VARCHAR | **'artista', 'cliente', 'funcionario_nps', 'funcionario_felicidade'** |
+| bar_id | INTEGER FK | Referência ao bar |
+| data | DATE | Data do feedback |
+| nome_respondente | TEXT | Quem respondeu |
+| setor | TEXT | Setor (se aplicável) |
+| avaliacao_resumo | VARCHAR | Classificação (promotor, neutro, detrator, satisfeito, etc) |
+| nota_numerica | INTEGER | Nota convertida para escala 0-10 |
+| comentario | TEXT | Comentário/feedback |
+| sugestoes | TEXT | Sugestões |
+| elogios | TEXT | Elogios |
+| problemas | TEXT | Problemas identificados |
+| status | VARCHAR | Status do feedback |
+| prioridade | INTEGER | Prioridade (1=alta, 3=baixa) |
+
+### VIEW: feedback_resumo_mensal (Resumo mensal por tipo)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| bar_id | INTEGER FK | Referência ao bar |
+| mes | DATE | Mês (truncado) |
+| tipo_feedback | VARCHAR | Tipo do feedback |
+| total_respostas | INTEGER | Total de respostas |
+| media_nota | NUMERIC | Média das notas |
+| positivos | INTEGER | Feedbacks positivos |
+| negativos | INTEGER | Feedbacks negativos |
+| alta_prioridade | INTEGER | Feedbacks urgentes |
+
+### VIEW: feedback_resumo_semanal (Resumo semanal por tipo)
+| Coluna | Tipo | Descrição |
+|--------|------|-----------|
+| bar_id | INTEGER FK | Referência ao bar |
+| semana | DATE | Semana (truncada) |
+| tipo_feedback | VARCHAR | Tipo do feedback |
+| total_respostas | INTEGER | Total de respostas |
+| media_nota | NUMERIC | Média das notas |
+| positivos | INTEGER | Feedbacks positivos |
+| negativos | INTEGER | Feedbacks negativos |
+
+---
+
+## 11. AGENTE IA
 
 ### agente_insights (Insights gerados)
 | Coluna | Tipo | Descrição |
@@ -520,6 +627,13 @@ Para detalhes por categoria (bilheteria, cerveja, drinks, comida):
 | Clientes/comandas | \`contahub_periodo\` |
 | Ingressos Sympla | \`sympla_resumo\` |
 | Faturamento por hora | \`yuzer_fatporhora\` ou \`contahub_fatporhora\` |
+| **FEEDBACKS (TODOS CONSOLIDADOS)** | \`feedback_consolidado\` |
+| Feedbacks de artistas | \`feedback_artistas\` |
+| NPS de clientes (voz do cliente) | \`nps_reservas\` |
+| NPS coletado por funcionários | \`nps\` |
+| Pesquisa de felicidade | \`pesquisa_felicidade\` |
+| Resumo mensal de feedbacks | \`feedback_resumo_mensal\` |
+| Resumo semanal de feedbacks | \`feedback_resumo_semanal\` |
 `
 
     // 2. USAR IA PARA GERAR SQL COM CONTEXTO ZYKOR
@@ -587,6 +701,22 @@ Quando perguntar "quanto foi o faturamento de [data]", SEMPRE considere:
 - "última semana": WHERE data_evento >= CURRENT_DATE - 7
 - "mês atual": WHERE EXTRACT(MONTH FROM data_evento) = EXTRACT(MONTH FROM CURRENT_DATE)
 - "top produtos": ORDER BY valorfinal DESC LIMIT 10
+
+# IMPORTANTE PARA FEEDBACKS
+Existem 4 tipos de feedbacks consolidados na view \`feedback_consolidado\`:
+1. **'artista'**: Feedbacks de artistas/bandas sobre camarim, estrutura, segurança
+2. **'cliente'**: Voz do Cliente - NPS das reservas (tabela nps_reservas)
+3. **'funcionario_nps'**: NPS coletado por funcionários sobre clientes
+4. **'funcionario_felicidade'**: Pesquisa de felicidade/satisfação dos funcionários
+
+Para perguntas sobre feedbacks, use:
+- \`feedback_consolidado\`: todos os feedbacks unificados
+- \`feedback_resumo_mensal\`: visão consolidada por mês
+- \`feedback_resumo_semanal\`: visão consolidada por semana
+- Filtrar por \`tipo_feedback\` para categoria específica
+- Filtrar por \`prioridade = 1\` para feedbacks urgentes
+- Comentários negativos: \`avaliacao_resumo IN ('detrator', 'insatisfeito')\`
+- Comentários positivos: \`avaliacao_resumo IN ('promotor', 'satisfeito', 'muito_satisfeito')\`
 
 # RESPONDA EM JSON
 {

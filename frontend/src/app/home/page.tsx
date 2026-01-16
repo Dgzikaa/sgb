@@ -102,7 +102,7 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="h-full px-6 py-8 flex flex-col max-w-none">
+      <div className="h-full px-4 sm:px-6 py-4 sm:py-8 flex flex-col max-w-none">
         {/* Header - Apenas hora e data */}
         <motion.div 
           className="mb-8 flex-shrink-0"
@@ -139,7 +139,7 @@ export default function HomePage() {
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 h-full">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 h-full">
             {quickActions.map((action, index) => (
               <motion.div
                 key={index}
@@ -147,16 +147,16 @@ export default function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 * index }}
                 className="group"
-                whileHover={{ y: -8, scale: 1.02 }}
+                whileHover={{ y: -4, scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Link href={action.href}>
-                  <div className="relative h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 cursor-pointer transition-all duration-300 hover:shadow-xl dark:hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 hover:border-blue-300 dark:hover:border-blue-600 overflow-hidden min-h-[240px]">
+                  <div className="relative h-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl sm:rounded-2xl p-4 sm:p-8 cursor-pointer transition-all duration-300 hover:shadow-xl dark:hover:shadow-2xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/20 hover:border-blue-300 dark:hover:border-blue-600 overflow-hidden min-h-[140px] sm:min-h-[240px]">
                     
                     {/* Badge */}
                     {action.badge && (
-                      <div className="absolute top-4 right-4 z-10">
-                        <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-semibold px-3 py-1 shadow-lg">
+                      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
+                        <Badge className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-[10px] sm:text-xs font-semibold px-2 py-0.5 sm:px-3 sm:py-1 shadow-lg">
                           {action.badge}
                         </Badge>
                       </div>
@@ -165,31 +165,31 @@ export default function HomePage() {
                     {/* Content */}
                     <div className="relative flex flex-col items-center h-full justify-center text-center">
                       {/* Icon */}
-                      <div className="relative mb-6">
-                        <div className={`w-20 h-20 bg-gradient-to-br ${action.color} rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300`}>
-                          <action.icon className="w-10 h-10 text-white" />
+                      <div className="relative mb-3 sm:mb-6">
+                        <div className={`w-12 h-12 sm:w-20 sm:h-20 bg-gradient-to-br ${action.color} rounded-xl sm:rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-all duration-300`}>
+                          <action.icon className="w-6 h-6 sm:w-10 sm:h-10 text-white" />
                         </div>
                       </div>
                       
                       {/* Title */}
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">
+                      <h3 className="text-sm sm:text-xl font-bold text-gray-900 dark:text-white mb-1 sm:mb-3 leading-tight">
                         {action.title}
                       </h3>
                       
-                      {/* Description */}
-                      <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
+                      {/* Description - Hidden on mobile */}
+                      <p className="hidden sm:block text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
                         {action.description}
                       </p>
                       
                       {/* Action button */}
-                      <div className="mt-auto flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold text-sm group-hover:gap-2 transition-all duration-300">
-                        <span>Acessar</span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+                      <div className="mt-auto flex items-center justify-center text-blue-600 dark:text-blue-400 font-semibold text-xs sm:text-sm group-hover:gap-2 transition-all duration-300">
+                        <span className="hidden sm:inline">Acessar</span>
+                        <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 group-hover:translate-x-1 transition-transform duration-300" />
                       </div>
                     </div>
                     
                     {/* Gradient overlay on hover */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-xl sm:rounded-2xl"></div>
                   </div>
                 </Link>
               </motion.div>
