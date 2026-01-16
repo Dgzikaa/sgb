@@ -7,6 +7,64 @@
 
 ## 2026-01
 
+### 2026-01-15 - Extração e Documentação Conselho de Cotistas
+
+**O que foi feito:**
+- ✅ Extraído conteúdo de 2 PDFs da reunião de conselho (script Node.js + pdfjs-dist)
+- ✅ Documentados resultados financeiros 4º Tri 2025:
+  - EBITDA: R$ 611.861,98
+  - FCO: R$ 252.058,33
+  - CMV Médio: 26%
+  - Investimento inicial 100% pago
+- ✅ Documentadas decisões do Conselho de Cotistas:
+  - DEC-050: Distribuição R$ 390.000 em lucros
+  - DEC-051: Investimentos R$ 466.000 aprovados (Telão LED, Retrofit, etc)
+  - DEC-052: Valor sugerido CFO R$ 540.000
+  - DEC-053: Migração para Zykor aprovada
+- ✅ Documentada sociedade e participações:
+  - Grupo Bizu: 65,472%
+  - Digão: 16,368%
+  - Augusto: 11,16%
+  - Cidades: 5%
+  - 3V: 1%
+  - Gugu: 1%
+- ✅ Atualizado contexto com métricas de desempenho:
+  - Faturamento explodiu de R$ 1.2mi para R$ 1.6mi/mês
+  - Meta clientes: era 3.000, alcançou 5.000!
+  - Todos os dias aumentaram faturamento
+
+**Arquivos criados/alterados:**
+- `exemplo_teste/extract-pdf.js` - Script extrator de PDF
+- `exemplo_teste/*.txt` - Textos extraídos dos PDFs
+- `.cursor/zykor-context.md` - Atualizado com dados 4º Tri
+- `.cursor/decisoes.md` - Novas decisões DEC-050 a DEC-053
+- `.cursor/historico.md` - Este registro
+
+**Motivo:** Alimentar agentes com dados estratégicos do negócio
+
+---
+
+### 2026-01-15 - Yuzer Sync Multi-dias e Categorização
+
+**O que foi feito:**
+- ✅ Corrigido processamento de eventos multi-dias (Carnaval, festivais)
+- ✅ Nova função `extrairDatasDoNomeEvento` para detectar períodos
+- ✅ Dados diários agora são inseridos corretamente em `yuzer_pagamento`
+- ✅ RPC `update_eventos_base_with_sympla_yuzer` corrigida
+- ✅ Criadas views de categorização:
+  - `yuzer_produtos_categorizado` - Classifica em BILHETERIA, CERVEJA, DRINKS, etc
+  - `yuzer_resumo_por_categoria` - Totais diários por categoria
+- ✅ Agente SQL Expert atualizado com conhecimento de múltiplas fontes
+
+**Arquivos alterados:**
+- `backend/supabase/functions/yuzer-sync/index.ts`
+- `backend/supabase/functions/agente-sql-expert/index.ts`
+- Migrations para views e RPC
+
+**Problema resolvido:** Carnaval tinha faturamento só no dia 1, agora distribui corretamente pelos 4 dias
+
+---
+
 ### 2026-01-09 - Sistema de Contexto MEGA Completo
 
 **O que foi feito:**

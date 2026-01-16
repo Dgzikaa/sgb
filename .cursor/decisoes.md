@@ -212,6 +212,63 @@
 
 ---
 
+## 💼 DECISÕES DO CONSELHO DE COTISTAS
+
+### DEC-050: Distribuição de Lucros 4º Tri 2025
+**Data:** 2026-01-15
+**Fonte:** Reunião Conselho de Cotistas
+**Decisão:** Distribuir R$ 390.000,00 em lucros
+**Valores por sócio:**
+| Sócio | Participação | Valor |
+|-------|--------------|-------|
+| Grupo Bizu | 65,472% | R$ 255.340,80 |
+| Digão | 16,368% | R$ 63.835,20 |
+| Augusto | 11,16% | R$ 43.524,00 |
+| Cidades | 5% | R$ 19.500,00 |
+| 3V | 1% | R$ 3.900,00 |
+| Gugu | 1% | R$ 3.900,00 |
+**Observação:** Deduzidos valores já pagos antecipados de dividendos garantidos
+
+### DEC-051: Investimentos 1º Tri 2026
+**Data:** 2026-01-15
+**Fonte:** Reunião Conselho de Cotistas
+**Decisão:** Aprovar R$ 466.000,00 em investimentos
+**Composição do budget:**
+- Reinvestimento 4º Tri: R$ 150.000,00
+- Sobra reinvestimento 3º Tri: R$ 56.000,00
+- FCO Investimentos: R$ 260.000,00
+**Destinação aprovada:**
+| Investimento | Valor |
+|--------------|-------|
+| Tenda área externa | R$ 18.000 |
+| Ar-Condicionado Banheiros | R$ 8.000 |
+| Telão LED Enorme | R$ 140.000 |
+| Reforma Armazenamento + Escritório | R$ 150.000 |
+| Metade Retrofit Área Externa | R$ 150.000 |
+
+### DEC-052: Valor Sugerido CFO para Alocação
+**Data:** 2026-01-15
+**Fonte:** Reunião Conselho de Cotistas
+**Decisão:** CFO sugeriu R$ 540.000,00 para alocação
+**Composição:**
+- FCO: R$ 252.058,33
+- FCO ajustado ao Estoque: R$ 299.244,11
+- Adicional Contrato Diageo: R$ 18.750,00
+- Adicional Contrato Ambev: R$ 4.350,00
+- Número conforme Acordo: R$ 322.344,11
+**Alocação final:**
+- Reinvestimentos: R$ 150.000,00
+- Distribuição de Lucros: R$ 390.000,00
+
+### DEC-053: Migração para Zykor
+**Data:** 2026-01-15
+**Fonte:** Fechamento Trimestral 4º Tri 2025
+**Decisão:** Migração da gestão para o Zykor no 1º Tri 2026
+**Motivo:** Big Bet definida para próximo trimestre
+**Status:** Em andamento
+
+---
+
 ## 📝 COMO ADICIONAR DECISÕES
 
 ```markdown

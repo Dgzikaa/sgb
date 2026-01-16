@@ -1,7 +1,7 @@
 # ZYKOR - CONTEXTO COMPLETO DO AGENTE
 
 > LEIA ESTE ARQUIVO EM CADA NOVO CHAT!
-> Ultima atualizacao: 2026-01-09
+> Ultima atualizacao: 2026-01-15
 
 ---
 
@@ -58,6 +58,71 @@ Generos Musicais: Pagode (78 eventos) e Samba (76 eventos)
 | Maior Faturamento Dia | R$ 147.509,90 | 03/01/2026 |
 | Maior Publico Dia | 1.316 pessoas | 03/01/2026 |
 | Maior Faturamento Mes | R$ 1.850.434 | Dezembro/2025 |
+
+---
+
+## RESULTADOS 4º TRIMESTRE 2025 (Out-Nov-Dez)
+
+### Financeiro:
+| Metrica | Valor |
+|---------|-------|
+| EBITDA | R$ 611.861,98 |
+| FCO | R$ 252.058,33 |
+| FCO ajustado ao Estoque | R$ 299.244,11 |
+| CMV Medio | 26% |
+| Investimento Inicial | 100% PAGO! |
+
+### Contratos Patrocinio:
+| Parceiro | Adicional |
+|----------|-----------|
+| Diageo | R$ 18.750,00 |
+| Ambev | R$ 4.350,00 |
+
+### Desempenho:
+| Metrica | Antes | Depois |
+|---------|-------|--------|
+| Faturamento Medio | R$ 1.2mi | R$ 1.6mi |
+| Meta Clientes Ativos | 3.000 | 5.000 (alcancado!) |
+
+### Crescimento por Dia:
+- Todos os dias da semana aumentaram faturamento vs tri anterior
+- Dias mais consistentes: Sexta, Quarta, Quinta
+- Maior crescimento: Domingo
+
+### Qualidade (NPS):
+- Top Elogios: Atendimento, Velocidade, Qualidade Musica/Samba
+- Pontos Atencao: Altura do som, Lotacao (banheiro, fila feminino)
+
+### Big Bets Cumpridas:
+- ✅ Foco total em Growth (faturar mais, aumentar base)
+- ✅ Guardrails controlados
+- 🔄 Próximo: Migração gestão para Zykor
+
+---
+
+## INVESTIMENTOS APROVADOS 1º TRI 2026
+
+| Investimento | Valor | Status |
+|--------------|-------|--------|
+| Telão LED Enorme | R$ 140.000 | Aprovado |
+| Reforma Armazenamento + Escritório | R$ 150.000 | Aprovado |
+| Metade Retrofit Área Externa | R$ 150.000 | Aprovado |
+| Tenda área externa | R$ 18.000 | Aprovado |
+| Ar-Condicionado Banheiros | R$ 8.000 | Aprovado |
+| **TOTAL** | **R$ 466.000** | |
+
+---
+
+## SOCIEDADE E PARTICIPAÇÕES
+
+| Sócio | Participação |
+|-------|--------------|
+| Grupo Bizu | 65,472% |
+| Digão | 16,368% |
+| Augusto | 11,16% |
+| Cidades | 5% |
+| 3V | 1% |
+| Gugu | 1% |
 
 ---
 
