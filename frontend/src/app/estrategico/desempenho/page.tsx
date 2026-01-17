@@ -461,7 +461,7 @@ export default function DesempenhoPage() {
               titulo="Cockpit Financeiro"
               icone={<Wallet className="w-4 h-4 text-white" />}
               corGradiente="bg-gradient-to-r from-violet-600 to-violet-700"
-              defaultOpen={false}
+              defaultOpen={true}
             >
               <Indicador label="Imposto" valor={dadosSemana.imposto} valorAnterior={dadosSemanaAnterior?.imposto} formato="moeda" inverso />
               <Indicador label="Comissão" valor={dadosSemana.comissao} valorAnterior={dadosSemanaAnterior?.comissao} formato="moeda" inverso />
@@ -487,7 +487,7 @@ export default function DesempenhoPage() {
               titulo="Cockpit Produtos"
               icone={<ShoppingCart className="w-4 h-4 text-white" />}
               corGradiente="bg-gradient-to-r from-orange-500 to-orange-600"
-              defaultOpen={false}
+              defaultOpen={true}
             >
               <Indicador label="StockOut Comidas" valor={dadosSemana.stockout_comidas} valorAnterior={dadosSemanaAnterior?.stockout_comidas} inverso />
               <Indicador label="StockOut Drinks" valor={dadosSemana.stockout_drinks} valorAnterior={dadosSemanaAnterior?.stockout_drinks} inverso />
@@ -509,7 +509,7 @@ export default function DesempenhoPage() {
               titulo="Vendas & Marketing"
               icone={<Megaphone className="w-4 h-4 text-white" />}
               corGradiente="bg-gradient-to-r from-pink-500 to-pink-600"
-              defaultOpen={false}
+              defaultOpen={true}
             >
               {/* Vendas */}
               <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
