@@ -63,20 +63,16 @@ interface DadosSemana {
   imposto: number;
   comissao: number;
   cmv: number;
+  freelas: number;
+  cmo_fixo_simulacao: number;
+  alimentacao: number;
   cmo_custo: number;
   pro_labore: number;
-  ocupacao: number;
-  adm_fixo: number;
-  marketing_fixo: number;
-  escritorio_central: number;
-  adm_mkt_semana: number;
   rh_estorno_outros_operacao: number;
   materiais: number;
   manutencao: number;
   atracoes_eventos: number;
   utensilios: number;
-  consumacao_sem_socio: number;
-  lucro_rs: number;
   // Indicadores de Qualidade
   avaliacoes_5_google_trip: number;
   media_avaliacoes_google: number;
@@ -463,23 +459,18 @@ export default function DesempenhoPage() {
               corGradiente="bg-gradient-to-r from-violet-600 to-violet-700"
               defaultOpen={true}
             >
-              <Indicador label="Imposto" valor={dadosSemana.imposto} valorAnterior={dadosSemanaAnterior?.imposto} formato="moeda" inverso />
+              <Indicador label="Imposto (7%)" valor={dadosSemana.imposto} valorAnterior={dadosSemanaAnterior?.imposto} formato="moeda" inverso />
               <Indicador label="Comissão" valor={dadosSemana.comissao} valorAnterior={dadosSemanaAnterior?.comissao} formato="moeda" inverso />
               <Indicador label="CMV" valor={dadosSemana.cmv} valorAnterior={dadosSemanaAnterior?.cmv} formato="moeda" inverso />
-              <Indicador label="CMO Custo" valor={dadosSemana.cmo_custo} valorAnterior={dadosSemanaAnterior?.cmo_custo} formato="moeda" inverso />
+              <Indicador label="Freelas" valor={dadosSemana.freelas} valorAnterior={dadosSemanaAnterior?.freelas} formato="moeda" inverso />
+              <Indicador label="CMO Fixo Simulação" valor={dadosSemana.cmo_fixo_simulacao} valorAnterior={dadosSemanaAnterior?.cmo_fixo_simulacao} formato="moeda" inverso />
+              <Indicador label="Alimentação" valor={dadosSemana.alimentacao} valorAnterior={dadosSemanaAnterior?.alimentacao} formato="moeda" inverso />
               <Indicador label="Pró-Labore" valor={dadosSemana.pro_labore} valorAnterior={dadosSemanaAnterior?.pro_labore} formato="moeda" inverso />
-              <Indicador label="Ocupação" valor={dadosSemana.ocupacao} valorAnterior={dadosSemanaAnterior?.ocupacao} formato="moeda" inverso />
-              <Indicador label="Adm Fixo" valor={dadosSemana.adm_fixo} valorAnterior={dadosSemanaAnterior?.adm_fixo} formato="moeda" inverso />
-              <Indicador label="Marketing Fixo" valor={dadosSemana.marketing_fixo} valorAnterior={dadosSemanaAnterior?.marketing_fixo} formato="moeda" inverso />
-              <Indicador label="Escritório Central" valor={dadosSemana.escritorio_central} valorAnterior={dadosSemanaAnterior?.escritorio_central} formato="moeda" inverso />
-              <Indicador label="Adm e Mkt da Semana" valor={dadosSemana.adm_mkt_semana} valorAnterior={dadosSemanaAnterior?.adm_mkt_semana} formato="moeda" inverso />
               <Indicador label="RH+Estorno+Outros" valor={dadosSemana.rh_estorno_outros_operacao} valorAnterior={dadosSemanaAnterior?.rh_estorno_outros_operacao} formato="moeda" inverso />
               <Indicador label="Materiais" valor={dadosSemana.materiais} valorAnterior={dadosSemanaAnterior?.materiais} formato="moeda" inverso />
               <Indicador label="Manutenção" valor={dadosSemana.manutencao} valorAnterior={dadosSemanaAnterior?.manutencao} formato="moeda" inverso />
               <Indicador label="Atrações/Eventos" valor={dadosSemana.atracoes_eventos} valorAnterior={dadosSemanaAnterior?.atracoes_eventos} formato="moeda" inverso />
               <Indicador label="Utensílios" valor={dadosSemana.utensilios} valorAnterior={dadosSemanaAnterior?.utensilios} formato="moeda" inverso />
-              <Indicador label="Consumação (sem sócio)" valor={dadosSemana.consumacao_sem_socio} valorAnterior={dadosSemanaAnterior?.consumacao_sem_socio} formato="moeda" />
-              <Indicador label="Lucro (R$)" valor={dadosSemana.lucro_rs} valorAnterior={dadosSemanaAnterior?.lucro_rs} formato="moeda" />
             </Secao>
 
             {/* Cockpit Produtos */}
