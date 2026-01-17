@@ -425,9 +425,9 @@ export default function DesempenhoPage() {
               <Indicador label="Atração/Faturamento" valor={dadosSemana.custo_atracao_faturamento} valorAnterior={dadosSemanaAnterior?.custo_atracao_faturamento} formato="percentual" inverso />
             </Secao>
 
-            {/* OVT - Indicadores Estratégicos */}
+            {/* OVT - Clientes + Qualidade */}
             <Secao
-              titulo="OVT - Clientes"
+              titulo="OVT - Clientes & Qualidade"
               icone={<Users className="w-4 h-4 text-white" />}
               corGradiente="bg-gradient-to-r from-blue-600 to-blue-700"
             >
@@ -438,14 +438,11 @@ export default function DesempenhoPage() {
               <Indicador label="Clientes Ativos" valor={dadosSemana.clientes_ativos} valorAnterior={dadosSemanaAnterior?.clientes_ativos} />
               <Indicador label="Reservas Totais" valor={dadosSemana.reservas_totais} valorAnterior={dadosSemanaAnterior?.reservas_totais} />
               <Indicador label="Reservas Presentes" valor={dadosSemana.reservas_presentes} valorAnterior={dadosSemanaAnterior?.reservas_presentes} />
-            </Secao>
-
-            {/* Indicadores de Qualidade */}
-            <Secao
-              titulo="Qualidade"
-              icone={<Star className="w-4 h-4 text-white" />}
-              corGradiente="bg-gradient-to-r from-amber-500 to-amber-600"
-            >
+              <div className="px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800">
+                <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase flex items-center gap-1">
+                  <Star className="w-3 h-3" /> Qualidade
+                </span>
+              </div>
               <Indicador label="Avaliações 5★ Google/Trip" valor={dadosSemana.avaliacoes_5_google_trip} valorAnterior={dadosSemanaAnterior?.avaliacoes_5_google_trip} />
               <Indicador label="Média Avaliações Google" valor={dadosSemana.media_avaliacoes_google} valorAnterior={dadosSemanaAnterior?.media_avaliacoes_google} formato="decimal" />
               <Indicador label="NPS Reservas" valor={dadosSemana.nps_reservas} valorAnterior={dadosSemanaAnterior?.nps_reservas} />
