@@ -321,7 +321,7 @@ export default function DesempenhoPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header com navegação */}
       <div className="sticky top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3">
+        <div className="max-w-[98vw] mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Tabs */}
             <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'semanal' | 'mensal')}>
@@ -385,9 +385,9 @@ export default function DesempenhoPage() {
       </div>
 
       {/* Conteúdo */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-[98vw] mx-auto px-4 py-6">
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {[...Array(6)].map((_, i) => (
               <Skeleton key={i} className="h-64 rounded-xl" />
             ))}
@@ -403,7 +403,7 @@ export default function DesempenhoPage() {
             </p>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {/* GUARDRAIL - Indicadores Estratégicos */}
             <Secao
               titulo="GUARDRAIL - Estratégicos"
