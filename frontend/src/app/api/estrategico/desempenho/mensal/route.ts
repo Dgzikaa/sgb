@@ -29,21 +29,32 @@ export async function GET(request: NextRequest) {
     // Uma semana pertence a um mês se a maioria dos dias (4+) está naquele mês
     const semanasDoMes = calcularSemanasDoMes(mes, ano);
 
-    // Buscar dados de todas as semanas do mês
-    const { data: semanasData, error } = await supabase
-      .from('desempenho_semanal')
-      .select('*')
-      .eq('bar_id', barId)
-      .eq('ano', ano)
-      .in('numero_semana', semanasDoMes);
+    // Buscar dados de todas as semanas do mês (desempenho + marketing em paralelo)
+    const [desempenhoResult, marketingResult] = await Promise.all([
+      supabase
+        .from('desempenho_semanal')
+        .select('*')
+        .eq('bar_id', barId)
+        .eq('ano', ano)
+        .in('numero_semana', semanasDoMes),
+      supabase
+        .from('marketing_semanal')
+        .select('*')
+        .eq('bar_id', barId)
+        .eq('ano', ano)
+        .in('semana', semanasDoMes)
+    ]);
 
-    if (error) {
-      console.error('Erro ao buscar dados mensais:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (desempenhoResult.error) {
+      console.error('Erro ao buscar dados mensais:', desempenhoResult.error);
+      return NextResponse.json({ error: desempenhoResult.error.message }, { status: 500 });
     }
 
+    // Mesclar dados de desempenho com marketing por semana
+    const semanasData = mesclarDadosMarketing(desempenhoResult.data || [], marketingResult.data || []);
+
     // Agregar os dados
-    const dadosMensais = agregarDadosMensais(semanasData || []);
+    const dadosMensais = agregarDadosMensais(semanasData);
 
     // Buscar dados do mês anterior para comparação
     let mesAnterior = mes - 1;
@@ -55,14 +66,23 @@ export async function GET(request: NextRequest) {
 
     const semanasMesAnterior = calcularSemanasDoMes(mesAnterior, anoAnterior);
     
-    const { data: semanasAnteriorData } = await supabase
-      .from('desempenho_semanal')
-      .select('*')
-      .eq('bar_id', barId)
-      .eq('ano', anoAnterior)
-      .in('numero_semana', semanasMesAnterior);
+    const [desempenhoAnteriorResult, marketingAnteriorResult] = await Promise.all([
+      supabase
+        .from('desempenho_semanal')
+        .select('*')
+        .eq('bar_id', barId)
+        .eq('ano', anoAnterior)
+        .in('numero_semana', semanasMesAnterior),
+      supabase
+        .from('marketing_semanal')
+        .select('*')
+        .eq('bar_id', barId)
+        .eq('ano', anoAnterior)
+        .in('semana', semanasMesAnterior)
+    ]);
 
-    const dadosMesAnterior = agregarDadosMensais(semanasAnteriorData || []);
+    const semanasAnteriorData = mesclarDadosMarketing(desempenhoAnteriorResult.data || [], marketingAnteriorResult.data || []);
+    const dadosMesAnterior = agregarDadosMensais(semanasAnteriorData);
 
     return NextResponse.json({
       success: true,
@@ -84,6 +104,48 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Mesclar dados de desempenho com marketing
+function mesclarDadosMarketing(desempenhoData: any[], marketingData: any[]): any[] {
+  // Criar um mapa de marketing por semana
+  const marketingMap = new Map<number, any>();
+  for (const m of marketingData) {
+    marketingMap.set(m.semana, m);
+  }
+
+  // Mesclar dados
+  return desempenhoData.map(d => {
+    const marketing = marketingMap.get(d.numero_semana);
+    if (!marketing) return d;
+
+    return {
+      ...d,
+      o_num_posts: marketing.o_num_posts,
+      o_alcance: marketing.o_alcance,
+      o_interacao: marketing.o_interacao,
+      o_compartilhamento: marketing.o_compartilhamento,
+      o_engajamento: marketing.o_engajamento,
+      o_num_stories: marketing.o_num_stories,
+      o_visu_stories: marketing.o_visu_stories,
+      m_valor_investido: marketing.m_valor_investido,
+      m_alcance: marketing.m_alcance,
+      m_frequencia: marketing.m_frequencia,
+      m_cpm: marketing.m_cpm,
+      m_cliques: marketing.m_cliques,
+      m_ctr: marketing.m_ctr,
+      m_custo_por_clique: marketing.m_cpc,
+      m_conversas_iniciadas: marketing.m_conversas_iniciadas,
+      g_valor_investido: marketing.g_valor_investido,
+      g_impressoes: marketing.g_impressoes,
+      g_cliques: marketing.g_cliques,
+      g_ctr: marketing.g_ctr,
+      g_solicitacoes_rotas: marketing.g_solicitacoes_rotas,
+      gmn_total_acoes: marketing.gmn_total_acoes,
+      gmn_total_visualizacoes: marketing.gmn_total_visualizacoes,
+      gmn_solicitacoes_rotas: marketing.gmn_solicitacoes_rotas,
+    };
+  });
 }
 
 // Calcular quais semanas pertencem a um mês
