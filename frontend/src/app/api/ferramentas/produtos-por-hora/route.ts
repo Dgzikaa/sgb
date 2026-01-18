@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       `)
       .eq('trn_dtgerencial', data_selecionada)
       .eq('bar_id', bar_id)
-      .not('grp_desc', 'in', '("Mercadorias- Compras","Insumos","Uso Interno")')
+      .not('grp_desc', 'in', '(Mercadorias- Compras,Insumos,Uso Interno)')
       .order('qtd', { ascending: false });
 
     if (errorAnalitico) {
