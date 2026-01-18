@@ -130,13 +130,13 @@ const defaultSidebarItems: SidebarItem[] = [
           description: 'Estratégia comercial e metas',
           permission: 'planejamento',
         },
-        // {
-        //   icon: DollarSign,
-        //   label: 'Orçamentação',
-        //   href: '/estrategico/orcamentacao',
-        //   description: 'Gestão orçamentária integrada',
-        //   permission: 'configuracoes',
-        // },
+        {
+          icon: DollarSign,
+          label: 'Orçamentação',
+          href: '/estrategico/orcamentacao',
+          description: 'Gestão orçamentária integrada',
+          permission: 'configuracoes',
+        },
       ],
     },
     // {
