@@ -231,11 +231,23 @@ export default function DesempenhoPage() {
   
   const [activeTab, setActiveTab] = useState<'semanal' | 'mensal'>('semanal');
   const [loading, setLoading] = useState(true);
-  const [semanaAtual, setSemanaAtual] = useState<number>(2); // Semana atual
+  
+  // Estados para visão semanal
+  const [semanaAtual, setSemanaAtual] = useState<number>(2);
   const [anoAtual, setAnoAtual] = useState<number>(2026);
   const [dadosSemana, setDadosSemana] = useState<DadosSemana | null>(null);
   const [dadosSemanaAnterior, setDadosSemanaAnterior] = useState<DadosSemana | null>(null);
   const [totalSemanas, setTotalSemanas] = useState<number>(53);
+  
+  // Estados para visão mensal
+  const [mesAtual, setMesAtual] = useState<number>(new Date().getMonth() + 1);
+  const [anoMensal, setAnoMensal] = useState<number>(new Date().getFullYear());
+  const [dadosMes, setDadosMes] = useState<any | null>(null);
+  const [dadosMesAnterior, setDadosMesAnterior] = useState<any | null>(null);
+  const [qtdSemanasMes, setQtdSemanasMes] = useState<number>(0);
+  
+  const nomesMeses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
   // Formatar data
   const formatarData = (dataStr: string) => {
@@ -245,7 +257,7 @@ export default function DesempenhoPage() {
   };
 
   // Carregar dados da semana
-  const carregarDados = useCallback(async () => {
+  const carregarDadosSemanal = useCallback(async () => {
     if (!selectedBar || !user) return;
     
     setLoading(true);
@@ -270,10 +282,46 @@ export default function DesempenhoPage() {
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedBar?.id, user?.id, semanaAtual, anoAtual]);
 
-  // Navegação
+  // Carregar dados do mês
+  const carregarDadosMensal = useCallback(async () => {
+    if (!selectedBar || !user) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `/api/estrategico/desempenho/mensal?mes=${mesAtual}&ano=${anoMensal}`,
+        {
+          headers: {
+            'x-user-data': encodeURIComponent(JSON.stringify({ ...user, bar_id: selectedBar?.id }))
+          }
+        }
+      );
+
+      if (!response.ok) throw new Error('Erro ao carregar dados mensais');
+      
+      const data = await response.json();
+      setDadosMes(data.mes || null);
+      setDadosMesAnterior(data.mesAnterior || null);
+      setQtdSemanasMes(data.quantidadeSemanas || 0);
+    } catch (error) {
+      console.error('Erro ao carregar dados mensais:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedBar?.id, user?.id, mesAtual, anoMensal]);
+
+  // Função unificada para carregar dados
+  const carregarDados = useCallback(() => {
+    if (activeTab === 'semanal') {
+      carregarDadosSemanal();
+    } else {
+      carregarDadosMensal();
+    }
+  }, [activeTab, carregarDadosSemanal, carregarDadosMensal]);
+
+  // Navegação semanal
   const navegarSemana = (direcao: 'anterior' | 'proxima') => {
     if (direcao === 'anterior') {
       if (semanaAtual === 1) {
@@ -292,6 +340,25 @@ export default function DesempenhoPage() {
     }
   };
 
+  // Navegação mensal
+  const navegarMes = (direcao: 'anterior' | 'proxima') => {
+    if (direcao === 'anterior') {
+      if (mesAtual === 1) {
+        setMesAtual(12);
+        setAnoMensal(prev => prev - 1);
+      } else {
+        setMesAtual(prev => prev - 1);
+      }
+    } else {
+      if (mesAtual === 12) {
+        setMesAtual(1);
+        setAnoMensal(prev => prev + 1);
+      } else {
+        setMesAtual(prev => prev + 1);
+      }
+    }
+  };
+
   useEffect(() => {
     setPageTitle('📊 Desempenho');
   }, [setPageTitle]);
@@ -299,6 +366,15 @@ export default function DesempenhoPage() {
   useEffect(() => {
     carregarDados();
   }, [carregarDados]);
+
+  // Recarregar ao mudar de aba
+  useEffect(() => {
+    carregarDados();
+  }, [activeTab]);
+
+  // Dados ativos baseados na aba selecionada
+  const dadosAtivos = activeTab === 'semanal' ? dadosSemana : dadosMes;
+  const dadosAnteriores = activeTab === 'semanal' ? dadosSemanaAnterior : dadosMesAnterior;
 
   // Verificar seleção de bar
   if (!selectedBar) {
@@ -337,32 +413,47 @@ export default function DesempenhoPage() {
               </TabsList>
             </Tabs>
 
-            {/* Navegação de Semana */}
+            {/* Navegação de Semana/Mês */}
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => navegarSemana('anterior')}
+                onClick={() => activeTab === 'semanal' ? navegarSemana('anterior') : navegarMes('anterior')}
                 className="h-10 w-10"
               >
                 <ChevronLeft className="h-5 w-5" />
               </Button>
               
               <div className="min-w-[200px] text-center">
-                <div className="text-lg font-bold text-gray-900 dark:text-white">
-                  Semana {semanaAtual.toString().padStart(2, '0')}
-                </div>
-                {dadosSemana && (
-                  <div className="text-sm text-gray-500 dark:text-gray-400">
-                    {formatarData(dadosSemana.data_inicio)} a {formatarData(dadosSemana.data_fim)}/{anoAtual}
-                  </div>
+                {activeTab === 'semanal' ? (
+                  <>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      Semana {semanaAtual.toString().padStart(2, '0')}
+                    </div>
+                    {dadosAtivos && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {formatarData(dadosAtivos.data_inicio)} a {formatarData(dadosAtivos.data_fim)}/{anoAtual}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <div className="text-lg font-bold text-gray-900 dark:text-white">
+                      {nomesMeses[mesAtual]} {anoMensal}
+                    </div>
+                    {qtdSemanasMes > 0 && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400">
+                        {qtdSemanasMes} semanas consolidadas
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
               
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => navegarSemana('proxima')}
+                onClick={() => activeTab === 'semanal' ? navegarSemana('proxima') : navegarMes('proxima')}
                 className="h-10 w-10"
               >
                 <ChevronRight className="h-5 w-5" />
@@ -392,14 +483,17 @@ export default function DesempenhoPage() {
               <Skeleton key={i} className="h-64 rounded-xl" />
             ))}
           </div>
-        ) : !dadosSemana ? (
+        ) : !dadosAtivos ? (
           <Card className="bg-white dark:bg-gray-800 p-8 text-center">
             <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              Sem dados para esta semana
+              Sem dados para {activeTab === 'semanal' ? 'esta semana' : 'este mês'}
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
-              Não há dados de desempenho registrados para a Semana {semanaAtual} de {anoAtual}.
+              {activeTab === 'semanal' 
+                ? `Não há dados de desempenho registrados para a Semana ${semanaAtual} de ${anoAtual}.`
+                : `Não há dados de desempenho registrados para ${nomesMeses[mesAtual]} de ${anoMensal}.`
+              }
             </p>
           </Card>
         ) : (
@@ -410,19 +504,19 @@ export default function DesempenhoPage() {
               icone={<DollarSign className="w-4 h-4 text-white" />}
               corGradiente="bg-gradient-to-r from-emerald-600 to-emerald-700"
             >
-              <Indicador label="Faturamento Total" valor={dadosSemana.faturamento_total} valorAnterior={dadosSemanaAnterior?.faturamento_total} formato="moeda" />
-              <Indicador label="Faturamento Couvert" valor={dadosSemana.faturamento_entrada} valorAnterior={dadosSemanaAnterior?.faturamento_entrada} formato="moeda" />
-              <Indicador label="Faturamento Bar" valor={dadosSemana.faturamento_bar} valorAnterior={dadosSemanaAnterior?.faturamento_bar} formato="moeda" />
-              <Indicador label="Faturamento CMvível" valor={dadosSemana.faturamento_cmovivel} valorAnterior={dadosSemanaAnterior?.faturamento_cmovivel} formato="moeda" />
-              <Indicador label="CMV R$" valor={dadosSemana.cmv_rs} valorAnterior={dadosSemanaAnterior?.cmv_rs} formato="moeda" inverso />
-              <Indicador label="Ticket Médio ContaHub" valor={dadosSemana.ticket_medio} valorAnterior={dadosSemanaAnterior?.ticket_medio} formato="moeda" />
-              <Indicador label="TM Entrada" valor={dadosSemana.tm_entrada} valorAnterior={dadosSemanaAnterior?.tm_entrada} formato="moeda" />
-              <Indicador label="TM Bar" valor={dadosSemana.tm_bar} valorAnterior={dadosSemanaAnterior?.tm_bar} formato="moeda" />
-              <Indicador label="CMV Limpo %" valor={dadosSemana.cmv_limpo} valorAnterior={dadosSemanaAnterior?.cmv_limpo} formato="percentual" inverso />
-              <Indicador label="CMV Global Real" valor={dadosSemana.cmv_global_real} valorAnterior={dadosSemanaAnterior?.cmv_global_real} formato="percentual" inverso />
-              <Indicador label="CMV Teórico" valor={dadosSemana.cmv_teorico} valorAnterior={dadosSemanaAnterior?.cmv_teorico} formato="percentual" inverso />
-              <Indicador label="CMO %" valor={dadosSemana.cmo} valorAnterior={dadosSemanaAnterior?.cmo} formato="percentual" inverso />
-              <Indicador label="Atração/Faturamento" valor={dadosSemana.custo_atracao_faturamento} valorAnterior={dadosSemanaAnterior?.custo_atracao_faturamento} formato="percentual" inverso />
+              <Indicador label="Faturamento Total" valor={dadosAtivos.faturamento_total} valorAnterior={dadosAnteriores?.faturamento_total} formato="moeda" />
+              <Indicador label="Faturamento Couvert" valor={dadosAtivos.faturamento_entrada} valorAnterior={dadosAnteriores?.faturamento_entrada} formato="moeda" />
+              <Indicador label="Faturamento Bar" valor={dadosAtivos.faturamento_bar} valorAnterior={dadosAnteriores?.faturamento_bar} formato="moeda" />
+              <Indicador label="Faturamento CMvível" valor={dadosAtivos.faturamento_cmovivel} valorAnterior={dadosAnteriores?.faturamento_cmovivel} formato="moeda" />
+              <Indicador label="CMV R$" valor={dadosAtivos.cmv_rs} valorAnterior={dadosAnteriores?.cmv_rs} formato="moeda" inverso />
+              <Indicador label="Ticket Médio ContaHub" valor={dadosAtivos.ticket_medio} valorAnterior={dadosAnteriores?.ticket_medio} formato="moeda" />
+              <Indicador label="TM Entrada" valor={dadosAtivos.tm_entrada} valorAnterior={dadosAnteriores?.tm_entrada} formato="moeda" />
+              <Indicador label="TM Bar" valor={dadosAtivos.tm_bar} valorAnterior={dadosAnteriores?.tm_bar} formato="moeda" />
+              <Indicador label="CMV Limpo %" valor={dadosAtivos.cmv_limpo} valorAnterior={dadosAnteriores?.cmv_limpo} formato="percentual" inverso />
+              <Indicador label="CMV Global Real" valor={dadosAtivos.cmv_global_real} valorAnterior={dadosAnteriores?.cmv_global_real} formato="percentual" inverso />
+              <Indicador label="CMV Teórico" valor={dadosAtivos.cmv_teorico} valorAnterior={dadosAnteriores?.cmv_teorico} formato="percentual" inverso />
+              <Indicador label="CMO %" valor={dadosAtivos.cmo} valorAnterior={dadosAnteriores?.cmo} formato="percentual" inverso />
+              <Indicador label="Atração/Faturamento" valor={dadosAtivos.custo_atracao_faturamento} valorAnterior={dadosAnteriores?.custo_atracao_faturamento} formato="percentual" inverso />
             </Secao>
 
             {/* OVT - Clientes + Qualidade */}
@@ -431,22 +525,22 @@ export default function DesempenhoPage() {
               icone={<Users className="w-4 h-4 text-white" />}
               corGradiente="bg-gradient-to-r from-blue-600 to-blue-700"
             >
-              <Indicador label="Retenção 1 mês" valor={dadosSemana.retencao_1m} valorAnterior={dadosSemanaAnterior?.retencao_1m} formato="percentual" />
-              <Indicador label="Retenção 2 meses" valor={dadosSemana.retencao_2m} valorAnterior={dadosSemanaAnterior?.retencao_2m} formato="percentual" />
-              <Indicador label="% Novos Clientes" valor={dadosSemana.perc_clientes_novos} valorAnterior={dadosSemanaAnterior?.perc_clientes_novos} formato="percentual" />
-              <Indicador label="Visitas" valor={dadosSemana.clientes_atendidos} valorAnterior={dadosSemanaAnterior?.clientes_atendidos} />
-              <Indicador label="Clientes Ativos" valor={dadosSemana.clientes_ativos} valorAnterior={dadosSemanaAnterior?.clientes_ativos} />
-              <Indicador label="Reservas Totais" valor={dadosSemana.reservas_totais} valorAnterior={dadosSemanaAnterior?.reservas_totais} />
-              <Indicador label="Reservas Presentes" valor={dadosSemana.reservas_presentes} valorAnterior={dadosSemanaAnterior?.reservas_presentes} />
+              <Indicador label="Retenção 1 mês" valor={dadosAtivos.retencao_1m} valorAnterior={dadosAnteriores?.retencao_1m} formato="percentual" />
+              <Indicador label="Retenção 2 meses" valor={dadosAtivos.retencao_2m} valorAnterior={dadosAnteriores?.retencao_2m} formato="percentual" />
+              <Indicador label="% Novos Clientes" valor={dadosAtivos.perc_clientes_novos} valorAnterior={dadosAnteriores?.perc_clientes_novos} formato="percentual" />
+              <Indicador label="Visitas" valor={dadosAtivos.clientes_atendidos} valorAnterior={dadosAnteriores?.clientes_atendidos} />
+              <Indicador label="Clientes Ativos" valor={dadosAtivos.clientes_ativos} valorAnterior={dadosAnteriores?.clientes_ativos} />
+              <Indicador label="Reservas Totais" valor={dadosAtivos.reservas_totais} valorAnterior={dadosAnteriores?.reservas_totais} />
+              <Indicador label="Reservas Presentes" valor={dadosAtivos.reservas_presentes} valorAnterior={dadosAnteriores?.reservas_presentes} />
               <div className="px-3 py-1.5 bg-amber-50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800">
                 <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase flex items-center gap-1">
                   <Star className="w-3 h-3" /> Qualidade
                 </span>
               </div>
-              <Indicador label="Avaliações 5★ Google/Trip" valor={dadosSemana.avaliacoes_5_google_trip} valorAnterior={dadosSemanaAnterior?.avaliacoes_5_google_trip} />
-              <Indicador label="Média Avaliações Google" valor={dadosSemana.media_avaliacoes_google} valorAnterior={dadosSemanaAnterior?.media_avaliacoes_google} formato="decimal" />
-              <Indicador label="NPS Reservas" valor={dadosSemana.nps_reservas} valorAnterior={dadosSemanaAnterior?.nps_reservas} />
-              <Indicador label="NPS Felicidade Equipe" valor={dadosSemana.nota_felicidade_equipe} valorAnterior={dadosSemanaAnterior?.nota_felicidade_equipe} />
+              <Indicador label="Avaliações 5★ Google/Trip" valor={dadosAtivos.avaliacoes_5_google_trip} valorAnterior={dadosAnteriores?.avaliacoes_5_google_trip} />
+              <Indicador label="Média Avaliações Google" valor={dadosAtivos.media_avaliacoes_google} valorAnterior={dadosAnteriores?.media_avaliacoes_google} formato="decimal" />
+              <Indicador label="NPS Reservas" valor={dadosAtivos.nps_reservas} valorAnterior={dadosAnteriores?.nps_reservas} />
+              <Indicador label="NPS Felicidade Equipe" valor={dadosAtivos.nota_felicidade_equipe} valorAnterior={dadosAnteriores?.nota_felicidade_equipe} />
             </Secao>
 
             {/* Cockpit Financeiro */}
@@ -456,18 +550,18 @@ export default function DesempenhoPage() {
               corGradiente="bg-gradient-to-r from-violet-600 to-violet-700"
               defaultOpen={true}
             >
-              <Indicador label="Imposto (7%)" valor={dadosSemana.imposto} valorAnterior={dadosSemanaAnterior?.imposto} formato="moeda" inverso />
-              <Indicador label="Comissão" valor={dadosSemana.comissao} valorAnterior={dadosSemanaAnterior?.comissao} formato="moeda" inverso />
-              <Indicador label="CMV" valor={dadosSemana.cmv} valorAnterior={dadosSemanaAnterior?.cmv} formato="moeda" inverso />
-              <Indicador label="Freelas" valor={dadosSemana.freelas} valorAnterior={dadosSemanaAnterior?.freelas} formato="moeda" inverso />
-              <Indicador label="CMO Fixo Simulação" valor={dadosSemana.cmo_fixo_simulacao} valorAnterior={dadosSemanaAnterior?.cmo_fixo_simulacao} formato="moeda" inverso />
-              <Indicador label="Alimentação" valor={dadosSemana.alimentacao} valorAnterior={dadosSemanaAnterior?.alimentacao} formato="moeda" inverso />
-              <Indicador label="Pró-Labore" valor={dadosSemana.pro_labore} valorAnterior={dadosSemanaAnterior?.pro_labore} formato="moeda" inverso />
-              <Indicador label="RH+Estorno+Outros" valor={dadosSemana.rh_estorno_outros_operacao} valorAnterior={dadosSemanaAnterior?.rh_estorno_outros_operacao} formato="moeda" inverso />
-              <Indicador label="Materiais" valor={dadosSemana.materiais} valorAnterior={dadosSemanaAnterior?.materiais} formato="moeda" inverso />
-              <Indicador label="Manutenção" valor={dadosSemana.manutencao} valorAnterior={dadosSemanaAnterior?.manutencao} formato="moeda" inverso />
-              <Indicador label="Atrações/Eventos" valor={dadosSemana.atracoes_eventos} valorAnterior={dadosSemanaAnterior?.atracoes_eventos} formato="moeda" inverso />
-              <Indicador label="Utensílios" valor={dadosSemana.utensilios} valorAnterior={dadosSemanaAnterior?.utensilios} formato="moeda" inverso />
+              <Indicador label="Imposto (7%)" valor={dadosAtivos.imposto} valorAnterior={dadosAnteriores?.imposto} formato="moeda" inverso />
+              <Indicador label="Comissão" valor={dadosAtivos.comissao} valorAnterior={dadosAnteriores?.comissao} formato="moeda" inverso />
+              <Indicador label="CMV" valor={dadosAtivos.cmv} valorAnterior={dadosAnteriores?.cmv} formato="moeda" inverso />
+              <Indicador label="Freelas" valor={dadosAtivos.freelas} valorAnterior={dadosAnteriores?.freelas} formato="moeda" inverso />
+              <Indicador label="CMO Fixo Simulação" valor={dadosAtivos.cmo_fixo_simulacao} valorAnterior={dadosAnteriores?.cmo_fixo_simulacao} formato="moeda" inverso />
+              <Indicador label="Alimentação" valor={dadosAtivos.alimentacao} valorAnterior={dadosAnteriores?.alimentacao} formato="moeda" inverso />
+              <Indicador label="Pró-Labore" valor={dadosAtivos.pro_labore} valorAnterior={dadosAnteriores?.pro_labore} formato="moeda" inverso />
+              <Indicador label="RH+Estorno+Outros" valor={dadosAtivos.rh_estorno_outros_operacao} valorAnterior={dadosAnteriores?.rh_estorno_outros_operacao} formato="moeda" inverso />
+              <Indicador label="Materiais" valor={dadosAtivos.materiais} valorAnterior={dadosAnteriores?.materiais} formato="moeda" inverso />
+              <Indicador label="Manutenção" valor={dadosAtivos.manutencao} valorAnterior={dadosAnteriores?.manutencao} formato="moeda" inverso />
+              <Indicador label="Atrações/Eventos" valor={dadosAtivos.atracoes_eventos} valorAnterior={dadosAnteriores?.atracoes_eventos} formato="moeda" inverso />
+              <Indicador label="Utensílios" valor={dadosAtivos.utensilios} valorAnterior={dadosAnteriores?.utensilios} formato="moeda" inverso />
             </Secao>
 
             {/* Cockpit Produtos */}
@@ -477,19 +571,19 @@ export default function DesempenhoPage() {
               corGradiente="bg-gradient-to-r from-orange-500 to-orange-600"
               defaultOpen={true}
             >
-              <Indicador label="StockOut Comidas" valor={dadosSemana.stockout_comidas} valorAnterior={dadosSemanaAnterior?.stockout_comidas} inverso />
-              <Indicador label="StockOut Drinks" valor={dadosSemana.stockout_drinks} valorAnterior={dadosSemanaAnterior?.stockout_drinks} inverso />
-              <Indicador label="StockOut Bar" valor={dadosSemana.stockout_bar} valorAnterior={dadosSemanaAnterior?.stockout_bar} inverso />
-              <Indicador label="% Bebidas" valor={dadosSemana.perc_bebidas} valorAnterior={dadosSemanaAnterior?.perc_bebidas} formato="percentual" />
-              <Indicador label="% Drinks" valor={dadosSemana.perc_drinks} valorAnterior={dadosSemanaAnterior?.perc_drinks} formato="percentual" />
-              <Indicador label="% Comida" valor={dadosSemana.perc_comida} valorAnterior={dadosSemanaAnterior?.perc_comida} formato="percentual" />
-              <Indicador label="% Happy Hour" valor={dadosSemana.perc_happy_hour} valorAnterior={dadosSemanaAnterior?.perc_happy_hour} formato="percentual" />
-              <Indicador label="Qtde Itens Bar" valor={dadosSemana.qtde_itens_bar} valorAnterior={dadosSemanaAnterior?.qtde_itens_bar} />
-              <Indicador label="Atrasos Bar" valor={dadosSemana.atrasos_bar} valorAnterior={dadosSemanaAnterior?.atrasos_bar} inverso />
-              <Indicador label="Tempo Saída Bar" valor={dadosSemana.tempo_saida_bar} valorAnterior={dadosSemanaAnterior?.tempo_saida_bar} formato="decimal" sufixo=" min" inverso />
-              <Indicador label="Qtde Itens Cozinha" valor={dadosSemana.qtde_itens_cozinha} valorAnterior={dadosSemanaAnterior?.qtde_itens_cozinha} />
-              <Indicador label="Atrasos Cozinha" valor={dadosSemana.atrasos_cozinha} valorAnterior={dadosSemanaAnterior?.atrasos_cozinha} inverso />
-              <Indicador label="Tempo Saída Cozinha" valor={dadosSemana.tempo_saida_cozinha} valorAnterior={dadosSemanaAnterior?.tempo_saida_cozinha} formato="decimal" sufixo=" min" inverso />
+              <Indicador label="StockOut Comidas" valor={dadosAtivos.stockout_comidas} valorAnterior={dadosAnteriores?.stockout_comidas} inverso />
+              <Indicador label="StockOut Drinks" valor={dadosAtivos.stockout_drinks} valorAnterior={dadosAnteriores?.stockout_drinks} inverso />
+              <Indicador label="StockOut Bar" valor={dadosAtivos.stockout_bar} valorAnterior={dadosAnteriores?.stockout_bar} inverso />
+              <Indicador label="% Bebidas" valor={dadosAtivos.perc_bebidas} valorAnterior={dadosAnteriores?.perc_bebidas} formato="percentual" />
+              <Indicador label="% Drinks" valor={dadosAtivos.perc_drinks} valorAnterior={dadosAnteriores?.perc_drinks} formato="percentual" />
+              <Indicador label="% Comida" valor={dadosAtivos.perc_comida} valorAnterior={dadosAnteriores?.perc_comida} formato="percentual" />
+              <Indicador label="% Happy Hour" valor={dadosAtivos.perc_happy_hour} valorAnterior={dadosAnteriores?.perc_happy_hour} formato="percentual" />
+              <Indicador label="Qtde Itens Bar" valor={dadosAtivos.qtde_itens_bar} valorAnterior={dadosAnteriores?.qtde_itens_bar} />
+              <Indicador label="Atrasos Bar" valor={dadosAtivos.atrasos_bar} valorAnterior={dadosAnteriores?.atrasos_bar} inverso />
+              <Indicador label="Tempo Saída Bar" valor={dadosAtivos.tempo_saida_bar} valorAnterior={dadosAnteriores?.tempo_saida_bar} formato="decimal" sufixo=" min" inverso />
+              <Indicador label="Qtde Itens Cozinha" valor={dadosAtivos.qtde_itens_cozinha} valorAnterior={dadosAnteriores?.qtde_itens_cozinha} />
+              <Indicador label="Atrasos Cozinha" valor={dadosAtivos.atrasos_cozinha} valorAnterior={dadosAnteriores?.atrasos_cozinha} inverso />
+              <Indicador label="Tempo Saída Cozinha" valor={dadosAtivos.tempo_saida_cozinha} valorAnterior={dadosAnteriores?.tempo_saida_cozinha} formato="decimal" sufixo=" min" inverso />
             </Secao>
 
             {/* Cockpit Vendas + Marketing */}
@@ -503,35 +597,35 @@ export default function DesempenhoPage() {
               <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
                 <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Vendas</span>
               </div>
-              <Indicador label="% Fat. até 19h" valor={dadosSemana.perc_faturamento_ate_19h} valorAnterior={dadosSemanaAnterior?.perc_faturamento_ate_19h} formato="percentual" />
-              <Indicador label="Venda Balcão" valor={dadosSemana.venda_balcao} valorAnterior={dadosSemanaAnterior?.venda_balcao} formato="moeda" />
-              <Indicador label="Couvert / Atrações" valor={dadosSemana.couvert_atracoes} valorAnterior={dadosSemanaAnterior?.couvert_atracoes} formato="moeda" />
-              <Indicador label="QUI+SÁB+DOM" valor={dadosSemana.qui_sab_dom} valorAnterior={dadosSemanaAnterior?.qui_sab_dom} formato="moeda" />
+              <Indicador label="% Fat. até 19h" valor={dadosAtivos.perc_faturamento_ate_19h} valorAnterior={dadosAnteriores?.perc_faturamento_ate_19h} formato="percentual" />
+              <Indicador label="Venda Balcão" valor={dadosAtivos.venda_balcao} valorAnterior={dadosAnteriores?.venda_balcao} formato="moeda" />
+              <Indicador label="Couvert / Atrações" valor={dadosAtivos.couvert_atracoes} valorAnterior={dadosAnteriores?.couvert_atracoes} formato="moeda" />
+              <Indicador label="QUI+SÁB+DOM" valor={dadosAtivos.qui_sab_dom} valorAnterior={dadosAnteriores?.qui_sab_dom} formato="moeda" />
               
               {/* Marketing Orgânico */}
               <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
                 <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Marketing Orgânico</span>
               </div>
-              <Indicador label="Nº de Posts" valor={dadosSemana.o_num_posts} valorAnterior={dadosSemanaAnterior?.o_num_posts} />
-              <Indicador label="Alcance" valor={dadosSemana.o_alcance} valorAnterior={dadosSemanaAnterior?.o_alcance} />
-              <Indicador label="Interação" valor={dadosSemana.o_interacao} valorAnterior={dadosSemanaAnterior?.o_interacao} />
-              <Indicador label="Compartilhamento" valor={dadosSemana.o_compartilhamento} valorAnterior={dadosSemanaAnterior?.o_compartilhamento} />
-              <Indicador label="Engajamento" valor={dadosSemana.o_engajamento} valorAnterior={dadosSemanaAnterior?.o_engajamento} formato="percentual" />
-              <Indicador label="Nº Stories" valor={dadosSemana.o_num_stories} valorAnterior={dadosSemanaAnterior?.o_num_stories} />
-              <Indicador label="Visu Stories" valor={dadosSemana.o_visu_stories} valorAnterior={dadosSemanaAnterior?.o_visu_stories} />
+              <Indicador label="Nº de Posts" valor={dadosAtivos.o_num_posts} valorAnterior={dadosAnteriores?.o_num_posts} />
+              <Indicador label="Alcance" valor={dadosAtivos.o_alcance} valorAnterior={dadosAnteriores?.o_alcance} />
+              <Indicador label="Interação" valor={dadosAtivos.o_interacao} valorAnterior={dadosAnteriores?.o_interacao} />
+              <Indicador label="Compartilhamento" valor={dadosAtivos.o_compartilhamento} valorAnterior={dadosAnteriores?.o_compartilhamento} />
+              <Indicador label="Engajamento" valor={dadosAtivos.o_engajamento} valorAnterior={dadosAnteriores?.o_engajamento} formato="percentual" />
+              <Indicador label="Nº Stories" valor={dadosAtivos.o_num_stories} valorAnterior={dadosAnteriores?.o_num_stories} />
+              <Indicador label="Visu Stories" valor={dadosAtivos.o_visu_stories} valorAnterior={dadosAnteriores?.o_visu_stories} />
               
               {/* Marketing Pago */}
               <div className="px-3 py-2 bg-gray-50 dark:bg-gray-700/30">
                 <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Marketing Pago (Meta)</span>
               </div>
-              <Indicador label="Valor Investido" valor={dadosSemana.m_valor_investido} valorAnterior={dadosSemanaAnterior?.m_valor_investido} formato="moeda" />
-              <Indicador label="Alcance" valor={dadosSemana.m_alcance} valorAnterior={dadosSemanaAnterior?.m_alcance} />
-              <Indicador label="Frequência" valor={dadosSemana.m_frequencia} valorAnterior={dadosSemanaAnterior?.m_frequencia} formato="decimal" />
-              <Indicador label="CPM" valor={dadosSemana.m_cpm} valorAnterior={dadosSemanaAnterior?.m_cpm} formato="moeda" inverso />
-              <Indicador label="Cliques" valor={dadosSemana.m_cliques} valorAnterior={dadosSemanaAnterior?.m_cliques} />
-              <Indicador label="CTR" valor={dadosSemana.m_ctr} valorAnterior={dadosSemanaAnterior?.m_ctr} formato="percentual" />
-              <Indicador label="Custo por Clique" valor={dadosSemana.m_custo_por_clique} valorAnterior={dadosSemanaAnterior?.m_custo_por_clique} formato="moeda" inverso />
-              <Indicador label="Conversas Iniciadas" valor={dadosSemana.m_conversas_iniciadas} valorAnterior={dadosSemanaAnterior?.m_conversas_iniciadas} />
+              <Indicador label="Valor Investido" valor={dadosAtivos.m_valor_investido} valorAnterior={dadosAnteriores?.m_valor_investido} formato="moeda" />
+              <Indicador label="Alcance" valor={dadosAtivos.m_alcance} valorAnterior={dadosAnteriores?.m_alcance} />
+              <Indicador label="Frequência" valor={dadosAtivos.m_frequencia} valorAnterior={dadosAnteriores?.m_frequencia} formato="decimal" />
+              <Indicador label="CPM" valor={dadosAtivos.m_cpm} valorAnterior={dadosAnteriores?.m_cpm} formato="moeda" inverso />
+              <Indicador label="Cliques" valor={dadosAtivos.m_cliques} valorAnterior={dadosAnteriores?.m_cliques} />
+              <Indicador label="CTR" valor={dadosAtivos.m_ctr} valorAnterior={dadosAnteriores?.m_ctr} formato="percentual" />
+              <Indicador label="Custo por Clique" valor={dadosAtivos.m_custo_por_clique} valorAnterior={dadosAnteriores?.m_custo_por_clique} formato="moeda" inverso />
+              <Indicador label="Conversas Iniciadas" valor={dadosAtivos.m_conversas_iniciadas} valorAnterior={dadosAnteriores?.m_conversas_iniciadas} />
             </Secao>
           </div>
         )}
