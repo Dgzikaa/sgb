@@ -24,6 +24,25 @@
 2. Mova ideias implementadas para "✅ IDEIAS IMPLEMENTADAS"
 3. Adicione novas decisões em `decisoes.md`
 
+## 🔚 REGRA DE FINALIZAÇÃO OBRIGATÓRIA
+
+**SEMPRE antes de encerrar qualquer sessão de trabalho:**
+
+1. ⚠️ **PERGUNTAR AO USUÁRIO**: "Quer que eu atualize os arquivos de contexto antes de finalizar?"
+2. Se sim, atualizar:
+   - `.cursor/historico.md` - O que foi implementado nesta sessão
+   - `.cursor/ideias.md` - Marcar ideias como implementadas ou em andamento
+   - `.cursor/decisoes.md` - Novas decisões arquiteturais (se houver)
+3. Fazer commit das atualizações: `docs: atualizar contexto da sessão YYYY-MM-DD`
+4. Fazer push (com confirmação do usuário)
+
+**Gatilhos para perguntar:**
+- Usuário diz "finalizar", "encerrar", "por hoje é isso", "obrigado", "valeu"
+- Sessão teve implementações significativas
+- Mais de 3-5 commits foram feitos na sessão
+
+**NÃO ESQUECER**: Esta regra é OBRIGATÓRIA para manter continuidade entre sessões!
+
 ---
 
 ## ⚠️ REGRAS CRÍTICAS ABSOLUTAS (NUNCA IGNORAR)
