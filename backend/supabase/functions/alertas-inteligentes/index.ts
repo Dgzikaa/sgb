@@ -40,12 +40,28 @@ class AlertasInteligentesService {
   // ========================================
   async analisarFaturamento(barId: number): Promise<Alerta[]> {
     const alertas: Alerta[] = []
-    const hoje = new Date()
-    const horaAtual = hoje.getHours()
-    const ontem = new Date(hoje)
-    ontem.setDate(ontem.getDate() - 1)
-    const ontemStr = ontem.toISOString().split('T')[0]
-    const hojeStr = hoje.toISOString().split('T')[0]
+    
+    // Usar timezone de São Paulo para calcular corretamente "ontem"
+    const agora = new Date()
+    const spFormatter = new Intl.DateTimeFormat('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      hour12: false
+    })
+    const partes = spFormatter.formatToParts(agora)
+    const getPartValue = (type: string) => partes.find(p => p.type === type)?.value || ''
+    
+    const hojeStr = `${getPartValue('year')}-${getPartValue('month')}-${getPartValue('day')}`
+    const horaAtual = parseInt(getPartValue('hour'))
+    
+    // Calcular ontem corretamente no timezone de São Paulo
+    const hojeDate = new Date(`${hojeStr}T12:00:00-03:00`)
+    const ontemDate = new Date(hojeDate)
+    ontemDate.setDate(ontemDate.getDate() - 1)
+    const ontemStr = ontemDate.toISOString().split('T')[0]
     
     // Horário limite para considerar que o sync deveria ter rodado (7h da manhã)
     const HORARIO_SYNC = 7
