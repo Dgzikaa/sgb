@@ -129,6 +129,18 @@ export default function SaudeDadosPage() {
     ? (validacoesUltimos7Dias.filter(v => v.validacao_passou).length / validacoesUltimos7Dias.length * 100).toFixed(0)
     : 0
 
+  // Função segura para formatar datas
+  const formatarData = (data: string | null | undefined, formatStr: string = 'dd/MM/yyyy'): string => {
+    if (!data) return '-'
+    try {
+      const parsed = parseISO(data)
+      if (isNaN(parsed.getTime())) return '-'
+      return format(parsed, formatStr, { locale: ptBR })
+    } catch {
+      return '-'
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-6">
@@ -276,7 +288,7 @@ export default function SaudeDadosPage() {
                         {validacoes.map((v) => (
                           <tr key={v.id} className="border-b border-gray-100 dark:border-gray-700/50">
                             <td className="py-3 px-4 text-gray-900 dark:text-white">
-                              {format(parseISO(v.data_referencia), 'dd/MM/yyyy', { locale: ptBR })}
+                              {formatarData(v.data_referencia, 'dd/MM/yyyy')}
                             </td>
                             <td className="py-3 px-4">
                               {v.validacao_passou ? (
@@ -360,7 +372,7 @@ export default function SaudeDadosPage() {
                                 {alerta.descricao}
                               </p>
                               <p className="text-xs text-gray-500 mt-2">
-                                {format(parseISO(alerta.criado_em), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                {formatarData(alerta.criado_em, "dd/MM/yyyy 'às' HH:mm")}
                               </p>
                             </div>
                           </div>
@@ -403,7 +415,7 @@ export default function SaudeDadosPage() {
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-400">
                         <Clock className="w-3 h-3 inline mr-1" />
-                        {sync.ultima_sync ? format(parseISO(sync.ultima_sync), "dd/MM HH:mm", { locale: ptBR }) : 'Nunca'}
+                        {sync.ultima_sync ? formatarData(sync.ultima_sync, "dd/MM HH:mm") : 'Nunca'}
                       </p>
                       {sync.registros > 0 && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -446,11 +458,11 @@ export default function SaudeDadosPage() {
                         {bloqueados.slice(0, 20).map((b) => (
                           <tr key={b.id} className="border-b border-gray-100 dark:border-gray-700/50">
                             <td className="py-3 px-4 text-gray-900 dark:text-white">
-                              {format(parseISO(b.data_referencia), 'dd/MM/yyyy', { locale: ptBR })}
+                              {formatarData(b.data_referencia, 'dd/MM/yyyy')}
                             </td>
                             <td className="py-3 px-4 text-gray-600 dark:text-gray-400">{b.tabela}</td>
                             <td className="py-3 px-4 text-gray-600 dark:text-gray-400">
-                              {format(parseISO(b.bloqueado_em), "dd/MM HH:mm", { locale: ptBR })}
+                              {formatarData(b.bloqueado_em, "dd/MM HH:mm")}
                             </td>
                             <td className="py-3 px-4 text-sm text-gray-500">{b.motivo}</td>
                           </tr>

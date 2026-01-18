@@ -119,6 +119,30 @@ export default function MonitoramentoPage() {
     return `${hours}h ${minutes}m`;
   };
 
+  // Função segura para formatar datas
+  const formatarData = (data: string | null | undefined, formatStr: string = 'dd/MM/yyyy'): string => {
+    if (!data) return '-';
+    try {
+      const parsed = parseISO(data);
+      if (isNaN(parsed.getTime())) return '-';
+      return format(parsed, formatStr, { locale: ptBR });
+    } catch {
+      return '-';
+    }
+  };
+
+  // Função segura para formatDistanceToNow
+  const formatarDistancia = (data: string | null | undefined): string => {
+    if (!data) return 'Nunca';
+    try {
+      const parsed = parseISO(data);
+      if (isNaN(parsed.getTime())) return 'Nunca';
+      return formatDistanceToNow(parsed, { addSuffix: true, locale: ptBR });
+    } catch {
+      return 'Nunca';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -265,17 +289,13 @@ export default function MonitoramentoPage() {
                     <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <p className="text-sm text-gray-600 dark:text-gray-400">Nibo</p>
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {health?.metrics.ultima_sincronizacao_nibo 
-                          ? formatDistanceToNow(parseISO(health.metrics.ultima_sincronizacao_nibo), { addSuffix: true, locale: ptBR })
-                          : 'Nunca'}
+                        {formatarDistancia(health?.metrics.ultima_sincronizacao_nibo)}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                       <p className="text-sm text-gray-600 dark:text-gray-400">ContaHub</p>
                       <p className="font-medium text-gray-900 dark:text-white">
-                        {health?.metrics.ultima_sincronizacao_contahub 
-                          ? formatDistanceToNow(parseISO(health.metrics.ultima_sincronizacao_contahub), { addSuffix: true, locale: ptBR })
-                          : 'Nunca'}
+                        {formatarDistancia(health?.metrics.ultima_sincronizacao_contahub)}
                       </p>
                     </div>
                   </div>
@@ -351,10 +371,10 @@ export default function MonitoramentoPage() {
                           <TableCell className="font-medium text-gray-900 dark:text-white">{exec.jobname || `Job ${exec.jobid}`}</TableCell>
                           <TableCell>{getStatusBadge(exec.status)}</TableCell>
                           <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                            {exec.start_time ? format(parseISO(exec.start_time), 'dd/MM HH:mm:ss', { locale: ptBR }) : '-'}
+                            {formatarData(exec.start_time, 'dd/MM HH:mm:ss')}
                           </TableCell>
                           <TableCell className="text-sm text-gray-600 dark:text-gray-400">
-                            {exec.end_time ? format(parseISO(exec.end_time), 'dd/MM HH:mm:ss', { locale: ptBR }) : '-'}
+                            {formatarData(exec.end_time, 'dd/MM HH:mm:ss')}
                           </TableCell>
                           <TableCell className="max-w-xs truncate text-sm text-gray-600 dark:text-gray-400">
                             {exec.return_message || '-'}

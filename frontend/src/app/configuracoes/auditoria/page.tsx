@@ -26,15 +26,17 @@ interface AuditoriaRegistro {
   id: number
   evento_id: number
   data_evento: string
-  bar_id: number
-  nome: string
+  bar_id?: number
+  nome?: string
   campo_alterado: string
   valor_anterior: string
   valor_novo: string
   funcao_origem: string
-  motivo: string
+  motivo?: string
   data_alteracao: string
-  diferenca_numerica?: number
+  diferenca?: number
+  percentual_mudanca?: number
+  metadata?: Record<string, any>
 }
 
 interface ResumoAuditoria {
@@ -68,49 +70,57 @@ export default function AuditoriaPage() {
       const data = await response.json()
       
       if (data.success) {
-        setRegistros(data.data || [])
+        // A API retorna data.data.mudancas quando não há filtro por evento_id ou data_evento
+        const mudancas = data.data?.mudancas || data.data || []
+        setRegistros(mudancas)
         
         // Calcular resumo
         const hoje = new Date().toISOString().split('T')[0]
         const semanaAtras = subDays(new Date(), 7).toISOString().split('T')[0]
         const mesAtras = subDays(new Date(), 30).toISOString().split('T')[0]
         
-        const registrosHoje = data.data.filter((r: AuditoriaRegistro) => 
+        const registrosHoje = mudancas.filter((r: AuditoriaRegistro) => 
           r.data_alteracao?.startsWith(hoje)
         ).length
         
-        const registrosSemana = data.data.filter((r: AuditoriaRegistro) => 
+        const registrosSemana = mudancas.filter((r: AuditoriaRegistro) => 
           r.data_alteracao >= semanaAtras
         ).length
         
-        const registrosMes = data.data.filter((r: AuditoriaRegistro) => 
+        const registrosMes = mudancas.filter((r: AuditoriaRegistro) => 
           r.data_alteracao >= mesAtras
         ).length
 
         // Campo mais alterado
         const camposCount: Record<string, number> = {}
-        data.data.forEach((r: AuditoriaRegistro) => {
+        mudancas.forEach((r: AuditoriaRegistro) => {
           camposCount[r.campo_alterado] = (camposCount[r.campo_alterado] || 0) + 1
         })
         const campoMaisAlterado = Object.entries(camposCount)
           .sort((a, b) => b[1] - a[1])[0]?.[0] || '-'
 
-        // Valor total de diferença
-        const valorTotalDiferenca = data.data
-          .filter((r: AuditoriaRegistro) => r.diferenca_numerica)
-          .reduce((acc: number, r: AuditoriaRegistro) => acc + (r.diferenca_numerica || 0), 0)
+        // Valor total de diferença (usar 'diferenca' ao invés de 'diferenca_numerica')
+        const valorTotalDiferenca = mudancas
+          .filter((r: AuditoriaRegistro) => r.diferenca !== undefined)
+          .reduce((acc: number, r: AuditoriaRegistro) => acc + (r.diferenca || 0), 0)
 
         setResumo({
-          totalRegistros: data.data.length,
+          totalRegistros: mudancas.length,
           registrosHoje,
           registrosSemana,
           registrosMes,
           campoMaisAlterado,
           valorTotalDiferenca
         })
+      } else {
+        // Se a API retornou erro, exibir array vazio
+        setRegistros([])
+        setResumo(null)
       }
     } catch (error) {
       console.error('Erro ao buscar auditoria:', error)
+      setRegistros([])
+      setResumo(null)
     } finally {
       setLoading(false)
     }
@@ -167,6 +177,18 @@ export default function AuditoriaPage() {
       case 'sympla_liquido': return 'outline'
       case 'yuzer_liquido': return 'outline'
       default: return 'default'
+    }
+  }
+
+  const formatarData = (data: string | null | undefined, formatStr: string = 'dd/MM/yyyy'): string => {
+    if (!data) return '-'
+    try {
+      // Tenta parseISO primeiro (para formatos ISO como "2025-01-17" ou "2025-01-17T10:00:00Z")
+      const parsed = parseISO(data)
+      if (isNaN(parsed.getTime())) return '-'
+      return format(parsed, formatStr, { locale: ptBR })
+    } catch {
+      return '-'
     }
   }
 
@@ -350,7 +372,7 @@ export default function AuditoriaPage() {
                           >
                             <td className="py-3 px-4">
                               <span className="text-gray-900 dark:text-white font-medium">
-                                {format(parseISO(registro.data_evento), 'dd/MM/yyyy', { locale: ptBR })}
+                                {formatarData(registro.data_evento, 'dd/MM/yyyy')}
                               </span>
                             </td>
                             <td className="py-3 px-4">
@@ -365,18 +387,18 @@ export default function AuditoriaPage() {
                               {formatarValor(registro.valor_novo, registro.campo_alterado)}
                             </td>
                             <td className="py-3 px-4 text-right">
-                              {registro.diferenca_numerica !== undefined && (
-                                <span className={`font-medium ${registro.diferenca_numerica >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                  {registro.diferenca_numerica >= 0 ? '+' : ''}
+                              {registro.diferenca !== undefined && (
+                                <span className={`font-medium ${registro.diferenca >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                  {registro.diferenca >= 0 ? '+' : ''}
                                   {['real_r', 'sympla_liquido', 'yuzer_liquido'].includes(registro.campo_alterado) 
-                                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(registro.diferenca_numerica)
-                                    : registro.diferenca_numerica
+                                    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(registro.diferenca)
+                                    : registro.diferenca
                                   }
                                 </span>
                               )}
                             </td>
                             <td className="py-3 px-4 text-sm text-gray-500 dark:text-gray-500">
-                              {format(parseISO(registro.data_alteracao), "dd/MM HH:mm", { locale: ptBR })}
+                              {formatarData(registro.data_alteracao, "dd/MM HH:mm")}
                             </td>
                           </tr>
                         ))}
