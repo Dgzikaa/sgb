@@ -7,6 +7,64 @@
 
 ## 2026-01
 
+### 2026-01-16 - Página de Eventos e Correção de Produtos
+
+**O que foi feito:**
+- ✅ Corrigido filtro `not...in` na API `produtos-por-hora` que estava com sintaxe incorreta
+- ✅ Antes: `'("Mercadorias- Compras","Insumos","Uso Interno")'` (errado)
+- ✅ Depois: `'(Mercadorias- Compras,Insumos,Uso Interno)'` (correto)
+- ✅ Página `/analitico/eventos` agora exibe produtos corretamente
+
+**Arquivos alterados:**
+- `frontend/src/app/api/ferramentas/produtos-por-hora/route.ts`
+
+**Problema resolvido:** Página de eventos mostrava "Nenhum produto encontrado" mesmo tendo 4188 registros
+
+---
+
+### 2026-01-16 - Integração Marketing Meta/Google + Tab Mensal
+
+**O que foi feito:**
+- ✅ Criada tabela `marketing_semanal` para armazenar dados de marketing
+- ✅ Criada Edge Function `sync-marketing-meta` - busca dados do Meta Ads e Instagram Organic
+- ✅ Criada Edge Function `sync-marketing-google` - busca dados do Google Ads e GMB
+- ✅ Criada Edge Function `sync-marketing-auto` - orquestra sync automático
+- ✅ Configurado cron job diário às 07:00 BRT para sync automático
+- ✅ Sincronizados dados históricos de Fev/2025 até Jan/2026 (Meta)
+- ✅ Implementada aba "Mensal" na página de desempenho
+- ✅ Criada API `/api/estrategico/desempenho/mensal` - agrega dados semanais em mensais
+- ✅ Atualizada API `/api/estrategico/desempenho/semana` - mescla dados de `marketing_semanal`
+- ✅ Corrigido cálculo de timezone no `alertas-inteligentes` (usava UTC, agora usa BRT)
+
+**Arquivos criados:**
+- `backend/supabase/functions/sync-marketing-meta/index.ts`
+- `backend/supabase/functions/sync-marketing-google/index.ts`
+- `backend/supabase/functions/sync-marketing-auto/index.ts`
+- `frontend/src/app/api/estrategico/desempenho/mensal/route.ts`
+
+**Arquivos alterados:**
+- `frontend/src/app/estrategico/desempenho/page.tsx` (tab mensal, layout melhorado)
+- `frontend/src/app/api/estrategico/desempenho/semana/route.ts` (merge marketing)
+- `backend/supabase/functions/alertas-inteligentes/index.ts` (timezone fix)
+
+**Pendências:**
+- ⏳ Instagram Organic Insights - aguardando acesso ao Business Manager da Supersal
+- ⏳ Google Ads API - aguardando `GOOGLE_ADS_CUSTOMER_ID` e `GOOGLE_ADS_DEVELOPER_TOKEN`
+- ⏳ Google My Business API - aguardando `GOOGLE_GMB_LOCATION_ID`
+
+---
+
+### 2026-01-16 - Melhorias Layout Desempenho
+
+**O que foi feito:**
+- ✅ Layout da página `/estrategico/desempenho` aproveitando tela inteira
+- ✅ Indicadores lado a lado (não mais empilhados)
+- ✅ Combinados cockpits "Qualidade" e "OVT - Clientes" em uma seção
+- ✅ Todos os cockpits expandidos por padrão
+- ✅ Adicionado ícone de lápis para campos manuais editáveis
+
+---
+
 ### 2026-01-15 - Extração e Documentação Conselho de Cotistas
 
 **O que foi feito:**

@@ -22,8 +22,8 @@
 - [ ] Integrar na analise diaria
 - [ ] Alertas de eventos proximos
 
-### 2. Analise de Atracoes nas Redes Sociais
-**Status:** IDEIA
+### 2. Analise de Atracoes nas Redes Sociais + Marketing Automatizado
+**Status:** 🔄 PARCIALMENTE IMPLEMENTADO
 **Descricao:** Verificar engajamento das atracoes com @ordinariobar:
 - Posts marcando o bar
 - Stories compartilhados
@@ -37,9 +37,17 @@
 - STZ, Sambadona (Legado do Samba)
 - 7naRoda (Terca)
 - DJs: Afrika, Vinny, Caju, Jess Ullun, Negritah, Leo Cabral
+**Implementado em 16/01/2026:**
+- [x] Tabela `marketing_semanal` criada
+- [x] Edge Function `sync-marketing-meta` (Meta Ads funcionando)
+- [x] Edge Function `sync-marketing-google` (aguardando credenciais)
+- [x] Edge Function `sync-marketing-auto` (cron diário 07:00 BRT)
+- [x] Dados históricos Meta sincronizados (Fev/2025 - Jan/2026)
+- [x] Frontend exibindo dados de marketing no cockpit
 **Proximos passos:**
-- [ ] Pesquisar API do Instagram/Meta Business
-- [ ] Criar integracao ou scraper
+- [ ] Obter acesso ao Business Manager (Supersal) para Instagram Organic Insights
+- [ ] Configurar Google Ads Customer ID e Developer Token
+- [ ] Configurar Google My Business Location ID
 - [ ] Correlacionar posts com faturamento do dia
 - [ ] Dashboard de performance de atracoes
 - [ ] Ranking de atracoes por ROI
