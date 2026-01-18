@@ -223,6 +223,18 @@ function Secao({ titulo, icone, corGradiente, children, defaultOpen = true }: Se
   );
 }
 
+// Função para calcular a semana ISO do ano
+function getSemanaISO(data: Date): { semana: number; ano: number } {
+  const d = new Date(Date.UTC(data.getFullYear(), data.getMonth(), data.getDate()));
+  // Ajustar para quinta-feira da semana (ISO 8601)
+  d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+  // Primeiro dia do ano
+  const inicioAno = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  // Calcular número da semana
+  const semana = Math.ceil((((d.getTime() - inicioAno.getTime()) / 86400000) + 1) / 7);
+  return { semana, ano: d.getUTCFullYear() };
+}
+
 export default function DesempenhoPage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
@@ -232,9 +244,12 @@ export default function DesempenhoPage() {
   const [activeTab, setActiveTab] = useState<'semanal' | 'mensal'>('semanal');
   const [loading, setLoading] = useState(true);
   
+  // Calcular semana atual dinamicamente
+  const semanaInicialCalc = useMemo(() => getSemanaISO(new Date()), []);
+  
   // Estados para visão semanal
-  const [semanaAtual, setSemanaAtual] = useState<number>(2);
-  const [anoAtual, setAnoAtual] = useState<number>(2026);
+  const [semanaAtual, setSemanaAtual] = useState<number>(semanaInicialCalc.semana);
+  const [anoAtual, setAnoAtual] = useState<number>(semanaInicialCalc.ano);
   const [dadosSemana, setDadosSemana] = useState<DadosSemana | null>(null);
   const [dadosSemanaAnterior, setDadosSemanaAnterior] = useState<DadosSemana | null>(null);
   const [totalSemanas, setTotalSemanas] = useState<number>(53);
