@@ -88,11 +88,18 @@ export async function POST(request: NextRequest) {
 
     console.log(`🍽️ Dados prodporhora encontrados: ${produtosPorHora?.length || 0} registros (apenas para happy hour)`);
 
-    // 🔄 Combinar dados: prodporhora (com horários) + analitico (produtos completos)
+    // 🔄 SEMPRE usar contahub_analitico como fonte principal de produtos
+    // O contahub_prodporhora pode ter dados incompletos ou zerados
     let produtosPorHoraEnriquecidos: ProdutoPorHora[] = [];
 
-    // Se temos dados do prodporhora, usar como base e enriquecer com analítico
-    if (produtosPorHora && produtosPorHora.length > 0) {
+    // Calcular total de quantidade do prodporhora para verificar se tem dados úteis
+    const totalQtdProdPorHora = produtosPorHora?.reduce((sum, item) => sum + (parseFloat(String(item.quantidade)) || 0), 0) || 0;
+    const usarProdPorHora = produtosPorHora && produtosPorHora.length > 10 && totalQtdProdPorHora > 0;
+
+    console.log(`📊 ProdPorHora: ${produtosPorHora?.length || 0} registros, total qtd: ${totalQtdProdPorHora}, usar: ${usarProdPorHora}`);
+    console.log(`📊 Analítico: ${dadosAnaliticos?.length || 0} registros`);
+
+    if (usarProdPorHora) {
       // Criar mapa de produtos da banda baseado no analítico
       const produtosBandaMap = new Map<string, boolean>();
       if (dadosAnaliticos) {
@@ -112,12 +119,13 @@ export async function POST(request: NextRequest) {
 
       console.log(`🍽️ Usando ${produtosPorHora.length} produtos do prodporhora com info de banda`);
     } else {
-      // Fallback: usar apenas dados do analítico (sem horário específico)
+      // Usar dados do analítico (fonte principal e mais confiável)
       const produtosAgregados = new Map<string, ProdutoPorHora>();
       
       dadosAnaliticos?.forEach(item => {
         const mesaDesc = item.vd_mesadesc?.toLowerCase() || '';
-        const isBanda = mesaDesc.includes('banda') || mesaDesc.includes('dj');
+        const isBanda = mesaDesc.includes('banda') || mesaDesc.includes('dj') || 
+                       (item.prd_desc?.includes('[Banda]')) || (item.prd_desc?.includes('Banda'));
         const key = item.prd_desc;
         
         if (produtosAgregados.has(key)) {
@@ -128,7 +136,7 @@ export async function POST(request: NextRequest) {
           }
         } else {
           produtosAgregados.set(key, {
-            hora: 0, // Sem hora específica
+            hora: 0, // Sem hora específica do analítico
             produto_id: item.prd_desc || '',
             produto_descricao: item.prd_desc || '',
             grupo_descricao: item.grp_desc || '',
