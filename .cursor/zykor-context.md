@@ -1,7 +1,7 @@
 # ZYKOR - CONTEXTO COMPLETO DO AGENTE
 
 > LEIA ESTE ARQUIVO EM CADA NOVO CHAT!
-> Ultima atualizacao: 2026-01-15
+> Ultima atualizacao: 2026-01-19
 
 ---
 
@@ -520,6 +520,59 @@ Meses FRACOS:
 Campos existem na tabela, preenchidos manualmente:
 - o_num_posts, o_alcance, o_interacao, o_compartilhamento, o_engajamento, o_num_stories, o_visu_stories
 - m_valor_investido, m_alcance, m_frequencia, m_cpm, m_cliques, m_ctr, m_custo_por_clique, m_conversas_iniciadas
+
+---
+
+## CRM - SISTEMA DE SEGMENTACAO DE CLIENTES (Lista Quente)
+
+> Implementado em: 2026-01-19
+
+### Localizacao:
+- **Frontend**: `/analitico/clientes` → Aba "Lista Quente"
+- **APIs**:
+  - `GET /api/crm/lista-quente` - Busca clientes por critérios
+  - `POST /api/crm/lista-quente` - Salva segmento
+  - `DELETE /api/crm/lista-quente` - Remove segmento
+  - `GET /api/crm/segmentos` - Lista segmentos salvos
+
+### Critérios de Segmentação Disponíveis:
+
+**Janela e Frequência:**
+- `diasJanela`: Período de análise (30, 60, 90, 120, 180, 365 dias)
+- `minVisitasTotal` / `maxVisitasTotal`: Total de visitas no período
+- `minVisitasDia`: Mínimo de visitas em dia específico da semana
+- `diasDiferentes`: Cliente frequenta múltiplos dias
+
+**Financeiros:**
+- `ticketMedioMin` / `ticketMedioMax`: Ticket médio do cliente
+- `ticketEntradaMin` / `ticketEntradaMax`: Valor de entrada/couvert
+- `ticketConsumoMin` / `ticketConsumoMax`: Valor de consumo no bar
+- `gastoTotalMin` / `gastoTotalMax`: Gasto total no período
+
+**Recência e Ciclo de Vida:**
+- `ultimaVisitaMinDias` / `ultimaVisitaMaxDias`: Dias desde última visita
+- `primeiraVisitaMaxDias`: Clientes novos (primeira visita há X dias)
+
+**Perfil Social:**
+- `tamanhoGrupoMin` / `tamanhoGrupoMax`: Tamanho médio do grupo
+
+**Contato:**
+- `temEmail`: true/false - Filtrar por ter email
+- `temTelefone`: true/false - Filtrar por ter telefone
+
+### Exportação:
+- **CSV Simples**: Nome, Email, Telefone (para campanhas)
+- **CSV Completo**: Todos os dados calculados do cliente
+
+### Tabela de Persistência:
+- `crm_segmentacao`: Armazena segmentos salvos com nome e critérios
+
+### Fonte de Dados:
+- Tabela `contahub_periodo`: Histórico de visitas dos clientes
+
+### Uso Principal:
+Gerar listas "quentes" de clientes para campanhas de marketing segmentadas.
+Exemplo: Clientes ativos de quinta-feira com ticket médio > R$100.
 
 ---
 
