@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays, Calendar, User, Eye, X, Activity, Search } from 'lucide-react'
+import { Phone, Users, TrendingUp, MessageCircle, DollarSign, Target, Download, CalendarDays, Calendar, User, Eye, X, Activity, Search, Flame, Settings2, FileSpreadsheet, Loader2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
 import { useBar } from '@/contexts/BarContext'
@@ -131,6 +131,49 @@ export default function ClientesPage() {
   const [paginaTempos, setPaginaTempos] = useState(1) // ✅ Hook para paginação dos tempos
   const [perfilConsumo, setPerfilConsumo] = useState<PerfilConsumo | null>(null)
   const [loadingPerfil, setLoadingPerfil] = useState(false)
+  
+  // Estados para Segmentação/Lista Quente
+  const [segmentoDia, setSegmentoDia] = useState<string>('')
+  const [segmentoResumo, setSegmentoResumo] = useState<any>(null)
+  const [segmentoClientes, setSegmentoClientes] = useState<any[]>([])
+  const [loadingSegmento, setLoadingSegmento] = useState(false)
+  const [segmentosSalvos, setSegmentosSalvos] = useState<any[]>([])
+  const [nomeSegmento, setNomeSegmento] = useState<string>('')
+  const [salvandoSegmento, setSalvandoSegmento] = useState(false)
+  
+  // Critérios de segmentação
+  const [criterios, setCriterios] = useState({
+    // Janela e frequência
+    diasJanela: 90,
+    minVisitasTotal: 2,
+    maxVisitasTotal: '',
+    minVisitasDia: 1,
+    diasDiferentes: '',
+    
+    // Financeiros
+    ticketMedioMin: '',
+    ticketMedioMax: '',
+    ticketEntradaMin: '',
+    ticketEntradaMax: '',
+    ticketConsumoMin: '',
+    ticketConsumoMax: '',
+    gastoTotalMin: '',
+    gastoTotalMax: '',
+    
+    // Recência
+    ultimaVisitaMinDias: '',
+    ultimaVisitaMaxDias: '',
+    primeiraVisitaMaxDias: '',
+    
+    // Perfil Social
+    tamanhoGrupoMin: '',
+    tamanhoGrupoMax: '',
+    
+    // Contato
+    temEmail: '',
+    temTelefone: '',
+  })
+  
   const { toast } = useToast()
   const { selectedBar } = useBar()
   const isApiCallingRef = useRef(false)
@@ -333,6 +376,218 @@ export default function ClientesPage() {
     }
   }, [selectedBar])
 
+  // Construir URL com todos os critérios
+  const construirUrlSegmentacao = useCallback((diaSemana?: string, formato?: string) => {
+    if (!selectedBar) return ''
+    
+    const params = new URLSearchParams()
+    params.append('bar_id', selectedBar.id.toString())
+    
+    // Janela e frequência
+    params.append('dias_janela', criterios.diasJanela.toString())
+    params.append('min_visitas_total', criterios.minVisitasTotal.toString())
+    params.append('min_visitas_dia', criterios.minVisitasDia.toString())
+    if (criterios.maxVisitasTotal) params.append('max_visitas_total', criterios.maxVisitasTotal)
+    if (criterios.diasDiferentes) params.append('dias_diferentes', criterios.diasDiferentes)
+    
+    // Financeiros
+    if (criterios.ticketMedioMin) params.append('ticket_medio_min', criterios.ticketMedioMin)
+    if (criterios.ticketMedioMax) params.append('ticket_medio_max', criterios.ticketMedioMax)
+    if (criterios.ticketEntradaMin) params.append('ticket_entrada_min', criterios.ticketEntradaMin)
+    if (criterios.ticketEntradaMax) params.append('ticket_entrada_max', criterios.ticketEntradaMax)
+    if (criterios.ticketConsumoMin) params.append('ticket_consumo_min', criterios.ticketConsumoMin)
+    if (criterios.ticketConsumoMax) params.append('ticket_consumo_max', criterios.ticketConsumoMax)
+    if (criterios.gastoTotalMin) params.append('gasto_total_min', criterios.gastoTotalMin)
+    if (criterios.gastoTotalMax) params.append('gasto_total_max', criterios.gastoTotalMax)
+    
+    // Recência
+    if (criterios.ultimaVisitaMinDias) params.append('ultima_visita_min_dias', criterios.ultimaVisitaMinDias)
+    if (criterios.ultimaVisitaMaxDias) params.append('ultima_visita_max_dias', criterios.ultimaVisitaMaxDias)
+    if (criterios.primeiraVisitaMaxDias) params.append('primeira_visita_max_dias', criterios.primeiraVisitaMaxDias)
+    
+    // Perfil Social
+    if (criterios.tamanhoGrupoMin) params.append('tamanho_grupo_min', criterios.tamanhoGrupoMin)
+    if (criterios.tamanhoGrupoMax) params.append('tamanho_grupo_max', criterios.tamanhoGrupoMax)
+    
+    // Contato
+    if (criterios.temEmail) params.append('tem_email', criterios.temEmail)
+    if (criterios.temTelefone) params.append('tem_telefone', criterios.temTelefone)
+    
+    // Dia da semana
+    if (diaSemana) params.append('dia_semana', diaSemana)
+    
+    // Formato
+    if (formato) params.append('formato', formato)
+    
+    return `/api/crm/lista-quente?${params.toString()}`
+  }, [selectedBar, criterios])
+
+  const fetchSegmentacao = useCallback(async (diaSemana?: string) => {
+    if (!selectedBar) return
+    
+    try {
+      setLoadingSegmento(true)
+      
+      const url = construirUrlSegmentacao(diaSemana)
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error('Erro ao buscar segmentação')
+      }
+      
+      const data = await response.json()
+      
+      if (diaSemana) {
+        setSegmentoClientes(data.data?.clientes || [])
+      } else {
+        setSegmentoResumo(data.data)
+        setSegmentoClientes([])
+      }
+    } catch (err) {
+      toast({
+        title: "Erro ao buscar segmentação",
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: "destructive"
+      })
+    } finally {
+      setLoadingSegmento(false)
+    }
+  }, [selectedBar, construirUrlSegmentacao, toast])
+
+  const downloadCSVSegmento = useCallback(async (completo: boolean = false) => {
+    if (!selectedBar || !segmentoDia) {
+      toast({
+        title: "Selecione um dia",
+        description: "Escolha um dia da semana para baixar o CSV",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      const formato = completo ? 'csv_completo' : 'csv'
+      const url = construirUrlSegmentacao(segmentoDia, formato)
+      
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error('Erro ao baixar CSV')
+      }
+      
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `segmento-${segmentoDia}-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      document.body.removeChild(a)
+      
+      toast({
+        title: "CSV exportado!",
+        description: `${segmentoClientes.length} clientes exportados`,
+      })
+    } catch (err) {
+      toast({
+        title: "Erro ao exportar",
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: "destructive"
+      })
+    }
+  }, [selectedBar, segmentoDia, segmentoClientes.length, construirUrlSegmentacao, toast])
+
+  const salvarSegmento = useCallback(async () => {
+    if (!selectedBar || !nomeSegmento.trim()) {
+      toast({
+        title: "Nome obrigatório",
+        description: "Digite um nome para o segmento",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      setSalvandoSegmento(true)
+      
+      const response = await fetch('/api/crm/lista-quente', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: selectedBar.id,
+          nome_segmento: nomeSegmento,
+          descricao: `Criado em ${new Date().toLocaleDateString('pt-BR')}`,
+          criterios: criterios
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erro ao salvar segmento')
+      }
+      
+      toast({
+        title: "Segmento salvo!",
+        description: `"${nomeSegmento}" salvo com sucesso`,
+      })
+      
+      setNomeSegmento('')
+      fetchSegmentosSalvos()
+    } catch (err) {
+      toast({
+        title: "Erro ao salvar",
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: "destructive"
+      })
+    } finally {
+      setSalvandoSegmento(false)
+    }
+  }, [selectedBar, nomeSegmento, criterios, toast])
+
+  const fetchSegmentosSalvos = useCallback(async () => {
+    if (!selectedBar) return
+    
+    try {
+      const response = await fetch(`/api/crm/segmentos?bar_id=${selectedBar.id}`)
+      const data = await response.json()
+      if (data.success) {
+        setSegmentosSalvos(data.data?.segmentos || [])
+      }
+    } catch (err) {
+      console.error('Erro ao buscar segmentos salvos:', err)
+    }
+  }, [selectedBar])
+
+  const carregarSegmentoSalvo = useCallback((segmento: any) => {
+    if (segmento.criterios) {
+      setCriterios({
+        diasJanela: segmento.criterios.diasJanela || 90,
+        minVisitasTotal: segmento.criterios.minVisitasTotal || 2,
+        maxVisitasTotal: segmento.criterios.maxVisitasTotal || '',
+        minVisitasDia: segmento.criterios.minVisitasDia || 1,
+        diasDiferentes: segmento.criterios.diasDiferentes || '',
+        ticketMedioMin: segmento.criterios.ticketMedioMin || '',
+        ticketMedioMax: segmento.criterios.ticketMedioMax || '',
+        ticketEntradaMin: segmento.criterios.ticketEntradaMin || '',
+        ticketEntradaMax: segmento.criterios.ticketEntradaMax || '',
+        ticketConsumoMin: segmento.criterios.ticketConsumoMin || '',
+        ticketConsumoMax: segmento.criterios.ticketConsumoMax || '',
+        gastoTotalMin: segmento.criterios.gastoTotalMin || '',
+        gastoTotalMax: segmento.criterios.gastoTotalMax || '',
+        ultimaVisitaMinDias: segmento.criterios.ultimaVisitaMinDias || '',
+        ultimaVisitaMaxDias: segmento.criterios.ultimaVisitaMaxDias || '',
+        primeiraVisitaMaxDias: segmento.criterios.primeiraVisitaMaxDias || '',
+        tamanhoGrupoMin: segmento.criterios.tamanhoGrupoMin || '',
+        tamanhoGrupoMax: segmento.criterios.tamanhoGrupoMax || '',
+        temEmail: segmento.criterios.temEmail || '',
+        temTelefone: segmento.criterios.temTelefone || '',
+      })
+      toast({
+        title: "Segmento carregado",
+        description: `Critérios de "${segmento.nome}" aplicados`,
+      })
+    }
+  }, [toast])
+
   const abrirModalCliente = useCallback(async (cliente: Cliente) => {
     setClienteSelecionado(cliente)
     setPaginaTempos(1) // ✅ Resetar paginação ao trocar de cliente
@@ -356,7 +611,11 @@ export default function ClientesPage() {
     if (activeTab === 'reservantes' && reservantes.length === 0) {
       fetchReservantes()
     }
-  }, [activeTab, fetchReservantes, reservantes.length])
+    if (activeTab === 'lista-quente' && !segmentoResumo) {
+      fetchSegmentacao()
+      fetchSegmentosSalvos()
+    }
+  }, [activeTab, fetchReservantes, reservantes.length, fetchSegmentacao, fetchSegmentosSalvos, segmentoResumo])
 
   // Função para executar a busca (chamada pelo botão ou Enter)
   const executarBusca = useCallback(() => {
@@ -917,6 +1176,13 @@ export default function ClientesPage() {
                     <Calendar className="h-4 w-4 mr-2" />
                     Reservantes
                   </TabsTrigger>
+                  <TabsTrigger 
+                    value="lista-quente" 
+                    className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/25 !rounded-xl"
+                  >
+                    <Flame className="h-4 w-4 mr-2" />
+                    Lista Quente
+                  </TabsTrigger>
                   <Link href="/relatorios/clientes-ativos">
                     <div className="px-4 py-2.5 text-sm font-medium transition-all duration-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-xl flex items-center cursor-pointer text-gray-700 dark:text-gray-300 hover:text-purple-600 dark:hover:text-purple-400">
                       <Activity className="h-4 w-4 mr-2" />
@@ -1349,6 +1615,511 @@ export default function ClientesPage() {
                   ))}
                 </TableBody>
               </Table>
+            </TabsContent>
+
+            {/* ABA LISTA QUENTE */}
+            <TabsContent value="lista-quente" className="mt-0">
+              <div className="p-6">
+                {/* Segmentos Salvos */}
+                {segmentosSalvos.length > 0 && !segmentoDia && (
+                  <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 mb-4">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                        💾 Segmentos Salvos
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex flex-wrap gap-2">
+                        {segmentosSalvos.map((seg: any) => (
+                          <Button
+                            key={seg.id}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => carregarSegmentoSalvo(seg)}
+                            className="text-xs"
+                          >
+                            {seg.nome}
+                          </Button>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Configurações de Critérios - Completo */}
+                <Card className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800 mb-6">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-gray-900 dark:text-white flex items-center gap-2">
+                      <Settings2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                      Construtor de Segmentos
+                    </CardTitle>
+                    <CardDescription className="text-gray-600 dark:text-gray-400">
+                      Combine múltiplos critérios para criar segmentos personalizados de clientes
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Linha 1: Janela e Frequência */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        📅 Janela e Frequência
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Janela (dias)</label>
+                          <Select value={criterios.diasJanela.toString()} onValueChange={(v) => setCriterios({...criterios, diasJanela: parseInt(v)})}>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              <SelectItem value="30">30 dias</SelectItem>
+                              <SelectItem value="60">60 dias</SelectItem>
+                              <SelectItem value="90">90 dias</SelectItem>
+                              <SelectItem value="120">120 dias</SelectItem>
+                              <SelectItem value="180">180 dias</SelectItem>
+                              <SelectItem value="365">1 ano</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Mín. Visitas Total</label>
+                          <Select value={criterios.minVisitasTotal.toString()} onValueChange={(v) => setCriterios({...criterios, minVisitasTotal: parseInt(v)})}>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              {[1,2,3,4,5,6,7,8,9,10].map(n => (
+                                <SelectItem key={n} value={n.toString()}>{n}+ visitas</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Máx. Visitas Total</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Sem limite" 
+                            value={criterios.maxVisitasTotal}
+                            onChange={(e) => setCriterios({...criterios, maxVisitasTotal: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Mín. no Dia</label>
+                          <Select value={criterios.minVisitasDia.toString()} onValueChange={(v) => setCriterios({...criterios, minVisitasDia: parseInt(v)})}>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              {[1,2,3,4,5].map(n => (
+                                <SelectItem key={n} value={n.toString()}>{n}+ vezes</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Dias Diferentes</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Multi-dia" 
+                            value={criterios.diasDiferentes}
+                            onChange={(e) => setCriterios({...criterios, diasDiferentes: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Linha 2: Financeiros */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        💰 Critérios Financeiros
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Ticket Médio Mín (R$)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Ex: 100" 
+                            value={criterios.ticketMedioMin}
+                            onChange={(e) => setCriterios({...criterios, ticketMedioMin: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Ticket Médio Máx (R$)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Sem limite" 
+                            value={criterios.ticketMedioMax}
+                            onChange={(e) => setCriterios({...criterios, ticketMedioMax: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Gasto Total Mín (R$)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Ex: 500" 
+                            value={criterios.gastoTotalMin}
+                            onChange={(e) => setCriterios({...criterios, gastoTotalMin: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Gasto Total Máx (R$)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Sem limite" 
+                            value={criterios.gastoTotalMax}
+                            onChange={(e) => setCriterios({...criterios, gastoTotalMax: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Linha 3: Recência */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        🕐 Recência e Ciclo de Vida
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Última visita há + de (dias)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Ex: 30 (inativos)" 
+                            value={criterios.ultimaVisitaMinDias}
+                            onChange={(e) => setCriterios({...criterios, ultimaVisitaMinDias: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Última visita há - de (dias)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Ex: 7 (recentes)" 
+                            value={criterios.ultimaVisitaMaxDias}
+                            onChange={(e) => setCriterios({...criterios, ultimaVisitaMaxDias: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Cliente Novo (1ª visita em)</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Ex: 30 dias" 
+                            value={criterios.primeiraVisitaMaxDias}
+                            onChange={(e) => setCriterios({...criterios, primeiraVisitaMaxDias: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Tamanho Grupo Mín</label>
+                          <Input 
+                            type="number" 
+                            placeholder="Ex: 3 pessoas" 
+                            value={criterios.tamanhoGrupoMin}
+                            onChange={(e) => setCriterios({...criterios, tamanhoGrupoMin: e.target.value})}
+                            className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Linha 4: Contato e Ações */}
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                        📱 Filtros de Contato
+                      </h4>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Tem Email?</label>
+                          <Select value={criterios.temEmail} onValueChange={(v) => setCriterios({...criterios, temEmail: v})}>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
+                              <SelectValue placeholder="Todos" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              <SelectItem value="">Todos</SelectItem>
+                              <SelectItem value="true">Sim, tem email</SelectItem>
+                              <SelectItem value="false">Não tem email</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Tem Telefone?</label>
+                          <Select value={criterios.temTelefone} onValueChange={(v) => setCriterios({...criterios, temTelefone: v})}>
+                            <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
+                              <SelectValue placeholder="Todos" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-white dark:bg-gray-800">
+                              <SelectItem value="">Todos</SelectItem>
+                              <SelectItem value="true">Sim, tem telefone</SelectItem>
+                              <SelectItem value="false">Não tem telefone</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botões de Ação */}
+                    <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-orange-200 dark:border-orange-800">
+                      <Button
+                        onClick={() => {
+                          setSegmentoDia('')
+                          setSegmentoResumo(null)
+                          fetchSegmentacao()
+                        }}
+                        className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white"
+                      >
+                        {loadingSegmento ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Buscando...
+                          </>
+                        ) : (
+                          <>
+                            <Search className="h-4 w-4 mr-2" />
+                            Aplicar Filtros
+                          </>
+                        )}
+                      </Button>
+                      
+                      <div className="flex items-center gap-2">
+                        <Input 
+                          placeholder="Nome do segmento..."
+                          value={nomeSegmento}
+                          onChange={(e) => setNomeSegmento(e.target.value)}
+                          className="w-48 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm"
+                        />
+                        <Button
+                          variant="outline"
+                          onClick={salvarSegmento}
+                          disabled={salvandoSegmento || !nomeSegmento.trim()}
+                          className="border-orange-300 dark:border-orange-700 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
+                        >
+                          {salvandoSegmento ? <Loader2 className="h-4 w-4 animate-spin" /> : '💾 Salvar'}
+                        </Button>
+                      </div>
+                      
+                      <Button
+                        variant="ghost"
+                        onClick={() => setCriterios({
+                          diasJanela: 90, minVisitasTotal: 2, maxVisitasTotal: '', minVisitasDia: 1, diasDiferentes: '',
+                          ticketMedioMin: '', ticketMedioMax: '', ticketEntradaMin: '', ticketEntradaMax: '',
+                          ticketConsumoMin: '', ticketConsumoMax: '', gastoTotalMin: '', gastoTotalMax: '',
+                          ultimaVisitaMinDias: '', ultimaVisitaMaxDias: '', primeiraVisitaMaxDias: '',
+                          tamanhoGrupoMin: '', tamanhoGrupoMax: '', temEmail: '', temTelefone: '',
+                        })}
+                        className="text-gray-500 dark:text-gray-400"
+                      >
+                        <X className="h-4 w-4 mr-1" />
+                        Limpar
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Estatísticas do Segmento */}
+                {segmentoResumo?.estatisticas && !segmentoDia && (
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
+                          {segmentoResumo.estatisticas.totalClientes?.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Clientes no Segmento</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                          R$ {segmentoResumo.estatisticas.ticketMedioGeral?.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Ticket Médio</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          {segmentoResumo.estatisticas.visitasMedias}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Visitas Médias</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                          {segmentoResumo.estatisticas.comEmail?.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Com Email</div>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                      <CardContent className="p-4 text-center">
+                        <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                          {segmentoResumo.estatisticas.comTelefone?.toLocaleString('pt-BR')}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">Com Telefone</div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Resumo por Dia da Semana */}
+                {loadingSegmento && !segmentoDia ? (
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-orange-600 mr-3" />
+                    <span className="text-gray-600 dark:text-gray-400">Aplicando filtros...</span>
+                  </div>
+                ) : segmentoResumo && !segmentoDia ? (
+                  <>
+                    <div className="mb-4 flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                        <Flame className="h-5 w-5 text-orange-500" />
+                        Distribuição por Dia da Semana
+                      </h3>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                      {segmentoResumo.resumoPorDia && Object.entries(segmentoResumo.resumoPorDia).map(([dia, dados]: [string, any]) => (
+                        <Card 
+                          key={dia}
+                          className={`cursor-pointer transition-all duration-300 hover:scale-105 hover:shadow-xl ${
+                            dados.totalClientes > 0 
+                              ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700' 
+                              : 'bg-gray-100 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 opacity-60'
+                          }`}
+                          onClick={() => {
+                            if (dados.totalClientes > 0) {
+                              setSegmentoDia(dia)
+                              fetchSegmentacao(dia)
+                            }
+                          }}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between mb-2">
+                              <h4 className="font-semibold text-gray-900 dark:text-white">{dados.label}</h4>
+                              {dados.totalClientes > 0 && <Flame className="h-4 w-4 text-orange-500" />}
+                            </div>
+                            <div className="text-3xl font-bold text-orange-600 dark:text-orange-400 mb-1">
+                              {dados.totalClientes}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              TM: R$ {dados.ticketMedioSegmento || 0}
+                            </div>
+                            {dados.exemplos?.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                                {dados.exemplos.slice(0, 2).map((ex: any, idx: number) => (
+                                  <div key={idx} className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                    {ex.nome} ({ex.visitas}x • R${ex.ticketMedio})
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                    
+                    <div className="text-center text-gray-500 dark:text-gray-400 text-sm">
+                      👆 Clique em um dia para ver a lista completa e baixar o CSV
+                    </div>
+                  </>
+                ) : null}
+
+                {/* Lista de Clientes do Dia Selecionado */}
+                {segmentoDia && (
+                  <div className="mt-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Button variant="outline" size="sm" onClick={() => { setSegmentoDia(''); setSegmentoClientes([]); }} className="text-gray-600 dark:text-gray-400">
+                          ← Voltar
+                        </Button>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                          <Flame className="h-5 w-5 text-orange-500" />
+                          Segmento - {segmentoDia.charAt(0).toUpperCase() + segmentoDia.slice(1)}
+                        </h3>
+                        <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">
+                          {segmentoClientes.length} clientes
+                        </Badge>
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        <Button onClick={() => downloadCSVSegmento(false)} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white">
+                          <FileSpreadsheet className="h-4 w-4 mr-2" />
+                          CSV Simples
+                        </Button>
+                        <Button onClick={() => downloadCSVSegmento(true)} variant="outline" className="border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20">
+                          <FileSpreadsheet className="h-4 w-4 mr-2" />
+                          CSV Completo
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {loadingSegmento ? (
+                      <div className="flex items-center justify-center py-12">
+                        <Loader2 className="h-8 w-8 animate-spin text-orange-600 mr-3" />
+                        <span className="text-gray-600 dark:text-gray-400">Carregando clientes...</span>
+                      </div>
+                    ) : (
+                      <Card className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <Table>
+                          <TableHeader className="bg-gradient-to-r from-orange-500 to-red-600">
+                            <TableRow className="border-b border-orange-400">
+                              <TableHead className="text-white font-semibold">#</TableHead>
+                              <TableHead className="text-white font-semibold">Nome</TableHead>
+                              <TableHead className="text-white font-semibold">Email</TableHead>
+                              <TableHead className="text-white font-semibold">Telefone</TableHead>
+                              <TableHead className="text-white font-semibold text-center">No Dia</TableHead>
+                              <TableHead className="text-white font-semibold text-center">Total</TableHead>
+                              <TableHead className="text-white font-semibold text-center">Ticket</TableHead>
+                              <TableHead className="text-white font-semibold text-center">Gasto</TableHead>
+                              <TableHead className="text-white font-semibold text-center">Contato</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {segmentoClientes.map((cliente, index) => (
+                              <TableRow key={index} className="border-b border-gray-100 dark:border-gray-700 hover:bg-orange-50 dark:hover:bg-orange-900/10">
+                                <TableCell className="font-medium text-gray-900 dark:text-white">{index + 1}</TableCell>
+                                <TableCell className="font-medium text-gray-900 dark:text-white">{cliente.Nome}</TableCell>
+                                <TableCell className="text-gray-600 dark:text-gray-400 text-sm">{cliente.Email || '-'}</TableCell>
+                                <TableCell className="text-gray-600 dark:text-gray-400">{cliente.Telefone || '-'}</TableCell>
+                                <TableCell className="text-center">
+                                  <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300">{cliente.VisitasNoDia}x</Badge>
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300">{cliente.TotalVisitas}</Badge>
+                                </TableCell>
+                                <TableCell className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                  R$ {cliente.TicketMedio?.toLocaleString('pt-BR')}
+                                </TableCell>
+                                <TableCell className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                  R$ {cliente.GastoTotal?.toLocaleString('pt-BR')}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                  {cliente.Telefone ? (
+                                    <Button size="sm" onClick={() => handleWhatsAppClick(cliente.Nome, cliente.Telefone)} className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-full w-8 h-8 p-0">
+                                      <MessageCircle className="h-4 w-4" />
+                                    </Button>
+                                  ) : <span className="text-gray-400 text-xs">-</span>}
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                        
+                        {segmentoClientes.length === 0 && (
+                          <div className="text-center py-12">
+                            <Flame className="h-12 w-12 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                            <p className="text-gray-500 dark:text-gray-400">Nenhum cliente encontrado</p>
+                          </div>
+                        )}
+                      </Card>
+                    )}
+                  </div>
+                )}
+              </div>
             </TabsContent>
           </CardContent>
         </Card>
