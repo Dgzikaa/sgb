@@ -1835,12 +1835,12 @@ export default function ClientesPage() {
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div>
                           <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Tem Email?</label>
-                          <Select value={criterios.temEmail} onValueChange={(v) => setCriterios({...criterios, temEmail: v})}>
+                          <Select value={criterios.temEmail || 'all'} onValueChange={(v) => setCriterios({...criterios, temEmail: v === 'all' ? '' : v})}>
                             <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
                               <SelectValue placeholder="Todos" />
                             </SelectTrigger>
                             <SelectContent className="bg-white dark:bg-gray-800">
-                              <SelectItem value="">Todos</SelectItem>
+                              <SelectItem value="all">Todos</SelectItem>
                               <SelectItem value="true">Sim, tem email</SelectItem>
                               <SelectItem value="false">Não tem email</SelectItem>
                             </SelectContent>
@@ -1848,12 +1848,12 @@ export default function ClientesPage() {
                         </div>
                         <div>
                           <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Tem Telefone?</label>
-                          <Select value={criterios.temTelefone} onValueChange={(v) => setCriterios({...criterios, temTelefone: v})}>
+                          <Select value={criterios.temTelefone || 'all'} onValueChange={(v) => setCriterios({...criterios, temTelefone: v === 'all' ? '' : v})}>
                             <SelectTrigger className="bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 h-9 text-sm">
                               <SelectValue placeholder="Todos" />
                             </SelectTrigger>
                             <SelectContent className="bg-white dark:bg-gray-800">
-                              <SelectItem value="">Todos</SelectItem>
+                              <SelectItem value="all">Todos</SelectItem>
                               <SelectItem value="true">Sim, tem telefone</SelectItem>
                               <SelectItem value="false">Não tem telefone</SelectItem>
                             </SelectContent>

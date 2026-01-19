@@ -19,6 +19,18 @@ export async function GET(request: NextRequest) {
       .order('created_at', { ascending: false });
     
     if (error) {
+      // Se a tabela não existir, retornar array vazio em vez de erro
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        console.log('ℹ️ Tabela crm_segmentacao não existe ainda, retornando vazio');
+        return NextResponse.json({
+          success: true,
+          data: {
+            segmentos: [],
+            total: 0
+          }
+        });
+      }
+      
       console.error('❌ Erro ao buscar segmentos:', error);
       return NextResponse.json(
         { success: false, error: 'Erro ao buscar segmentos: ' + error.message },
