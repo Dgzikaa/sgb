@@ -1,18 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { usePageTitle } from '@/contexts/PageTitleContext';
 import { useBar } from '@/contexts/BarContext';
+import { useUser } from '@/contexts/UserContext';
 import { Badge } from '@/components/ui/badge';
 import { 
   BarChart3,
   Settings,
   ArrowRight,
   Activity,
-  TrendingUp,
   PieChart,
   Wrench,
-  MessageSquare
+  MessageSquare,
+  CreditCard,
+  Package,
+  AlertCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -27,11 +30,84 @@ interface QuickAction {
   icon: React.ComponentType<{ className?: string }>;
   color: string;
   badge?: string;
+  // Permissões necessárias para ver este card (qualquer uma delas)
+  permissions: string[];
 }
+
+// Todos os módulos disponíveis
+const allQuickActions: QuickAction[] = [
+  {
+    title: 'Visão Geral Estratégica',
+    description: 'Dashboard executivo com todos os indicadores',
+    href: '/estrategico/visao-geral',
+    icon: BarChart3,
+    color: 'from-blue-500 to-blue-600',
+    badge: 'Principal',
+    permissions: ['todos', 'relatorios_visao_geral']
+  },
+  {
+    title: 'Desempenho',
+    description: 'Análise semanal e mensal dos resultados',
+    href: '/estrategico/desempenho',
+    icon: Activity,
+    color: 'from-green-500 to-green-600',
+    permissions: ['todos', 'gestao_desempenho']
+  },
+  {
+    title: 'Agente IA',
+    description: 'Chat inteligente e insights automáticos',
+    href: '/ferramentas/agente',
+    icon: MessageSquare,
+    color: 'from-purple-500 to-pink-500',
+    badge: 'Novo',
+    permissions: ['todos', 'ferramentas'] // Agente IA faz parte de ferramentas
+  },
+  {
+    title: 'Analítico',
+    description: 'Retrospectiva, clientes, eventos e produtos',
+    href: '/analitico',
+    icon: PieChart,
+    color: 'from-violet-500 to-purple-600',
+    permissions: ['todos', 'relatorios_eventos', 'relatorios_clientes', 'relatorios_clientes_ativos', 'gestao_crm']
+  },
+  {
+    title: 'Ferramentas',
+    description: 'CFP, calendário, contagem e simulações',
+    href: '/ferramentas',
+    icon: Wrench,
+    color: 'from-amber-500 to-orange-500',
+    permissions: ['todos', 'ferramentas', 'operacoes', 'operacoes_contagem_estoque', 'operacoes_contagem_rapida', 'gestao_calendario', 'financeiro_agendamento', 'gestao_stockout']
+  },
+  {
+    title: 'Agendamento',
+    description: 'Agendar e gerenciar pagamentos PIX',
+    href: '/ferramentas/agendamento',
+    icon: CreditCard,
+    color: 'from-emerald-500 to-teal-600',
+    permissions: ['todos', 'ferramentas', 'financeiro_agendamento']
+  },
+  {
+    title: 'Stockout',
+    description: 'Gerenciar produtos em falta',
+    href: '/ferramentas/stockout',
+    icon: Package,
+    color: 'from-red-500 to-rose-600',
+    permissions: ['todos', 'ferramentas', 'gestao_stockout']
+  },
+  {
+    title: 'Configurações',
+    description: 'Ajustes e configurações do sistema',
+    href: '/configuracoes',
+    icon: Settings,
+    color: 'from-gray-500 to-gray-600',
+    permissions: ['todos', 'configuracoes_usuarios', 'configuracoes_fichas_tecnicas', 'configuracoes_checklists', 'configuracoes_metas']
+  }
+];
 
 export default function HomePage() {
   const { setPageTitle } = usePageTitle();
   const { selectedBar } = useBar();
+  const { user } = useUser();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -39,54 +115,35 @@ export default function HomePage() {
     setIsLoaded(true);
   }, [setPageTitle]);
 
-
-
-  const quickActions: QuickAction[] = [
-    {
-      title: 'Visão Geral Estratégica',
-      description: 'Dashboard executivo com todos os indicadores',
-      href: '/estrategico/visao-geral',
-      icon: BarChart3,
-      color: 'from-blue-500 to-blue-600',
-      badge: 'Principal'
-    },
-    {
-      title: 'Desempenho',
-      description: 'Análise semanal e mensal dos resultados',
-      href: '/estrategico/desempenho',
-      icon: Activity,
-      color: 'from-green-500 to-green-600'
-    },
-    {
-      title: 'Agente IA',
-      description: 'Chat inteligente e insights automáticos',
-      href: '/ferramentas/agente',
-      icon: MessageSquare,
-      color: 'from-purple-500 to-pink-500',
-      badge: 'Novo'
-    },
-    {
-      title: 'Analítico',
-      description: 'Retrospectiva, clientes, eventos e produtos',
-      href: '/analitico',
-      icon: PieChart,
-      color: 'from-violet-500 to-purple-600'
-    },
-    {
-      title: 'Ferramentas',
-      description: 'CFP, calendário, contagem e simulações',
-      href: '/ferramentas',
-      icon: Wrench,
-      color: 'from-amber-500 to-orange-500'
-    },
-    {
-      title: 'Configurações',
-      description: 'Ajustes e configurações do sistema',
-      href: '/configuracoes',
-      icon: Settings,
-      color: 'from-gray-500 to-gray-600'
+  // Filtrar ações baseado nas permissões do usuário
+  const quickActions = useMemo(() => {
+    if (!user) return [];
+    
+    // Se é admin, mostrar tudo
+    if (user.role === 'admin') {
+      return allQuickActions;
     }
-  ];
+    
+    // Obter permissões do usuário
+    let userPermissions: string[] = [];
+    if (Array.isArray(user.modulos_permitidos)) {
+      userPermissions = user.modulos_permitidos;
+    } else if (typeof user.modulos_permitidos === 'object' && user.modulos_permitidos) {
+      userPermissions = Object.keys(user.modulos_permitidos).filter(
+        key => user.modulos_permitidos[key] === true
+      );
+    }
+    
+    // Se tem permissão 'todos', mostrar tudo
+    if (userPermissions.includes('todos')) {
+      return allQuickActions;
+    }
+    
+    // Filtrar cards que o usuário tem permissão
+    return allQuickActions.filter(action => {
+      return action.permissions.some(perm => userPermissions.includes(perm));
+    });
+  }, [user]);
 
   const currentTime = new Date().toLocaleTimeString('pt-BR', { 
     hour: '2-digit', 
@@ -139,7 +196,20 @@ export default function HomePage() {
           animate={{ opacity: isLoaded ? 1 : 0, y: isLoaded ? 0 : 20 }}
           transition={{ duration: 0.6, delay: 0.3 }}
         >
-          <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 h-full">
+          {quickActions.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full py-16">
+              <div className="p-4 bg-amber-100 dark:bg-amber-900/30 rounded-full mb-4">
+                <AlertCircle className="w-12 h-12 text-amber-600 dark:text-amber-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                Nenhum módulo disponível
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-center max-w-md">
+                Você ainda não tem permissões atribuídas. Entre em contato com um administrador para liberar seu acesso aos módulos do sistema.
+              </p>
+            </div>
+          ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 h-full">
             {quickActions.map((action, index) => (
               <motion.div
                 key={index}
@@ -195,6 +265,7 @@ export default function HomePage() {
               </motion.div>
             ))}
           </div>
+          )}
         </motion.div>
 
       </div>

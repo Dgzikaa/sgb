@@ -38,11 +38,16 @@ export async function POST(request: NextRequest) {
     const emailNormalizado = email.toLowerCase().trim();
     
     // Primeiro, buscar usuário pelo email (sem token) para ver se existe
-    const { data: usuarioCheck, error: checkError } = await supabase
+    // Usar .limit(1) ao invés de .single() porque o mesmo email pode ter múltiplos registros (um por bar)
+    // Priorizar o registro que tem o reset_token definido
+    const { data: usuariosCheck, error: checkError } = await supabase
       .from('usuarios_bar')
       .select('id, email, reset_token, reset_token_expiry, user_id')
       .eq('email', emailNormalizado)
-      .single();
+      .order('reset_token', { ascending: false, nullsFirst: false })
+      .limit(1);
+
+    const usuarioCheck = usuariosCheck?.[0];
 
     if (checkError || !usuarioCheck) {
       console.error('❌ Usuário não encontrado com email:', emailNormalizado);
@@ -68,20 +73,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Buscar dados completos do usuário
-    const { data: usuarioData, error: usuarioError } = await supabase
-      .from('usuarios_bar')
-      .select('user_id, nome, reset_token, reset_token_expiry, email')
-      .eq('id', usuarioCheck.id)
-      .single();
-
-    if (usuarioError || !usuarioData) {
-      console.error('❌ Erro ao buscar dados completos do usuário:', usuarioError);
-      return NextResponse.json(
-        { success: false, error: 'Erro ao buscar dados do usuário' },
-        { status: 500 }
-      );
-    }
+    // Usar os dados do usuarioCheck que já temos
+    const usuarioData = {
+      user_id: usuarioCheck.user_id,
+      nome: '', // não precisamos do nome aqui
+      reset_token: usuarioCheck.reset_token,
+      reset_token_expiry: usuarioCheck.reset_token_expiry,
+      email: usuarioCheck.email
+    };
 
     // Verificar se o token não expirou
     if (usuarioData.reset_token_expiry) {
