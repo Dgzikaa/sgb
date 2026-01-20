@@ -210,42 +210,15 @@ export async function POST(request: NextRequest) {
       console.warn('⚠️ Erro ao enviar email:', err);
     }
 
-    // 6. Tentar enviar email com senha temporária também
-    let emailSentWithPassword = false;
-    try {
-      const requestUrl = new URL(request.url);
-      const internalBaseUrl = `${requestUrl.protocol}//${requestUrl.host}`;
-      
-      const emailResponsePassword = await fetch(`${internalBaseUrl}/api/emails/password-reset`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          to: usuario.email,
-          nome: usuario.nome,
-          email: usuario.email,
-          senha_temporaria: senhaTemporaria,
-          role: usuario.role || 'funcionario',
-          loginUrl: baseUrl
-        })
-      });
-
-      if (emailResponsePassword.ok) {
-        emailSentWithPassword = true;
-        console.log('✅ Email com senha temporária enviado para:', usuario.email);
-      }
-    } catch (err) {
-      console.warn('⚠️ Erro ao enviar email com senha temporária:', err);
-    }
-
-    // 7. Retornar resultado com senha temporária
+    // 6. Retornar resultado com senha temporária
+    // NOTA: Removido envio duplicado de email com senha temporária
+    // O email com link (password-reset-link) já foi enviado acima
     return NextResponse.json({ 
       success: true,
-      message: emailSent || emailSentWithPassword
+      message: emailSent
         ? `✅ Email enviado para ${usuario.email}` 
         : `⚠️ Não foi possível enviar o email: ${emailError || 'Erro desconhecido'}`,
-      emailSent: emailSent || emailSentWithPassword,
+      emailSent: emailSent,
       emailError: emailError || undefined,
       // Sempre fornecer a senha temporária para o admin
       resetData: {
@@ -255,7 +228,7 @@ export async function POST(request: NextRequest) {
         temporaryPassword: senhaTemporaria, // 🔑 SENHA TEMPORÁRIA
         resetLink: resetLink,
         expiresAt: resetTokenExpiry.toISOString(),
-        message: emailSent || emailSentWithPassword
+        message: emailSent
           ? '📧 Email enviado! Senha temporária abaixo para compartilhar com o usuário:' 
           : '⚠️ Email não enviado! Use a senha temporária abaixo para compartilhar com o usuário:',
         avisoEmail: emailParaLogin !== usuario.email.toLowerCase().trim() 

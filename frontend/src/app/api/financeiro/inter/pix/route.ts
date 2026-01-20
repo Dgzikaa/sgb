@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getInterAccessToken } from '@/lib/inter/getAccessToken';
+import { realizarPagamentoPixInter } from '@/lib/inter/pixPayment';
 
 export const dynamic = 'force-dynamic';
 
@@ -153,13 +155,84 @@ export async function POST(request: NextRequest) {
     const credenciais = await getInterCredentials(bar_id);
     
     if (!credenciais) {
-      console.log('[INTER-PIX] Credenciais não encontradas, usando modo simulação');
+      console.error('[INTER-PIX] Credenciais não encontradas para bar_id:', bar_id);
+      return NextResponse.json(
+        { success: false, error: 'Credenciais Inter não configuradas para este bar' },
+        { status: 400 }
+      );
+    }
+
+    // ============================================================
+    // MODO PRODUÇÃO - Chamada real à API do Inter
+    // ============================================================
+    
+    console.log('[INTER-PIX] Credenciais encontradas, preparando chamada à API Inter');
+
+    // Extrair credenciais
+    const clientId = credenciais.client_id;
+    const clientSecret = credenciais.client_secret;
+    const contaCorrente = credenciais.configuracoes?.conta_corrente || '400516462';
+
+    if (!clientId || !clientSecret) {
+      return NextResponse.json(
+        { success: false, error: 'Credenciais Inter incompletas (falta client_id/client_secret)' },
+        { status: 400 }
+      );
+    }
+
+    console.log('[INTER-PIX] Client ID:', clientId.substring(0, 8) + '...');
+    console.log('[INTER-PIX] Conta Corrente:', contaCorrente);
+
+    try {
+      // 1. Obter access_token via OAuth2 com mTLS
+      console.log('[INTER-PIX] Obtendo access token...');
+      const accessToken = await getInterAccessToken(clientId, clientSecret, 'pagamento-pix.write');
+      console.log('[INTER-PIX] Access token obtido com sucesso');
+
+      // 2. Realizar pagamento PIX
+      console.log('[INTER-PIX] Realizando pagamento PIX...');
+      const resultadoPix = await realizarPagamentoPixInter({
+        token: accessToken,
+        contaCorrente: contaCorrente,
+        valor: valorNumerico,
+        descricao: descricao || `Pagamento PIX para ${destinatario || 'beneficiário'}`,
+        chave: tipoChave.chaveFormatada
+      });
+
+      if (!resultadoPix.success) {
+        console.error('[INTER-PIX] Erro no pagamento:', resultadoPix.error);
+        
+        // Salvar erro no banco para tracking
+        await supabase.from('pix_enviados').insert({
+          txid: `ERR_${Date.now()}`,
+          bar_id,
+          valor: valorNumerico,
+          beneficiario: {
+            nome: destinatario || 'Não informado',
+            chave: tipoChave.chaveFormatada,
+            tipoChave: tipoChave.tipo,
+            descricao: descricao || 'Pagamento PIX',
+            erro: resultadoPix.error
+          },
+          data_envio: new Date().toISOString(),
+          status: 'erro',
+          created_at: new Date().toISOString()
+        });
+
+        return NextResponse.json(
+          { success: false, error: resultadoPix.error },
+          { status: 400 }
+        );
+      }
+
+      // 3. PIX enviado com sucesso
+      const codigoSolicitacao = resultadoPix.data?.codigoSolicitacao || 
+                                 resultadoPix.data?.endToEndId || 
+                                 `PIX_${Date.now()}`;
       
-      // MODO SIMULAÇÃO - quando não há credenciais configuradas
-      // Em produção, isso faria a chamada real à API do Inter
-      const codigoSolicitacao = `PIX_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      
-      // Salvar no banco para tracking
+      console.log('[INTER-PIX] PIX enviado com sucesso:', codigoSolicitacao);
+
+      // Salvar no banco
       const { error: insertError } = await supabase.from('pix_enviados').insert({
         txid: codigoSolicitacao,
         bar_id,
@@ -171,7 +244,7 @@ export async function POST(request: NextRequest) {
           descricao: descricao || 'Pagamento PIX'
         },
         data_envio: new Date().toISOString(),
-        status: 'simulado', // Em produção seria 'pendente' ou 'enviado'
+        status: 'enviado',
         created_at: new Date().toISOString()
       });
 
@@ -181,78 +254,29 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: 'PIX registrado com sucesso (modo simulação - credenciais Inter não configuradas)',
+        message: 'PIX enviado com sucesso',
         data: {
           codigoSolicitacao,
           valor: valorNumerico,
           chave: tipoChave.chaveFormatada,
           tipoChave: tipoChave.tipo,
-          status: 'simulado',
-          destinatario
+          status: 'enviado',
+          destinatario,
+          interResponse: resultadoPix.data
         }
       });
-    }
 
-    // ============================================================
-    // MODO PRODUÇÃO - Chamada real à API do Inter
-    // ============================================================
-    
-    console.log('[INTER-PIX] Credenciais encontradas, preparando chamada à API Inter');
-
-    // Extrair credenciais
-    const clientId = credenciais.client_id || credenciais.api_key;
-    const clientSecret = credenciais.client_secret || credenciais.api_secret;
-    const contaCorrente = credenciais.conta_corrente || credenciais.account_id;
-
-    if (!clientId || !clientSecret) {
+    } catch (interError: any) {
+      console.error('[INTER-PIX] Erro na comunicação com Inter:', interError);
+      
       return NextResponse.json(
-        { success: false, error: 'Credenciais Inter incompletas (falta client_id/client_secret)' },
-        { status: 400 }
+        { 
+          success: false, 
+          error: `Erro na comunicação com Banco Inter: ${interError.message || 'Erro desconhecido'}` 
+        },
+        { status: 500 }
       );
     }
-
-    // TODO: Em produção, implementar:
-    // 1. Obter access_token via OAuth2
-    // 2. Enviar PIX via API do Inter
-    // 3. Tratar webhooks de confirmação
-    
-    // Por enquanto, simular sucesso e registrar
-    const codigoSolicitacao = `PIX_INTER_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-    
-    // Salvar no banco
-    const { error: insertError } = await supabase.from('pix_enviados').insert({
-      txid: codigoSolicitacao,
-      bar_id,
-      valor: valorNumerico,
-      beneficiario: {
-        nome: destinatario || 'Não informado',
-        chave: tipoChave.chaveFormatada,
-        tipoChave: tipoChave.tipo,
-        descricao: descricao || 'Pagamento PIX'
-      },
-      data_envio: new Date().toISOString(),
-      status: 'aguardando_aprovacao', // Status inicial para pagamentos reais
-      created_at: new Date().toISOString()
-    });
-
-    if (insertError) {
-      console.error('[INTER-PIX] Erro ao salvar no banco:', insertError);
-    }
-
-    console.log('[INTER-PIX] PIX registrado com sucesso:', codigoSolicitacao);
-
-    return NextResponse.json({
-      success: true,
-      message: 'PIX enviado para aprovação',
-      data: {
-        codigoSolicitacao,
-        valor: valorNumerico,
-        chave: tipoChave.chaveFormatada,
-        tipoChave: tipoChave.tipo,
-        status: 'aguardando_aprovacao',
-        destinatario
-      }
-    });
 
   } catch (error) {
     console.error('[INTER-PIX] Erro:', error);
