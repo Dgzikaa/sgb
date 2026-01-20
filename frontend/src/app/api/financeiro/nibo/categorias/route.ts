@@ -17,9 +17,10 @@ export async function GET(request: NextRequest) {
     console.log(`[NIBO-CATEGORIAS] Buscando categorias, bar_id=${barId}, ativo=${ativo}`);
 
     // Buscar categorias da tabela nibo_categorias
+    // IMPORTANTE: usar nibo_id como identificador para a API do NIBO
     let query = supabase
       .from('nibo_categorias')
-      .select('id, categoria_nome, categoria_macro, ativo, criado_em, atualizado_em')
+      .select('id, nibo_id, categoria_nome, categoria_macro, ativo, criado_em, atualizado_em')
       .order('categoria_macro')
       .order('categoria_nome');
 
@@ -48,11 +49,21 @@ export async function GET(request: NextRequest) {
       return acc;
     }, {});
 
+    // Mapear para usar nibo_id como 'id' para o frontend
+    // Se nibo_id não existir, manter o id interno (fallback)
+    const categoriasFormatadas = categorias?.map(cat => ({
+      ...cat,
+      id: cat.nibo_id || cat.id // Usar nibo_id se disponível
+    })) || [];
+
     return NextResponse.json({
       success: true,
-      categorias: categorias || [],
+      categorias: categoriasFormatadas,
       categoriasAgrupadas,
-      total: categorias?.length || 0
+      total: categorias?.length || 0,
+      aviso: categorias?.some(c => !c.nibo_id) 
+        ? 'Algumas categorias não têm nibo_id. Execute POST /api/financeiro/nibo/categorias/sync para sincronizar.' 
+        : undefined
     });
 
   } catch (error) {
