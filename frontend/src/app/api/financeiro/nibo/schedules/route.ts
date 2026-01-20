@@ -121,25 +121,30 @@ export async function POST(request: NextRequest) {
     }
 
     // Preparar payload para NIBO
-    // Documentação: https://api.nibo.com.br/empresas/v1/schedules
+    // Documentação: https://nibo.readme.io/reference/agendar-pagamento
+    // Endpoint correto para pagamentos (despesas): /schedules/debit
+    const valorAbsoluto = Math.abs(parseFloat(value));
+    
     const schedulePayload: any = {
       stakeholderId,
       dueDate, // Data de vencimento (YYYY-MM-DD)
       scheduleDate: scheduleDate || dueDate, // Data do agendamento
       accrualDate: accrualDate || dueDate, // Data de competência
-      value: Math.abs(parseFloat(value)), // Valor positivo
-      isExpense: true, // É uma despesa (saída)
-      description: description || 'Pagamento agendado'
+      description: description || 'Pagamento agendado',
+      // Categories é obrigatório no formato correto
+      categories: [{
+        categoryId: categoria_id || null,
+        value: valorAbsoluto,
+        description: description || 'Pagamento'
+      }]
     };
-
-    // Adicionar categoria se fornecida
-    if (categoria_id) {
-      schedulePayload.categoryId = categoria_id;
-    }
 
     // Adicionar centro de custo se fornecido
     if (centro_custo_id) {
-      schedulePayload.costCenterId = centro_custo_id;
+      schedulePayload.costCenters = [{
+        costCenterId: centro_custo_id,
+        value: valorAbsoluto
+      }];
     }
 
     // Adicionar referência se fornecida
@@ -147,17 +152,10 @@ export async function POST(request: NextRequest) {
       schedulePayload.reference = reference;
     }
 
-    // Adicionar categorias/descrições adicionais
-    if (categories && categories.length > 0) {
-      schedulePayload.items = categories.map((cat: any) => ({
-        description: cat.description || description,
-        value: Math.abs(parseFloat(value))
-      }));
-    }
+    console.log('[NIBO-SCHEDULES] Payload para NIBO (debit):', JSON.stringify(schedulePayload, null, 2));
 
-    console.log('[NIBO-SCHEDULES] Payload para NIBO:', JSON.stringify(schedulePayload, null, 2));
-
-    const response = await fetch(`${NIBO_BASE_URL}/schedules?apitoken=${credencial.api_token}`, {
+    // Endpoint correto: /schedules/debit para pagamentos (despesas)
+    const response = await fetch(`${NIBO_BASE_URL}/schedules/debit?apitoken=${credencial.api_token}`, {
       method: 'POST',
       headers: {
         'accept': 'application/json',
