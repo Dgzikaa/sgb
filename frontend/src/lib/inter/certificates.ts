@@ -11,9 +11,13 @@ export function getInterCertificates(): { cert: Buffer; key: Buffer } {
   }
 
   // 1. PRIORIDADE: Variáveis de ambiente (Vercel)
-  if (process.env.INTER_CERT_BASE64 && process.env.INTER_KEY_BASE64) {
-    const cert = Buffer.from(process.env.INTER_CERT_BASE64, 'base64');
-    const key = Buffer.from(process.env.INTER_KEY_BASE64, 'base64');
+  // Suporta: INTER_CERT/INTER_KEY, inter_cert/inter_key, ou INTER_CERT_BASE64/INTER_KEY_BASE64
+  const certEnv = process.env.INTER_CERT || process.env.inter_cert || process.env.INTER_CERT_BASE64;
+  const keyEnv = process.env.INTER_KEY || process.env.inter_key || process.env.INTER_KEY_BASE64;
+  
+  if (certEnv && keyEnv) {
+    const cert = Buffer.from(certEnv, 'base64');
+    const key = Buffer.from(keyEnv, 'base64');
 
     console.log('📄 Certificado Base64 (env) carregado:', cert.length, 'bytes');
     console.log(
@@ -79,6 +83,6 @@ export function getInterCertificates(): { cert: Buffer; key: Buffer } {
   }
 
   throw new Error(
-    'Certificados mTLS não encontrados. Configure INTER_CERT_BASE64 e INTER_KEY_BASE64 no Vercel.'
+    'Certificados mTLS não encontrados. Configure INTER_CERT e INTER_KEY no Vercel (base64).'
   );
 }
