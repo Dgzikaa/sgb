@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getInterAccessToken } from '@/lib/inter/getAccessToken';
+import { realizarPagamentoPixInter } from '@/lib/inter/pixPayment';
 
 // Configurações das contas (baseado no código Python)
 const CONFIGS = {
@@ -113,54 +115,46 @@ function getTipoPixNibo(tipo: string): number {
   }
 }
 
-// Função para obter token do Inter
+// Função para obter token do Inter (usando mTLS real)
 async function obterAccessToken(config: any, conta: string, bar_id: number): Promise<string> {
-  const body = new URLSearchParams({
-    client_id: config.CLIENT_ID,
-    client_secret: config.CLIENT_SECRET,
-    scope: 'pagamento-pix.write',
-    grant_type: 'client_credentials'
+  console.log('🔑 Obtendo token Inter para:', {
+    conta,
+    bar_id,
+    conta_corrente: config.CONTA_CORRENTE
   });
-
-  // Nota: Em produção, você precisará configurar os certificados SSL
-  // Por enquanto, vamos simular o processo
-    console.log('🔑 Obtendo token Inter para:', {
-      conta,
-      bar_id,
-      conta_corrente: config.CONTA_CORRENTE
-    });
   
-  // Simulação - em produção, fazer request real para o Inter
-  return 'token_simulado_' + Date.now();
+  // Usar função real com mTLS
+  const token = await getInterAccessToken(
+    config.CLIENT_ID,
+    config.CLIENT_SECRET,
+    'pagamento-pix.write'
+  );
+  
+  return token;
 }
 
-// Função para enviar PIX
+// Função para enviar PIX (usando mTLS real)
 async function enviarPix(config: any, token: string, payload: any): Promise<{ success: boolean; codigoSolicitacao?: string; error?: string }> {
-  console.log('💸 Enviando PIX:', payload);
+  console.log('💸 Enviando PIX real:', payload);
   
-  // Simulação - em produção, fazer request real para o Inter
-  // const response = await fetch('https://cdpj.partners.bancointer.com.br/banking/v2/pix', {
-  //   method: 'POST',
-  //   headers: {
-  //     'Authorization': `Bearer ${token}`,
-  //     'Content-Type': 'application/json',
-  //     'x-conta-corrente': config.CONTA_CORRENTE,
-  //   },
-  //   body: JSON.stringify(payload)
-  // });
+  // Usar função real com mTLS
+  const resultado = await realizarPagamentoPixInter({
+    token: token,
+    contaCorrente: config.CONTA_CORRENTE,
+    valor: parseFloat(payload.valor),
+    descricao: payload.descricao,
+    chave: payload.destinatario.chave
+  });
   
-  // Simulação de sucesso (80% de chance)
-  const sucesso = Math.random() > 0.2;
-  
-  if (sucesso) {
+  if (resultado.success) {
     return {
       success: true,
-      codigoSolicitacao: `PIX_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      codigoSolicitacao: resultado.data?.codigoSolicitacao || resultado.data?.endToEndId || `PIX_${Date.now()}`
     };
   } else {
     return {
       success: false,
-      error: 'Erro simulado na API Inter'
+      error: resultado.error || 'Erro na API Inter'
     };
   }
 }
