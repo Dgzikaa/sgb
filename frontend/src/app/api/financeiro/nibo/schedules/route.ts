@@ -125,6 +125,17 @@ export async function POST(request: NextRequest) {
     // Endpoint correto para pagamentos (despesas): /schedules/debit
     const valorAbsoluto = Math.abs(parseFloat(value));
     
+    // Montar objeto de categoria
+    const categoryItem: any = {
+      value: valorAbsoluto,
+      description: description || 'Pagamento'
+    };
+    
+    // Só adicionar categoryId se existir (pode ser opcional no NIBO)
+    if (categoria_id) {
+      categoryItem.categoryId = categoria_id;
+    }
+    
     const schedulePayload: any = {
       stakeholderId,
       dueDate, // Data de vencimento (YYYY-MM-DD)
@@ -132,11 +143,7 @@ export async function POST(request: NextRequest) {
       accrualDate: accrualDate || dueDate, // Data de competência
       description: description || 'Pagamento agendado',
       // Categories é obrigatório no formato correto
-      categories: [{
-        categoryId: categoria_id || null,
-        value: valorAbsoluto,
-        description: description || 'Pagamento'
-      }]
+      categories: [categoryItem]
     };
 
     // Adicionar centro de custo se fornecido
