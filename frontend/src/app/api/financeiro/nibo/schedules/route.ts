@@ -129,40 +129,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Preparar payload para NIBO
-    // Documentação: https://nibo.readme.io/reference/agendar-pagamento
-    // Endpoint correto para pagamentos (despesas): /schedules/debit
-    // IMPORTANTE: Para débitos, o valor DEVE ser NEGATIVO
-    // VERSÃO 2025-01-20 - DEPLOY FIX
-    const valorBruto = parseFloat(value);
-    console.log('[NIBO-SCHEDULES-V2] Valor bruto recebido:', valorBruto);
-    const valorNumerico = Math.abs(valorBruto);
-    console.log('[NIBO-SCHEDULES-V2] Valor absoluto:', valorNumerico);
-    const valorNegativo = valorNumerico * -1; // NIBO exige valor negativo para débitos
-    console.log('[NIBO-SCHEDULES-V2] Valor NEGATIVO final:', valorNegativo);
+    // Preparar payload para NIBO - endpoint /schedules/debit para AGENDAMENTO de despesas
+    // IMPORTANTE: Para débitos (despesas), o valor deve ser NEGATIVO
+    const valorNumerico = Math.abs(parseFloat(value));
+    const valorNegativo = -valorNumerico; // NIBO exige valor negativo para /schedules/debit
     
-    // Montar objeto de categoria - categoryId é OBRIGATÓRIO
+    console.log('[NIBO-SCHEDULES] Criando agendamento de despesa, valor:', valorNegativo);
+    
+    // Montar objeto de categoria com valor NEGATIVO
     const categoryItem: any = {
-      categoryId: categoria_id,
+      categoryId: categoria_id, // camelCase para /schedules
       value: valorNegativo, // Valor NEGATIVO para débitos
       description: description || 'Pagamento'
     };
     
+    // Payload para /schedules/debit
     const schedulePayload: any = {
-      stakeholderId,
-      dueDate, // Data de vencimento (YYYY-MM-DD)
+      stakeholderId: stakeholderId,
+      dueDate: dueDate, // Data de vencimento
       scheduleDate: scheduleDate || dueDate, // Data do agendamento
       accrualDate: accrualDate || dueDate, // Data de competência
       description: description || 'Pagamento agendado',
-      // Categories é obrigatório no formato correto
       categories: [categoryItem]
     };
 
-    // Adicionar centro de custo se fornecido
+    // Adicionar centro de custo se fornecido (com valor negativo)
     if (centro_custo_id) {
       schedulePayload.costCenters = [{
-        costCenterId: centro_custo_id,
-        value: valorNegativo // Também negativo para débitos
+        costCenterId: centro_custo_id, // camelCase para /schedules
+        value: valorNegativo
       }];
     }
 
@@ -171,10 +166,9 @@ export async function POST(request: NextRequest) {
       schedulePayload.reference = reference;
     }
 
-    console.log('[NIBO-SCHEDULES] Payload para NIBO (debit):', JSON.stringify(schedulePayload, null, 2));
-    console.log('[NIBO-SCHEDULES] VALOR NEGATIVO ENVIADO:', valorNegativo);
+    console.log('[NIBO-SCHEDULES] Payload para NIBO:', JSON.stringify(schedulePayload, null, 2));
 
-    // Endpoint correto: /schedules/debit para pagamentos (despesas)
+    // Endpoint /schedules/debit para AGENDAR despesas (não paga imediatamente)
     const response = await fetch(`${NIBO_BASE_URL}/schedules/debit?apitoken=${credencial.api_token}`, {
       method: 'POST',
       headers: {
