@@ -21,6 +21,17 @@ import {
 
 const modulosCRM = [
   {
+    id: 'umbler',
+    icon: Send,
+    titulo: 'Umbler Talk',
+    descricao: 'Histórico de conversas e cruzamento com reservas',
+    url: '/crm/umbler',
+    cor: 'from-green-500 to-emerald-500',
+    bgCard: 'bg-green-50 dark:bg-green-900/20',
+    borderCard: 'border-green-200 dark:border-green-800',
+    features: ['10.263 Conversas', '9.397 Contatos', 'Cruzamento Getin', 'Funil de Conversão']
+  },
+  {
     id: 'segmentacao',
     icon: Sparkles,
     titulo: 'Segmentação RFM',
@@ -137,7 +148,7 @@ export default function CRMHubPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm text-blue-600 dark:text-blue-400 mb-1">Módulos Ativos</div>
-                  <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">7</div>
+                  <div className="text-3xl font-bold text-blue-700 dark:text-blue-300">8</div>
                 </div>
                 <Activity className="w-12 h-12 text-blue-600 dark:text-blue-400 opacity-50" />
               </div>

@@ -363,18 +363,24 @@ export async function POST(request: NextRequest) {
     let niboAgendamentoId: string | null = null;
     
     try {
+      // Validar categoria_id ANTES de criar agendamento
+      if (!categoria_id) {
+        throw new Error('categoria_id é obrigatório para criar agendamento no NIBO');
+      }
+
       // Usar a mesma estrutura do botão "Agendar no NIBO" funcional
+      // IMPORTANTE: NÃO passar 'categories' - a API /schedules usa categoria_id diretamente
       const agendamento = {
         stakeholderId: stakeholderId,
         dueDate: dataPagamentoFormatada,
         scheduleDate: dataPagamentoFormatada,
-        categoria_id: categoria_id || '',
+        categoria_id: categoria_id, // OBRIGATÓRIO - ID da categoria no NIBO
         centro_custo_id: centro_custo_id || '',
-        categories: [{ description: descricao || 'Pagamento PIX' }],
         accrualDate: dataCompetenciaFormatada,
         value: valorNumerico,
         description: descricao || `Pagamento PIX para ${nome_beneficiario}`,
         reference: `PIX_${Date.now()}`,
+        bar_id: bar_id, // Importante: passar o bar_id correto
       };
 
       console.log('📋 Payload para NIBO:', agendamento);
@@ -383,9 +389,10 @@ export async function POST(request: NextRequest) {
         dueDate: !!dataPagamentoFormatada,
         scheduleDate: !!dataPagamentoFormatada,
         categoria_id: !!categoria_id,
+        categoria_id_valor: categoria_id,
         centro_custo_id: !!centro_custo_id,
-        categories: !!agendamento.categories && agendamento.categories.length > 0,
-        value: !!valorNumerico
+        value: !!valorNumerico,
+        bar_id: bar_id
       });
 
       const niboResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/financeiro/nibo/schedules`, {
