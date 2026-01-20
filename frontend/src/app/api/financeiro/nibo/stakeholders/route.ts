@@ -36,43 +36,25 @@ export async function GET(request: NextRequest) {
 
     console.log(`[NIBO-STAKEHOLDERS] Buscando stakeholders, q=${query}, bar_id=${barId}`);
 
+    // Limpar query - remover formatação do CPF/CNPJ
+    const cleanQuery = query?.replace(/\D/g, '') || '';
+
     const credencial = await getNiboCredentials(barId);
     
     if (!credencial) {
-      // Fallback: buscar na tabela local nibo_stakeholders
-      console.log('[NIBO-STAKEHOLDERS] Sem credenciais, buscando no banco local');
-      
-      let dbQuery = supabase
-        .from('nibo_stakeholders')
-        .select('*')
-        .eq('bar_id', barId);
-      
-      if (query) {
-        dbQuery = dbQuery.or(`documento_numero.ilike.%${query}%,nome.ilike.%${query}%`);
-      }
-      
-      const { data, error } = await dbQuery.limit(50);
-      
-      if (error) {
-        return NextResponse.json({ success: false, error: error.message }, { status: 500 });
-      }
-      
+      console.log('[NIBO-STAKEHOLDERS] Sem credenciais NIBO');
       return NextResponse.json({
-        success: true,
-        data: data || [],
-        source: 'database'
-      });
+        success: false,
+        error: 'Credenciais NIBO não encontradas',
+        data: []
+      }, { status: 400 });
     }
 
-    // Buscar na API do NIBO
-    let niboUrl = `${NIBO_BASE_URL}/stakeholders?apitoken=${credencial.api_token}`;
-    
-    if (query) {
-      // NIBO usa $filter para busca
-      niboUrl += `&$filter=contains(document,'${query}') or contains(name,'${query}')`;
-    }
-    
-    niboUrl += '&$top=50';
+    // Buscar na API do NIBO - buscar todos e filtrar localmente
+    // A API NIBO não suporta bem filtro por documento
+    const niboUrl = `${NIBO_BASE_URL}/stakeholders?apitoken=${credencial.api_token}&$top=500&$orderby=id`;
+
+    console.log('[NIBO-STAKEHOLDERS] Buscando da API NIBO...');
 
     const response = await fetch(niboUrl, {
       method: 'GET',
@@ -86,36 +68,51 @@ export async function GET(request: NextRequest) {
       const errorText = await response.text();
       console.error('[NIBO-STAKEHOLDERS] Erro na API NIBO:', response.status, errorText);
       return NextResponse.json(
-        { success: false, error: `Erro NIBO: ${response.status}` },
+        { success: false, error: `Erro NIBO: ${response.status}`, data: [] },
         { status: response.status }
       );
     }
 
     const niboData = await response.json();
-    const stakeholders = niboData.items || niboData || [];
+    let stakeholders = niboData.items || niboData || [];
 
-    // Formatar resposta
+    console.log(`[NIBO-STAKEHOLDERS] Encontrados ${stakeholders.length} stakeholders no NIBO`);
+
+    // Filtrar localmente se houver query
+    if (cleanQuery) {
+      stakeholders = stakeholders.filter((s: any) => {
+        const docNumber = s.document?.number?.replace(/\D/g, '') || '';
+        const name = (s.name || '').toLowerCase();
+        return docNumber.includes(cleanQuery) || name.includes(cleanQuery.toLowerCase());
+      });
+      console.log(`[NIBO-STAKEHOLDERS] Após filtro: ${stakeholders.length} stakeholders`);
+    }
+
+    // Formatar resposta - estrutura correta do NIBO
     const formattedData = stakeholders.map((s: any) => ({
       id: s.id || s.stakeholderId,
       name: s.name,
-      document: s.document,
+      document: s.document?.number || '',
+      documentType: s.document?.type || 'CPF',
       email: s.email,
       phone: s.phone,
-      type: s.type || 'fornecedor',
-      pixKey: s.pixKey || s.pix?.key,
-      pixKeyType: s.pixKeyType || s.pix?.type
+      type: s.type || 'Supplier',
+      pixKey: s.bankingInfo?.pixKeys?.[0]?.key || null,
+      pixKeyType: s.bankingInfo?.pixKeys?.[0]?.type || null,
+      bankingInfo: s.bankingInfo || null
     }));
 
     return NextResponse.json({
       success: true,
       data: formattedData,
-      source: 'nibo_api'
+      source: 'nibo_api',
+      total: formattedData.length
     });
 
   } catch (error) {
     console.error('[NIBO-STAKEHOLDERS] Erro:', error);
     return NextResponse.json(
-      { success: false, error: 'Erro interno ao buscar stakeholders' },
+      { success: false, error: 'Erro interno ao buscar stakeholders', data: [] },
       { status: 500 }
     );
   }
@@ -125,7 +122,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, document, type = 'fornecedor', bar_id = 3, pixKey, pixKeyType = 3 } = body;
+    const { name, document, type = 'fornecedor', bar_id = 3, pixKey, pixKeyType } = body;
 
     console.log(`[NIBO-STAKEHOLDERS] Criando stakeholder: ${name}, doc=${document}`);
 
@@ -145,20 +142,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Preparar payload para NIBO
+    const cleanDocument = document.replace(/\D/g, '');
+    const docType = cleanDocument.length <= 11 ? 'CPF' : 'CNPJ';
+    
+    // Mapear tipo para o formato NIBO
+    const niboType = type === 'fornecedor' || type === 'Supplier' ? 'Supplier' 
+                   : type === 'socio' || type === 'Partner' ? 'Partner' 
+                   : type === 'Customer' ? 'Customer'
+                   : 'Supplier';
+
+    // Preparar payload para NIBO - estrutura correta
     const stakeholderPayload: any = {
       name,
-      document: document.replace(/\D/g, ''), // Remover formatação
-      type: type === 'fornecedor' ? 'Supplier' : type === 'socio' ? 'Partner' : 'Employee'
+      document: {
+        number: cleanDocument,
+        type: docType
+      },
+      type: niboType
     };
 
     // Adicionar chave PIX se fornecida
     if (pixKey) {
-      stakeholderPayload.pix = {
-        key: pixKey,
-        type: pixKeyType // 1=Email, 2=Telefone, 3=CPF/CNPJ, 4=Aleatória
+      // Determinar tipo de PIX
+      let pixTypeStr = 'CPF';
+      if (pixKeyType === 1 || pixKeyType === 'EMAIL') pixTypeStr = 'EMAIL';
+      else if (pixKeyType === 2 || pixKeyType === 'PHONE') pixTypeStr = 'PHONE';
+      else if (pixKeyType === 3 || pixKeyType === 'CPF' || pixKeyType === 'CNPJ') pixTypeStr = docType;
+      else if (pixKeyType === 4 || pixKeyType === 'RANDOM') pixTypeStr = 'RANDOM';
+      
+      stakeholderPayload.bankingInfo = {
+        pixKeys: [{
+          key: pixKey.replace(/\D/g, ''), // Limpar a chave PIX
+          type: pixTypeStr
+        }]
       };
     }
+
+    console.log('[NIBO-STAKEHOLDERS] Payload:', JSON.stringify(stakeholderPayload, null, 2));
 
     const response = await fetch(`${NIBO_BASE_URL}/stakeholders?apitoken=${credencial.api_token}`, {
       method: 'POST',
@@ -180,17 +200,18 @@ export async function POST(request: NextRequest) {
     }
 
     const niboData = await response.json();
+    console.log('[NIBO-STAKEHOLDERS] Stakeholder criado:', niboData.id);
 
     // Também salvar no banco local para cache
     await supabase.from('nibo_stakeholders').upsert({
-      nibo_id: niboData.id,
+      nibo_id: String(niboData.id),
       bar_id,
       nome: name,
-      documento_numero: document.replace(/\D/g, ''),
-      documento_tipo: document.replace(/\D/g, '').length <= 11 ? 'CPF' : 'CNPJ',
-      tipo: type,
-      pix_chave: pixKey,
-      pix_tipo: pixKeyType === 1 ? 'email' : pixKeyType === 2 ? 'telefone' : pixKeyType === 3 ? 'cpf_cnpj' : 'aleatoria',
+      documento_numero: cleanDocument,
+      documento_tipo: docType,
+      tipo: niboType,
+      pix_chave: pixKey || null,
+      pix_tipo: pixKey ? (docType === 'CPF' ? 'CPF' : 'CNPJ') : null,
       ativo: true,
       atualizado_em: new Date().toISOString()
     }, {
@@ -202,8 +223,8 @@ export async function POST(request: NextRequest) {
       data: {
         id: niboData.id,
         name,
-        document,
-        type,
+        document: cleanDocument,
+        type: niboType,
         pixKey
       }
     });
