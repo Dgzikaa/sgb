@@ -680,6 +680,11 @@ export default function AgendamentoPage() {
     stakeholder: Stakeholder
   ) => {
     try {
+      // Validar que a categoria foi selecionada (OBRIGATÓRIO no NIBO)
+      if (!pagamento.categoria_id) {
+        throw new Error('Categoria é obrigatória. Selecione uma categoria antes de agendar no NIBO.');
+      }
+
       // Formatar valor corretamente
       const valorNumerico = parseFloat(
         pagamento.valor.replace('R$', '').replace(',', '.').trim()
@@ -697,9 +702,8 @@ export default function AgendamentoPage() {
         stakeholderId: stakeholder.id,
         dueDate: dataPagamento,
         scheduleDate: dataPagamento,
-        categoria_id: pagamento.categoria_id || '',
+        categoria_id: pagamento.categoria_id,
         centro_custo_id: pagamento.centro_custo_id || '',
-        categories: [{ description: pagamento.descricao || 'Pagamento PIX' }],
         accrualDate: dataCompetencia,
         value: valorNumerico,
         description:

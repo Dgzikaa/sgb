@@ -111,6 +111,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // IMPORTANTE: categoria_id é OBRIGATÓRIO no NIBO
+    // Se não foi passado, retornar erro claro
+    if (!categoria_id) {
+      return NextResponse.json(
+        { success: false, error: 'categoria_id é obrigatório. Selecione uma categoria antes de agendar.' },
+        { status: 400 }
+      );
+    }
+
     const credencial = await getNiboCredentials(bar_id);
     
     if (!credencial) {
@@ -125,16 +134,12 @@ export async function POST(request: NextRequest) {
     // Endpoint correto para pagamentos (despesas): /schedules/debit
     const valorAbsoluto = Math.abs(parseFloat(value));
     
-    // Montar objeto de categoria
+    // Montar objeto de categoria - categoryId é OBRIGATÓRIO
     const categoryItem: any = {
+      categoryId: categoria_id,
       value: valorAbsoluto,
       description: description || 'Pagamento'
     };
-    
-    // Só adicionar categoryId se existir (pode ser opcional no NIBO)
-    if (categoria_id) {
-      categoryItem.categoryId = categoria_id;
-    }
     
     const schedulePayload: any = {
       stakeholderId,
