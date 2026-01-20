@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       bar_id = 3
     } = body;
 
-    console.log(`[NIBO-SCHEDULES] Criando agendamento: ${description}, valor=${value}`);
+    console.log(`[NIBO-SCHEDULES] Criando agendamento: ${description}, valor=${value}, tipo=debit`);
 
     // Validações
     if (!stakeholderId || !dueDate || !value) {
@@ -167,6 +167,7 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('[NIBO-SCHEDULES] Payload para NIBO (debit):', JSON.stringify(schedulePayload, null, 2));
+    console.log('[NIBO-SCHEDULES] VALOR NEGATIVO ENVIADO:', valorNegativo);
 
     // Endpoint correto: /schedules/debit para pagamentos (despesas)
     const response = await fetch(`${NIBO_BASE_URL}/schedules/debit?apitoken=${credencial.api_token}`, {
