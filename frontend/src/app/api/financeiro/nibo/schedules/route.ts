@@ -133,8 +133,13 @@ export async function POST(request: NextRequest) {
     // Documentação: https://nibo.readme.io/reference/agendar-pagamento
     // Endpoint correto para pagamentos (despesas): /schedules/debit
     // IMPORTANTE: Para débitos, o valor DEVE ser NEGATIVO
-    const valorNumerico = Math.abs(parseFloat(value));
-    const valorNegativo = -valorNumerico; // NIBO exige valor negativo para débitos
+    // VERSÃO 2025-01-20 - DEPLOY FIX
+    const valorBruto = parseFloat(value);
+    console.log('[NIBO-SCHEDULES-V2] Valor bruto recebido:', valorBruto);
+    const valorNumerico = Math.abs(valorBruto);
+    console.log('[NIBO-SCHEDULES-V2] Valor absoluto:', valorNumerico);
+    const valorNegativo = valorNumerico * -1; // NIBO exige valor negativo para débitos
+    console.log('[NIBO-SCHEDULES-V2] Valor NEGATIVO final:', valorNegativo);
     
     // Montar objeto de categoria - categoryId é OBRIGATÓRIO
     const categoryItem: any = {
