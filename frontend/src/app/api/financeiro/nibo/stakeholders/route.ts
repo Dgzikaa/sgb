@@ -85,8 +85,25 @@ export async function GET(request: NextRequest) {
         const name = (s.name || '').toLowerCase();
         return docNumber.includes(cleanQuery) || name.includes(cleanQuery.toLowerCase());
       });
-      console.log(`[NIBO-STAKEHOLDERS] Após filtro: ${stakeholders.length} stakeholders`);
+      console.log(`[NIBO-STAKEHOLDERS] Após filtro por query: ${stakeholders.length} stakeholders`);
     }
+
+    // Filtrar arquivados e deletados - só mostrar ativos
+    stakeholders = stakeholders.filter((s: any) => !s.isArchived && !s.isDeleted);
+    console.log(`[NIBO-STAKEHOLDERS] Após filtro de arquivados: ${stakeholders.length} stakeholders`);
+
+    // Ordenar: priorizar quem tem PIX cadastrado e tipo Supplier
+    stakeholders.sort((a: any, b: any) => {
+      // Prioridade 1: Tem PIX
+      const aHasPix = a.bankAccountInformation?.pixKey ? 1 : 0;
+      const bHasPix = b.bankAccountInformation?.pixKey ? 1 : 0;
+      if (bHasPix !== aHasPix) return bHasPix - aHasPix;
+      
+      // Prioridade 2: É Supplier (para pagamentos)
+      const aIsSupplier = a.type === 'Supplier' ? 1 : 0;
+      const bIsSupplier = b.type === 'Supplier' ? 1 : 0;
+      return bIsSupplier - aIsSupplier;
+    });
 
     // Formatar resposta - estrutura correta do NIBO
     const formattedData = stakeholders.map((s: any) => ({
@@ -94,12 +111,13 @@ export async function GET(request: NextRequest) {
       name: s.name,
       document: s.document?.number || '',
       documentType: s.document?.type || 'CPF',
-      email: s.email,
-      phone: s.phone,
+      email: s.communication?.email || s.email,
+      phone: s.communication?.phone || s.phone,
       type: s.type || 'Supplier',
-      pixKey: s.bankingInfo?.pixKeys?.[0]?.key || null,
-      pixKeyType: s.bankingInfo?.pixKeys?.[0]?.type || null,
-      bankingInfo: s.bankingInfo || null
+      pixKey: s.bankAccountInformation?.pixKey || null,
+      pixKeyType: s.bankAccountInformation?.pixKeyType || null,
+      isArchived: s.isArchived || false,
+      isDeleted: s.isDeleted || false
     }));
 
     return NextResponse.json({

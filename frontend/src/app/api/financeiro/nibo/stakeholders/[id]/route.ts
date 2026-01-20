@@ -37,7 +37,7 @@ export async function PUT(
     const body = await request.json();
     const { name, document, pixKey, pixKeyType = 3, bar_id = 3 } = body;
 
-    console.log(`[NIBO-STAKEHOLDERS] Atualizando stakeholder ID=${id}`);
+    console.log(`[NIBO-STAKEHOLDERS] Atualizando stakeholder ID=${id}, pixKey=${pixKey}`);
 
     const credencial = await getNiboCredentials(bar_id);
     
@@ -48,18 +48,61 @@ export async function PUT(
       );
     }
 
-    // Preparar payload de atualização
-    const updatePayload: any = {};
+    // Primeiro, buscar o stakeholder para obter dados atuais
+    const getResponse = await fetch(`${NIBO_BASE_URL}/stakeholders/${id}?apitoken=${credencial.api_token}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'apitoken': credencial.api_token
+      }
+    });
+
+    if (!getResponse.ok) {
+      const errorText = await getResponse.text();
+      console.error('[NIBO-STAKEHOLDERS] Stakeholder não encontrado:', getResponse.status, errorText);
+      return NextResponse.json(
+        { success: false, error: `Stakeholder não encontrado: ${getResponse.status}` },
+        { status: getResponse.status }
+      );
+    }
+
+    const currentData = await getResponse.json();
+    console.log('[NIBO-STAKEHOLDERS] Dados atuais:', JSON.stringify(currentData, null, 2));
+
+    // Limpar documento
+    const cleanDocument = (document || currentData.document?.number || '').replace(/\D/g, '');
+    const docType = cleanDocument.length <= 11 ? 'CPF' : 'CNPJ';
+
+    // Preparar payload de atualização - estrutura correta do NIBO
+    const updatePayload: any = {
+      name: name || currentData.name,
+      document: {
+        number: cleanDocument,
+        type: docType
+      },
+      type: currentData.type || 'Supplier'
+    };
     
-    if (name) updatePayload.name = name;
-    if (document) updatePayload.document = document.replace(/\D/g, '');
-    
+    // Adicionar chave PIX se fornecida
     if (pixKey) {
-      updatePayload.pix = {
-        key: pixKey,
-        type: pixKeyType
+      const cleanPixKey = pixKey.replace(/\D/g, '');
+      
+      // Determinar tipo de PIX (NIBO usa números: 1=Email, 2=Telefone, 3=CPF/CNPJ, 4=Aleatória)
+      let pixType = 3; // Default CPF/CNPJ
+      if (pixKeyType === 1 || pixKeyType === 'EMAIL') pixType = 1;
+      else if (pixKeyType === 2 || pixKeyType === 'PHONE') pixType = 2;
+      else if (pixKeyType === 4 || pixKeyType === 'RANDOM') pixType = 4;
+      else pixType = 3; // CPF/CNPJ
+      
+      // Estrutura correta do NIBO para bankAccountInformation
+      updatePayload.bankAccountInformation = {
+        ...(currentData.bankAccountInformation || {}),
+        pixKey: cleanPixKey,
+        pixKeyType: pixType
       };
     }
+
+    console.log('[NIBO-STAKEHOLDERS] Payload de atualização:', JSON.stringify(updatePayload, null, 2));
 
     const response = await fetch(`${NIBO_BASE_URL}/stakeholders/${id}?apitoken=${credencial.api_token}`, {
       method: 'PUT',
@@ -81,14 +124,16 @@ export async function PUT(
     }
 
     const niboData = await response.json();
+    console.log('[NIBO-STAKEHOLDERS] Stakeholder atualizado:', niboData.id);
 
     // Atualizar cache local
     if (pixKey) {
+      const cleanPixKey = pixKey.replace(/\D/g, '');
       await supabase
         .from('nibo_stakeholders')
         .update({
-          pix_chave: pixKey,
-          pix_tipo: pixKeyType === 1 ? 'email' : pixKeyType === 2 ? 'telefone' : pixKeyType === 3 ? 'cpf_cnpj' : 'aleatoria',
+          pix_chave: cleanPixKey,
+          pix_tipo: cleanPixKey.length <= 11 ? 'CPF' : 'CNPJ',
           atualizado_em: new Date().toISOString()
         })
         .eq('nibo_id', id);
@@ -96,7 +141,13 @@ export async function PUT(
 
     return NextResponse.json({
       success: true,
-      data: niboData
+      data: {
+        id: niboData.id,
+        name: niboData.name,
+        document: niboData.document?.number,
+        pixKey: niboData.bankAccountInformation?.pixKey,
+        pixKeyType: niboData.bankAccountInformation?.pixKeyType
+      }
     });
 
   } catch (error) {
