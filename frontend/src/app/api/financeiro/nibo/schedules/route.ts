@@ -132,12 +132,14 @@ export async function POST(request: NextRequest) {
     // Preparar payload para NIBO
     // Documentação: https://nibo.readme.io/reference/agendar-pagamento
     // Endpoint correto para pagamentos (despesas): /schedules/debit
-    const valorAbsoluto = Math.abs(parseFloat(value));
+    // IMPORTANTE: Para débitos, o valor DEVE ser NEGATIVO
+    const valorNumerico = Math.abs(parseFloat(value));
+    const valorNegativo = -valorNumerico; // NIBO exige valor negativo para débitos
     
     // Montar objeto de categoria - categoryId é OBRIGATÓRIO
     const categoryItem: any = {
       categoryId: categoria_id,
-      value: valorAbsoluto,
+      value: valorNegativo, // Valor NEGATIVO para débitos
       description: description || 'Pagamento'
     };
     
@@ -155,7 +157,7 @@ export async function POST(request: NextRequest) {
     if (centro_custo_id) {
       schedulePayload.costCenters = [{
         costCenterId: centro_custo_id,
-        value: valorAbsoluto
+        value: valorNegativo // Também negativo para débitos
       }];
     }
 
@@ -189,13 +191,13 @@ export async function POST(request: NextRequest) {
     const niboData = await response.json();
     console.log('[NIBO-SCHEDULES] Agendamento criado no NIBO:', niboData.id || niboData.scheduleId);
 
-    // Salvar no banco local para tracking
+    // Salvar no banco local para tracking (salva valor POSITIVO para exibição)
     const { error: insertError } = await supabase.from('nibo_agendamentos').insert({
       nibo_id: niboData.id || niboData.scheduleId,
       bar_id,
       tipo: 'despesa',
       status: 'pendente',
-      valor: Math.abs(parseFloat(value)),
+      valor: valorNumerico, // Salva positivo para exibição
       data_vencimento: dueDate,
       data_pagamento: null,
       descricao: description,
