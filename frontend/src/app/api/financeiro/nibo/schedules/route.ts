@@ -101,7 +101,8 @@ export async function POST(request: NextRequest) {
       bar_id = 3
     } = body;
 
-    console.log(`[NIBO-SCHEDULES] Criando agendamento: ${description}, valor=${value}, tipo=debit`);
+    // BUILD_VERSION: 2026-01-20-v3-VALOR-NEGATIVO
+    console.log(`[NIBO-SCHEDULES-V3] Criando agendamento: ${description}, valor=${value}, tipo=debit`);
 
     // Validações
     if (!stakeholderId || !dueDate || !value) {
@@ -131,10 +132,19 @@ export async function POST(request: NextRequest) {
 
     // Preparar payload para NIBO - endpoint /schedules/debit para AGENDAMENTO de despesas
     // IMPORTANTE: Para débitos (despesas), o valor deve ser NEGATIVO
-    const valorNumerico = Math.abs(parseFloat(value));
-    const valorNegativo = -valorNumerico; // NIBO exige valor negativo para /schedules/debit
+    const valorNumerico = Math.abs(parseFloat(String(value)));
+    const valorNegativo = valorNumerico * -1; // NIBO exige valor negativo para /schedules/debit
     
-    console.log('[NIBO-SCHEDULES] Criando agendamento de despesa, valor:', valorNegativo);
+    console.log('[NIBO-SCHEDULES-V3] Valor NEGATIVO calculado:', valorNegativo, '(original:', value, ', numerico:', valorNumerico, ')');
+    
+    // Garantir que o valor é realmente negativo
+    if (valorNegativo >= 0) {
+      console.error('[NIBO-SCHEDULES-V3] ERRO: Valor não está negativo!', valorNegativo);
+      return NextResponse.json(
+        { success: false, error: `Erro interno: valor deveria ser negativo mas é ${valorNegativo}` },
+        { status: 500 }
+      );
+    }
     
     // Montar objeto de categoria com valor NEGATIVO
     const categoryItem: any = {
