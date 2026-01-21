@@ -30,6 +30,7 @@ import {
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
 
 interface Alerta {
   tipo: string;
@@ -88,6 +89,7 @@ const CATEGORIAS = [
 
 export default function ContagemEstoquePage() {
   const { setPageTitle } = usePageTitle();
+  const { selectedBar, isLoading: barLoading } = useBar();
 
   // Estados do formulário
   const [categoria, setCategoria] = useState('');
@@ -130,17 +132,19 @@ export default function ContagemEstoquePage() {
     setPageTitle('📦 Contagem de Estoque');
   }, [setPageTitle]);
 
-  // Buscar áreas ao carregar
+  // Buscar áreas ao carregar ou trocar de bar
   useEffect(() => {
-    buscarAreas();
-  }, []);
+    if (selectedBar?.id) {
+      buscarAreas();
+    }
+  }, [selectedBar?.id]);
 
-  // Carregar contagens ao mudar de tab
+  // Carregar contagens ao mudar de tab ou trocar de bar
   useEffect(() => {
-    if (activeTab === 'lista') {
+    if (activeTab === 'lista' && selectedBar?.id) {
       buscarContagens();
     }
-  }, [activeTab, filtroCategoria, filtroAlerta, filtroArea]);
+  }, [activeTab, filtroCategoria, filtroAlerta, filtroArea, selectedBar?.id]);
 
   // Fechar dropdown ao clicar fora
   useEffect(() => {
@@ -156,8 +160,10 @@ export default function ContagemEstoquePage() {
   }, []);
 
   const buscarAreas = async () => {
+    if (!selectedBar?.id) return;
+    
     try {
-      const response = await fetch('/api/operacoes/areas-contagem?ativas=true');
+      const response = await fetch(`/api/operacoes/areas-contagem?ativas=true&bar_id=${selectedBar.id}`);
       const result = await response.json();
       if (result.success) {
         setAreas(result.data || []);
@@ -168,7 +174,7 @@ export default function ContagemEstoquePage() {
   };
 
   const buscarProdutosPorCategoria = async (cat: string) => {
-    if (!cat) {
+    if (!cat || !selectedBar?.id) {
       setProdutosSugeridos([]);
       setMostrarSugestoes(false);
       return;
@@ -176,7 +182,7 @@ export default function ContagemEstoquePage() {
 
     setLoadingProdutos(true);
     try {
-      const response = await fetch(`/api/operacoes/contagem-estoque/produtos?categoria=${encodeURIComponent(cat)}`);
+      const response = await fetch(`/api/operacoes/contagem-estoque/produtos?categoria=${encodeURIComponent(cat)}&bar_id=${selectedBar.id}`);
       const result = await response.json();
 
       if (result.success) {
@@ -202,9 +208,15 @@ export default function ContagemEstoquePage() {
   };
 
   const buscarContagens = async () => {
+    if (!selectedBar?.id) {
+      console.log('Bar não selecionado, aguardando...');
+      return;
+    }
+    
     setLoadingContagens(true);
     try {
       const params = new URLSearchParams({
+        bar_id: selectedBar.id.toString(),
         limit: '200'  // Aumentar limite para ver mais insumos
       });
       
@@ -301,6 +313,11 @@ export default function ContagemEstoquePage() {
       toast.error('Corrija os erros antes de salvar');
       return;
     }
+    
+    if (!selectedBar?.id) {
+      toast.error('Selecione um bar antes de salvar');
+      return;
+    }
 
     setLoading(true);
     try {
@@ -310,6 +327,7 @@ export default function ContagemEstoquePage() {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          bar_id: selectedBar.id,
           categoria,
           descricao,
           estoque_fechado: parseFloat(estoqueFechado) || 0,
@@ -406,6 +424,30 @@ export default function ContagemEstoquePage() {
 
     return true;
   });
+
+  // Mostrar loading enquanto o bar está sendo carregado
+  if (barLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-500" />
+          <p className="text-gray-600 dark:text-gray-400">Carregando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar aviso se nenhum bar foi selecionado
+  if (!selectedBar?.id) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <Package className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+          <p className="text-gray-600 dark:text-gray-400">Selecione um bar para continuar</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

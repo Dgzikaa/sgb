@@ -8,6 +8,77 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Tamanho do batch para inserções (evitar timeout com muitos registros)
+const BATCH_SIZE = 500;
+
+// Função helper para inserir registros em batches
+async function insertInBatches(supabase: any, tableName: string, records: any[]): Promise<{ success: boolean, count: number, errors: number }> {
+  let totalInserted = 0;
+  let totalErrors = 0;
+  
+  // Dividir em batches
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const batch = records.slice(i, i + BATCH_SIZE);
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(records.length / BATCH_SIZE);
+    
+    console.log(`📦 Inserindo batch ${batchNum}/${totalBatches} (${batch.length} registros)...`);
+    
+    const { error } = await supabase
+      .from(tableName)
+      .insert(batch);
+    
+    if (error) {
+      console.error(`❌ Erro no batch ${batchNum}:`, error.message);
+      totalErrors += batch.length;
+    } else {
+      totalInserted += batch.length;
+    }
+    
+    // Pequeno delay entre batches para não sobrecarregar
+    if (i + BATCH_SIZE < records.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+  
+  console.log(`✅ Total inserido: ${totalInserted}, Erros: ${totalErrors}`);
+  return { success: totalErrors === 0, count: totalInserted, errors: totalErrors };
+}
+
+// Função helper para upsert em batches (para tabelas com conflito)
+async function upsertInBatches(supabase: any, tableName: string, records: any[], onConflict: string): Promise<{ success: boolean, count: number, errors: number }> {
+  let totalUpserted = 0;
+  let totalErrors = 0;
+  
+  // Dividir em batches
+  for (let i = 0; i < records.length; i += BATCH_SIZE) {
+    const batch = records.slice(i, i + BATCH_SIZE);
+    const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(records.length / BATCH_SIZE);
+    
+    console.log(`📦 Upsert batch ${batchNum}/${totalBatches} (${batch.length} registros)...`);
+    
+    const { error } = await supabase
+      .from(tableName)
+      .upsert(batch, { onConflict });
+    
+    if (error) {
+      console.error(`❌ Erro no batch ${batchNum}:`, error.message);
+      totalErrors += batch.length;
+    } else {
+      totalUpserted += batch.length;
+    }
+    
+    // Pequeno delay entre batches para não sobrecarregar
+    if (i + BATCH_SIZE < records.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+  
+  console.log(`✅ Total upserted: ${totalUpserted}, Erros: ${totalErrors}`);
+  return { success: totalErrors === 0, count: totalUpserted, errors: totalErrors };
+}
+
 // Função para processar dados de uma tabela específica
 async function processRawData(supabase: any, dataType: string, rawData: any, dataDate: string, barId: number = 3) {
   console.log(`📊 Processando ${dataType} para ${dataDate} (bar_id: ${barId})...`);
@@ -26,6 +97,7 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
     switch (dataType) {
       case 'analitico':
         // Primeiro deletar registros existentes para essa data/bar
+        console.log(`🗑️ Deletando registros analitico existentes para ${dataDate}...`);
         await supabase
           .from('contahub_analitico')
           .delete()
@@ -63,15 +135,17 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
         }));
         
         if (analiticoRecords.length > 0) {
-          const { error } = await supabase
-            .from('contahub_analitico')
-            .insert(analiticoRecords);
+          console.log(`📊 Processando ${analiticoRecords.length} registros de analitico em batches...`);
           
-          if (error) {
-            console.error(`❌ Erro ao inserir analítico:`, error.message);
-            errors = analiticoRecords.length;
+          // Usar inserção em batches para evitar timeout
+          const analiticoBatchResult = await insertInBatches(supabase, 'contahub_analitico', analiticoRecords);
+          
+          if (analiticoBatchResult.errors > 0) {
+            console.error(`⚠️ Analitico processado com ${analiticoBatchResult.errors} erros`);
+            errors = analiticoBatchResult.errors;
           } else {
-            processedCount = analiticoRecords.length;
+            processedCount = analiticoBatchResult.count;
+            console.log(`✅ Analitico: ${processedCount} registros inseridos com sucesso`);
           }
         }
         break;
@@ -158,6 +232,7 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
         break;
 
       case 'pagamentos':
+        console.log(`🗑️ Deletando registros pagamentos existentes para ${dataDate}...`);
         await supabase
           .from('contahub_pagamentos')
           .delete()
@@ -195,20 +270,23 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
         }));
         
         if (pagamentosRecords.length > 0) {
-          const { error } = await supabase
-            .from('contahub_pagamentos')
-            .insert(pagamentosRecords);
+          console.log(`📊 Processando ${pagamentosRecords.length} registros de pagamentos em batches...`);
           
-          if (error) {
-            console.error(`❌ Erro ao inserir pagamentos:`, error.message, JSON.stringify(error));
-            return { success: true, count: 0, errors: pagamentosRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          // Usar inserção em batches para evitar timeout
+          const pagamentosBatchResult = await insertInBatches(supabase, 'contahub_pagamentos', pagamentosRecords);
+          
+          if (pagamentosBatchResult.errors > 0) {
+            console.error(`⚠️ Pagamentos processado com ${pagamentosBatchResult.errors} erros`);
+            return { success: true, count: pagamentosBatchResult.count, errors: pagamentosBatchResult.errors };
           } else {
-            processedCount = pagamentosRecords.length;
+            processedCount = pagamentosBatchResult.count;
+            console.log(`✅ Pagamentos: ${processedCount} registros inseridos com sucesso`);
           }
         }
         break;
 
       case 'tempo':
+        console.log(`🗑️ Deletando registros tempo existentes para ${dataDate}...`);
         await supabase
           .from('contahub_tempo')
           .delete()
@@ -254,15 +332,17 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
         }));
         
         if (tempoRecords.length > 0) {
-          const { error } = await supabase
-            .from('contahub_tempo')
-            .insert(tempoRecords);
+          console.log(`📊 Processando ${tempoRecords.length} registros de tempo em batches...`);
           
-          if (error) {
-            console.error(`❌ Erro ao inserir tempo:`, error.message, JSON.stringify(error));
-            return { success: true, count: 0, errors: tempoRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          // Usar inserção em batches para evitar timeout
+          const batchResult = await insertInBatches(supabase, 'contahub_tempo', tempoRecords);
+          
+          if (batchResult.errors > 0) {
+            console.error(`⚠️ Tempo processado com ${batchResult.errors} erros`);
+            return { success: true, count: batchResult.count, errors: batchResult.errors };
           } else {
-            processedCount = tempoRecords.length;
+            processedCount = batchResult.count;
+            console.log(`✅ Tempo: ${processedCount} registros inseridos com sucesso`);
           }
         }
         break;
@@ -434,15 +514,16 @@ async function processRawData(supabase: any, dataType: string, rawData: any, dat
         }).filter((v: any) => v.vd); // Filtrar registros sem ID de venda
         
         if (vendasRecords.length > 0) {
-          const { error } = await supabase
-            .from('contahub_vendas')
-            .upsert(vendasRecords, { onConflict: 'idempotency_key' });
+          console.log(`📊 Processando ${vendasRecords.length} registros de vendas em batches...`);
           
-          if (error) {
-            console.error(`❌ Erro ao inserir vendas:`, error.message, JSON.stringify(error));
-            return { success: true, count: 0, errors: vendasRecords.length, errorMessage: error.message, errorDetails: JSON.stringify(error) };
+          // Usar upsert em batches para evitar timeout
+          const vendasBatchResult = await upsertInBatches(supabase, 'contahub_vendas', vendasRecords, 'idempotency_key');
+          
+          if (vendasBatchResult.errors > 0) {
+            console.error(`⚠️ Vendas processado com ${vendasBatchResult.errors} erros`);
+            return { success: true, count: vendasBatchResult.count, errors: vendasBatchResult.errors };
           } else {
-            processedCount = vendasRecords.length;
+            processedCount = vendasBatchResult.count;
             console.log(`✅ vendas: ${processedCount} registros processados com TODOS os campos`);
           }
         }

@@ -36,25 +36,33 @@ import {
   Eye,
   MousePointerClick,
   ShoppingCart,
-  Trash2
+  Trash2,
+  Phone,
+  AlertCircle,
+  Zap
 } from 'lucide-react';
 
 interface Campanha {
   id: string;
   nome: string;
-  tipo: 'whatsapp' | 'email' | 'cupom';
-  segmento_alvo: string[];
+  tipo: string;
+  channel_id: string;
   template_mensagem: string;
-  cupom_desconto?: number;
-  cupom_codigo?: string;
-  cupom_validade?: string;
-  agendamento?: string;
-  status: 'rascunho' | 'agendada' | 'em_execucao' | 'concluida' | 'cancelada';
-  criado_em: string;
+  template_name?: string;
+  variaveis?: Record<string, string>;
+  segmento_criterios?: Record<string, unknown>;
+  total_destinatarios: number;
   enviados: number;
-  abertos: number;
-  cliques: number;
-  conversoes: number;
+  entregues: number;
+  lidos: number;
+  erros: number;
+  respostas: number;
+  status: 'rascunho' | 'agendada' | 'em_execucao' | 'concluida' | 'cancelada';
+  agendado_para?: string;
+  iniciado_em?: string;
+  finalizado_em?: string;
+  criado_por_email?: string;
+  created_at: string;
 }
 
 interface Template {
@@ -63,6 +71,25 @@ interface Template {
   conteudo: string;
   variaveis: string[];
   categoria: string;
+}
+
+interface UmblerConfig {
+  configurado: boolean;
+  config: {
+    channel_name: string;
+    phone_number: string;
+  } | null;
+}
+
+interface Metricas {
+  campanhas: {
+    total: number;
+    concluidas: number;
+    total_enviados: number;
+    total_erros: number;
+    taxa_entrega: number;
+    taxa_resposta: number;
+  };
 }
 
 const SEGMENTOS = [
@@ -75,11 +102,83 @@ const SEGMENTOS = [
   { value: 'Inativos', label: '💤 Inativos', cor: 'red', desc: 'Muito tempo sem visitar' },
 ];
 
+const TEMPLATES_WHATSAPP: Template[] = [
+  {
+    nome: 'Reengajamento - Cliente em Risco',
+    tipo: 'whatsapp',
+    categoria: 'reengajamento',
+    conteudo: `Olá {nome}! 👋
+
+Sentimos sua falta no Ordinário! 🍺✨
+
+Preparamos algo especial para você: *{cupom_desconto}% de desconto* em sua próxima visita!
+
+Venha nos visitar! 🎉`,
+    variaveis: ['{nome}', '{cupom_desconto}']
+  },
+  {
+    nome: 'Boas-vindas - Novo Cliente',
+    tipo: 'whatsapp',
+    categoria: 'boas_vindas',
+    conteudo: `Olá {nome}! 🎉
+
+Foi um prazer te receber no Ordinário!
+
+Como primeira visita, queremos te dar um presente: *{cupom_desconto}% de desconto* na sua próxima vez!
+
+Mal podemos esperar pra te ver de novo! 🍻`,
+    variaveis: ['{nome}', '{cupom_desconto}']
+  },
+  {
+    nome: 'VIP - Cliente Especial',
+    tipo: 'whatsapp',
+    categoria: 'vip',
+    conteudo: `Olá {nome}! ⭐
+
+Você é um cliente VIP do Ordinário!
+
+Como agradecimento pela sua fidelidade, temos um presente exclusivo: *{cupom_desconto}% de desconto* para você!
+
+Você faz parte da nossa família! 🍺❤️`,
+    variaveis: ['{nome}', '{cupom_desconto}']
+  },
+  {
+    nome: 'Evento Especial - Convite',
+    tipo: 'whatsapp',
+    categoria: 'evento',
+    conteudo: `Olá {nome}! 🎊
+
+Temos um EVENTO ESPECIAL chegando e você está convidado!
+
+📅 Data: {evento_data}
+🎵 Atração: {evento_atracao}
+
+Te esperamos! 🎉`,
+    variaveis: ['{nome}', '{evento_data}', '{evento_atracao}']
+  },
+  {
+    nome: 'Saudade - Cliente Inativo',
+    tipo: 'whatsapp',
+    categoria: 'reativacao',
+    conteudo: `Ei {nome}! 😢
+
+Faz tempo que você não aparece por aqui...
+
+O Ordinário tá com saudade! 🍺
+
+Volta pra gente? Temos *{cupom_desconto}% de desconto* te esperando!
+
+Bora matar a saudade? 🤗`,
+    variaveis: ['{nome}', '{cupom_desconto}']
+  }
+];
+
 export default function CampanhasPage() {
   const [campanhas, setCampanhas] = useState<Campanha[]>([]);
-  const [templates, setTemplates] = useState<{ whatsapp: Template[]; email: Template[] }>({ whatsapp: [], email: [] });
+  const [templates] = useState<{ whatsapp: Template[]; email: Template[] }>({ whatsapp: TEMPLATES_WHATSAPP, email: [] });
   const [segmentosStats, setSegmentosStats] = useState<Record<string, number>>({});
-  const [whatsappConfigurado, setWhatsappConfigurado] = useState(false);
+  const [umblerConfig, setUmblerConfig] = useState<UmblerConfig | null>(null);
+  const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [loading, setLoading] = useState(true);
   const [modalAberto, setModalAberto] = useState(false);
   const [criandoCampanha, setCriandoCampanha] = useState(false);
@@ -91,24 +190,36 @@ export default function CampanhasPage() {
   const [templateSelecionado, setTemplateSelecionado] = useState('');
   const [mensagemCustom, setMensagemCustom] = useState('');
   const [cupomDesconto, setCupomDesconto] = useState(20);
-  const [cupomValidade, setCupomValidade] = useState(7);
   const [executarAgora, setExecutarAgora] = useState(true);
   const [limiteEnvios, setLimiteEnvios] = useState<number | undefined>(undefined);
 
   const fetchCampanhas = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/crm/campanhas?stats=true');
+      // Buscar campanhas da Umbler
+      const response = await fetch('/api/umbler/campanhas?bar_id=3');
       const result = await response.json();
+      setCampanhas(result.campanhas || []);
 
-      if (result.success) {
-        setCampanhas(result.data);
-        setTemplates({
-          whatsapp: result.templates_whatsapp || [],
-          email: result.templates_email || []
-        });
-        setSegmentosStats(result.segmentos_stats || {});
-        setWhatsappConfigurado(result.whatsapp_configurado || false);
+      // Buscar config da Umbler
+      const configResponse = await fetch('/api/umbler/config?bar_id=3');
+      const configResult = await configResponse.json();
+      setUmblerConfig(configResult);
+
+      // Buscar métricas
+      const metricasResponse = await fetch('/api/umbler/metricas?bar_id=3&periodo=30');
+      const metricasResult = await metricasResponse.json();
+      setMetricas(metricasResult);
+
+      // Buscar stats de segmentos (API existente)
+      try {
+        const segmentosResponse = await fetch('/api/crm/campanhas?stats=true');
+        const segmentosResult = await segmentosResponse.json();
+        if (segmentosResult.success) {
+          setSegmentosStats(segmentosResult.segmentos_stats || {});
+        }
+      } catch {
+        // Ignorar erro de segmentos
       }
     } catch (error) {
       console.error('Erro ao carregar campanhas:', error);
@@ -133,8 +244,8 @@ export default function CampanhasPage() {
       return;
     }
 
-    if (tipo === 'whatsapp' && !whatsappConfigurado) {
-      alert('WhatsApp não configurado! Vá em Configurações > WhatsApp para configurar.');
+    if (!umblerConfig?.configurado) {
+      alert('Umbler não configurado! A integração com WhatsApp via Umbler Talk não está ativa.');
       return;
     }
 
@@ -142,7 +253,7 @@ export default function CampanhasPage() {
     if (executarAgora && totalClientesSelecionados > 10) {
       const confirmar = confirm(
         `Você está prestes a enviar mensagens para ${totalClientesSelecionados.toLocaleString()} clientes.\n\n` +
-        `Isso pode demorar alguns minutos e gerar custos.\n\n` +
+        `Isso pode demorar alguns minutos.\n\n` +
         `Deseja continuar?`
       );
       if (!confirmar) return;
@@ -150,7 +261,8 @@ export default function CampanhasPage() {
 
     setCriandoCampanha(true);
     try {
-      const response = await fetch('/api/crm/campanhas', {
+      // Buscar clientes dos segmentos selecionados
+      const clientesResponse = await fetch('/api/crm/campanhas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -160,16 +272,58 @@ export default function CampanhasPage() {
           template_id: templateSelecionado || undefined,
           template_custom: mensagemCustom || undefined,
           cupom_desconto: cupomDesconto,
-          cupom_validade_dias: cupomValidade,
-          executar_agora: executarAgora,
+          executar_agora: false, // Não executar pela API antiga
           limite_envios: limiteEnvios
+        })
+      });
+
+      const clientesResult = await clientesResponse.json();
+
+      if (!clientesResult.success) {
+        alert(`Erro ao preparar campanha: ${clientesResult.error}`);
+        return;
+      }
+
+      // Preparar template
+      const templateContent = templateSelecionado 
+        ? templates.whatsapp.find(t => t.nome === templateSelecionado)?.conteudo || mensagemCustom
+        : mensagemCustom;
+
+      // Preparar destinatários a partir dos dados da campanha antiga
+      // Por enquanto, vamos criar uma campanha na nova estrutura
+      const destinatarios = clientesResult.clientes?.map((c: { telefone: string; nome: string; id: number }) => ({
+        telefone: c.telefone,
+        nome: c.nome,
+        cliente_contahub_id: c.id
+      })) || [];
+
+      if (destinatarios.length === 0) {
+        alert('Nenhum cliente encontrado nos segmentos selecionados com telefone válido.');
+        return;
+      }
+
+      // Criar campanha via Umbler
+      const response = await fetch('/api/umbler/campanhas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bar_id: 3,
+          nome,
+          tipo: 'marketing',
+          template_mensagem: templateContent,
+          variaveis: {
+            cupom_desconto: cupomDesconto.toString()
+          },
+          destinatarios: limiteEnvios ? destinatarios.slice(0, limiteEnvios) : destinatarios,
+          segmento_criterios: { segmentos: segmentosSelecionados },
+          executar_agora: executarAgora
         })
       });
 
       const result = await response.json();
 
       if (result.success) {
-        alert(result.mensagem);
+        alert(`Campanha criada com sucesso! ${result.total_destinatarios} destinatários.`);
         setModalAberto(false);
         resetForm();
         fetchCampanhas();
@@ -191,7 +345,6 @@ export default function CampanhasPage() {
     setTemplateSelecionado('');
     setMensagemCustom('');
     setCupomDesconto(20);
-    setCupomValidade(7);
     setExecutarAgora(true);
     setLimiteEnvios(undefined);
   };
@@ -200,7 +353,7 @@ export default function CampanhasPage() {
     if (!confirm('Tem certeza que deseja cancelar esta campanha?')) return;
 
     try {
-      const response = await fetch(`/api/crm/campanhas?id=${id}`, {
+      const response = await fetch(`/api/umbler/campanhas?id=${id}`, {
         method: 'DELETE'
       });
 
@@ -236,12 +389,14 @@ export default function CampanhasPage() {
     switch (tipo) {
       case 'whatsapp':
         return <Badge className="bg-green-600"><MessageCircle className="w-3 h-3 mr-1" /> WhatsApp</Badge>;
+      case 'marketing':
+        return <Badge className="bg-green-600"><Zap className="w-3 h-3 mr-1" /> Marketing</Badge>;
       case 'email':
         return <Badge className="bg-blue-600"><Mail className="w-3 h-3 mr-1" /> Email</Badge>;
-      case 'cupom':
-        return <Badge className="bg-purple-600"><Ticket className="w-3 h-3 mr-1" /> Cupom</Badge>;
+      case 'reengajamento':
+        return <Badge className="bg-orange-600"><Users className="w-3 h-3 mr-1" /> Reengajamento</Badge>;
       default:
-        return <Badge>-</Badge>;
+        return <Badge className="bg-gray-600">{tipo}</Badge>;
     }
   };
 
@@ -255,15 +410,12 @@ export default function CampanhasPage() {
 
   // Estatísticas gerais
   const stats = {
-    total: campanhas.length,
-    ativas: campanhas.filter(c => c.status === 'concluida').length,
-    total_enviados: campanhas.reduce((sum, c) => sum + (c.enviados || 0), 0),
-    taxa_abertura: campanhas.length > 0
-      ? ((campanhas.reduce((sum, c) => sum + (c.abertos || 0), 0) / Math.max(campanhas.reduce((sum, c) => sum + (c.enviados || 0), 0), 1)) * 100).toFixed(1)
-      : '0',
-    taxa_conversao: campanhas.length > 0
-      ? ((campanhas.reduce((sum, c) => sum + (c.conversoes || 0), 0) / Math.max(campanhas.reduce((sum, c) => sum + (c.enviados || 0), 0), 1)) * 100).toFixed(1)
-      : '0'
+    total: metricas?.campanhas.total || campanhas.length,
+    concluidas: metricas?.campanhas.concluidas || campanhas.filter(c => c.status === 'concluida').length,
+    total_enviados: metricas?.campanhas.total_enviados || campanhas.reduce((sum, c) => sum + (c.enviados || 0), 0),
+    total_erros: metricas?.campanhas.total_erros || campanhas.reduce((sum, c) => sum + (c.erros || 0), 0),
+    taxa_entrega: metricas?.campanhas.taxa_entrega || 0,
+    taxa_resposta: metricas?.campanhas.taxa_resposta || 0
   };
 
   return (
@@ -273,20 +425,37 @@ export default function CampanhasPage() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-              📢 Campanhas Automáticas
+              Campanhas WhatsApp
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              WhatsApp, Email e Cupons de Desconto Personalizados
+              Disparo em massa via Umbler Talk
+              {umblerConfig?.config && (
+                <span className="ml-2 inline-flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <Phone className="w-3 h-3" />
+                  {umblerConfig.config.channel_name} ({umblerConfig.config.phone_number})
+                </span>
+              )}
             </p>
           </div>
 
-          <Button 
-            onClick={() => setModalAberto(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nova Campanha
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => window.location.href = '/crm/conversas'}
+              variant="outline"
+              className="border-gray-300 dark:border-gray-600"
+            >
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Ver Conversas
+            </Button>
+            <Button 
+              onClick={() => setModalAberto(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={!umblerConfig?.configurado}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nova Campanha
+            </Button>
+          </div>
 
           <Dialog open={modalAberto} onOpenChange={setModalAberto}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800">
@@ -480,18 +649,28 @@ export default function CampanhasPage() {
                   </label>
                 </div>
 
-                {/* Aviso WhatsApp não configurado */}
-                {tipo === 'whatsapp' && !whatsappConfigurado && (
+                {/* Aviso Umbler não configurado */}
+                {!umblerConfig?.configurado && (
                   <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-orange-800 dark:text-orange-200">
-                      <Clock className="w-5 h-5" />
-                      <span className="font-medium">WhatsApp não configurado</span>
+                      <AlertCircle className="w-5 h-5" />
+                      <span className="font-medium">Umbler Talk não configurado</span>
                     </div>
                     <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
-                      Configure as credenciais do WhatsApp em{' '}
-                      <a href="/configuracoes/whatsapp" className="underline font-medium">
-                        Configurações → WhatsApp
-                      </a>
+                      A integração com Umbler Talk precisa ser configurada para enviar mensagens via WhatsApp.
+                    </p>
+                  </div>
+                )}
+
+                {/* Info Umbler configurado */}
+                {umblerConfig?.configurado && umblerConfig.config && (
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                    <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+                      <CheckCircle className="w-5 h-5" />
+                      <span className="font-medium">Umbler Talk conectado</span>
+                    </div>
+                    <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                      Canal: {umblerConfig.config.channel_name} • {umblerConfig.config.phone_number}
                     </p>
                   </div>
                 )}
@@ -551,7 +730,7 @@ export default function CampanhasPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-sm text-green-600 dark:text-green-400 mb-1">Concluídas</div>
-                    <div className="text-3xl font-bold text-green-700 dark:text-green-300">{stats.ativas}</div>
+                    <div className="text-3xl font-bold text-green-700 dark:text-green-300">{stats.concluidas}</div>
                   </div>
                   <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
@@ -574,8 +753,8 @@ export default function CampanhasPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm text-purple-600 dark:text-purple-400 mb-1">Taxa Abertura</div>
-                    <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">{stats.taxa_abertura}%</div>
+                    <div className="text-sm text-purple-600 dark:text-purple-400 mb-1">Taxa Entrega</div>
+                    <div className="text-3xl font-bold text-purple-700 dark:text-purple-300">{stats.taxa_entrega}%</div>
                   </div>
                   <Eye className="w-8 h-8 text-purple-600 dark:text-purple-400" />
                 </div>
@@ -586,14 +765,33 @@ export default function CampanhasPage() {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm text-orange-600 dark:text-orange-400 mb-1">Taxa Conversão</div>
-                    <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">{stats.taxa_conversao}%</div>
+                    <div className="text-sm text-orange-600 dark:text-orange-400 mb-1">Taxa Resposta</div>
+                    <div className="text-3xl font-bold text-orange-700 dark:text-orange-300">{stats.taxa_resposta}%</div>
                   </div>
-                  <ShoppingCart className="w-8 h-8 text-orange-600 dark:text-orange-400" />
+                  <MessageCircle className="w-8 h-8 text-orange-600 dark:text-orange-400" />
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* Alerta se Umbler não configurado */}
+          {!loading && !umblerConfig?.configurado && (
+            <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 mb-6">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                  <div>
+                    <p className="font-medium text-yellow-800 dark:text-yellow-200">
+                      Integração Umbler não configurada
+                    </p>
+                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                      Configure as credenciais da Umbler Talk para habilitar o disparo em massa via WhatsApp.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         )}
 
         {/* Lista de Campanhas */}
@@ -628,15 +826,13 @@ export default function CampanhasPage() {
                           <div className="flex gap-2 flex-wrap">
                             {getTipoBadge(campanha.tipo)}
                             {getStatusBadge(campanha.status)}
-                            {campanha.segmento_alvo.map(seg => (
-                              <Badge key={seg} variant="outline" className="text-xs">
-                                {seg}
-                              </Badge>
-                            ))}
+                            <Badge variant="outline" className="text-xs">
+                              {campanha.total_destinatarios} destinatários
+                            </Badge>
                           </div>
                         </div>
 
-                        {campanha.status === 'agendada' && (
+                        {(campanha.status === 'agendada' || campanha.status === 'rascunho') && (
                           <Button
                             onClick={() => cancelarCampanha(campanha.id)}
                             variant="outline"
@@ -649,57 +845,56 @@ export default function CampanhasPage() {
                         )}
                       </div>
 
-                      {/* Cupom Info */}
-                      {campanha.cupom_codigo && (
-                        <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg mb-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Ticket className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                            <span className="font-mono font-bold text-purple-700 dark:text-purple-300">
-                              {campanha.cupom_codigo}
-                            </span>
-                            <span className="text-purple-600 dark:text-purple-400">
-                              {campanha.cupom_desconto}% OFF
-                            </span>
-                            <span className="text-gray-600 dark:text-gray-400">
-                              até {new Date(campanha.cupom_validade!).toLocaleDateString('pt-BR')}
-                            </span>
-                          </div>
+                      {/* Template Preview */}
+                      {campanha.template_mensagem && (
+                        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg mb-4 text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
+                          {campanha.template_mensagem.substring(0, 150)}...
                         </div>
                       )}
 
                       {/* Métricas */}
-                      <div className="grid grid-cols-4 gap-4">
+                      <div className="grid grid-cols-5 gap-4">
                         <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                           <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {campanha.total_destinatarios || 0}
+                          </div>
+                          <div className="text-xs text-gray-600 dark:text-gray-400">Total</div>
+                        </div>
+
+                        <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                             {campanha.enviados || 0}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Enviados</div>
+                          <div className="text-xs text-blue-600 dark:text-blue-400">Enviados</div>
                         </div>
 
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {campanha.abertos || 0}
+                        <div className="text-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-green-700 dark:text-green-300">
+                            {campanha.entregues || 0}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Abertos</div>
+                          <div className="text-xs text-green-600 dark:text-green-400">Entregues</div>
                         </div>
 
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {campanha.cliques || 0}
+                        <div className="text-center p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-purple-700 dark:text-purple-300">
+                            {campanha.respostas || 0}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Cliques</div>
+                          <div className="text-xs text-purple-600 dark:text-purple-400">Respostas</div>
                         </div>
 
-                        <div className="text-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                            {campanha.conversoes || 0}
+                        <div className="text-center p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                          <div className="text-2xl font-bold text-red-700 dark:text-red-300">
+                            {campanha.erros || 0}
                           </div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">Conversões</div>
+                          <div className="text-xs text-red-600 dark:text-red-400">Erros</div>
                         </div>
                       </div>
 
-                      <div className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-                        Criada em: {new Date(campanha.criado_em).toLocaleString('pt-BR')}
+                      <div className="mt-4 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                        <span>Criada em: {new Date(campanha.created_at).toLocaleString('pt-BR')}</span>
+                        {campanha.finalizado_em && (
+                          <span>Finalizada em: {new Date(campanha.finalizado_em).toLocaleString('pt-BR')}</span>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

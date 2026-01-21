@@ -1,4 +1,4 @@
-﻿// =====================================================
+// =====================================================
 // 🇧🇷 TIMEZONE UTILS - BRASÍLIA (UTC-3)
 // Centraliza todas as operações de data/hora no timezone do Brasil
 // =====================================================
@@ -12,11 +12,42 @@ export const BRASIL_LOCALE = 'pt-BR';
 
 /**
  * Retorna a data/hora atual no timezone do Brasil
+ * Usa Intl.DateTimeFormat para maior compatibilidade
  */
 export function agora(): Date {
+  // Método mais robusto usando Intl.DateTimeFormat
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: BRASIL_TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  
+  const parts = formatter.formatToParts(new Date());
+  const get = (type: string) => parts.find(p => p.type === type)?.value || '0';
+  
   return new Date(
-    new Date().toLocaleString('en-US', { timeZone: BRASIL_TIMEZONE })
+    parseInt(get('year')),
+    parseInt(get('month')) - 1,
+    parseInt(get('day')),
+    parseInt(get('hour')),
+    parseInt(get('minute')),
+    parseInt(get('second'))
   );
+}
+
+/**
+ * Retorna a data de ontem no timezone do Brasil (formato YYYY-MM-DD)
+ */
+export function dataOntemBrasil(): string {
+  const hoje = agora();
+  const ontem = new Date(hoje);
+  ontem.setDate(ontem.getDate() - 1);
+  return ontem.toISOString().split('T')[0];
 }
 
 /**

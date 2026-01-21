@@ -315,6 +315,16 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
+    // Buscar templates do banco
+    const { data: templatesDB } = await supabase
+      .from('crm_templates')
+      .select('*')
+      .eq('ativo', true)
+      .order('categoria');
+    
+    const templatesWhatsapp = templatesDB?.filter(t => t.tipo === 'whatsapp') || TEMPLATES_WHATSAPP;
+    const templatesEmail = templatesDB?.filter(t => t.tipo === 'email') || TEMPLATES_EMAIL;
+
     // Contar clientes por segmento
     let segmentosStats: Record<string, number> | null = null;
     if (incluirStats) {
@@ -339,8 +349,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: campanhas || [],
-      templates_whatsapp: TEMPLATES_WHATSAPP,
-      templates_email: TEMPLATES_EMAIL,
+      templates_whatsapp: templatesWhatsapp,
+      templates_email: templatesEmail,
       segmentos_stats: segmentosStats,
       whatsapp_configurado: whatsappConfigurado
     });

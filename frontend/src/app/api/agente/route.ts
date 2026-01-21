@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { agora, dataHojeBrasil, dataOntemBrasil } from '@/lib/timezone';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -307,7 +308,8 @@ function classifyIntent(message: string): { intent: string; entities: Record<str
   }
 
   // Extrair entidades de tempo - PRIORIZAR data específica primeiro
-  const hoje = new Date();
+  // IMPORTANTE: Usar agora() do timezone.ts para garantir timezone Brasil
+  const hoje = agora();
   
   // 1. DETECTAR DATA ESPECÍFICA PRIMEIRO (DD/MM/YYYY, DD.MM.YYYY, DD-MM-YYYY, DD/MM/YY, DD/MM, etc.)
   // Formato com ano
@@ -426,7 +428,9 @@ async function fetchDataForIntent(
   
   // Limpar cache antigo
   cleanupCache();
-  const hoje = new Date();
+  
+  // IMPORTANTE: Usar agora() do timezone.ts para garantir timezone Brasil (America/Sao_Paulo)
+  const hoje = agora();
   const ontem = new Date(hoje);
   ontem.setDate(ontem.getDate() - 1);
   
@@ -434,6 +438,9 @@ async function fetchDataForIntent(
   inicioSemana.setDate(hoje.getDate() - hoje.getDay());
   
   const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+  
+  // Log para debug de timezone
+  console.log(`[Agente] Timezone: hoje=${hoje.toISOString().split('T')[0]}, ontem=${ontem.toISOString().split('T')[0]}`);
 
   switch (intent) {
     case 'faturamento': {
@@ -456,6 +463,8 @@ async function fetchDataForIntent(
         dataInicio = inicioMes.toISOString().split('T')[0];
       }
 
+      console.log(`[Agente Faturamento] Buscando bar_id=${barId}, dataInicio=${dataInicio}, dataFim=${dataFim}`);
+      
       const { data: eventosRaw } = await supabase
         .from('eventos_base')
         .select('data_evento, real_r, m1_r, cl_real, nome, yuzer_liquido, sympla_liquido')
@@ -466,6 +475,7 @@ async function fetchDataForIntent(
         .order('data_evento', { ascending: false });
 
       const eventos = eventosRaw as (EventoBase & { yuzer_liquido?: number; sympla_liquido?: number })[] | null;
+      console.log(`[Agente Faturamento] Eventos encontrados: ${eventos?.length || 0}, Total faturamento: ${eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0}`);
       const total = eventos?.reduce((acc, e) => acc + (e.real_r || 0), 0) || 0;
       const metaTotal = eventos?.reduce((acc, e) => acc + (e.m1_r || 0), 0) || 0;
       const clientesTotal = eventos?.reduce((acc, e) => acc + (e.cl_real || 0), 0) || 0;
@@ -834,7 +844,8 @@ async function fetchDataForIntent(
 
     case 'resumo': {
       // Buscar resumo geral - apenas eventos até hoje (não futuros)
-      const hojeResumo = new Date().toISOString().split('T')[0];
+      // Usar agora() para garantir timezone Brasil
+      const hojeResumo = agora().toISOString().split('T')[0];
       const { data: eventosRecentesRaw } = await supabase
         .from('eventos_base')
         .select('*')
@@ -961,7 +972,8 @@ async function fetchDataForIntent(
 
     case 'calendario': {
       // Buscar eventos futuros do calendário operacional
-      const hojeCalendario = new Date().toISOString().split('T')[0];
+      // Usar agora() para garantir timezone Brasil
+      const hojeCalendario = agora().toISOString().split('T')[0];
       
       const { data: eventosFuturos } = await supabase
         .from('calendario_operacional')
@@ -1174,7 +1186,8 @@ async function fetchDataForIntent(
 
     default: {
       // Buscar resumo geral - apenas eventos até hoje (não futuros)
-      const hojeDefault = new Date().toISOString().split('T')[0];
+      // Usar agora() para garantir timezone Brasil
+      const hojeDefault = agora().toISOString().split('T')[0];
       const { data: eventosDefaultRaw } = await supabase
         .from('eventos_base')
         .select('*')

@@ -786,21 +786,74 @@ serve(async (req) => {
     const titulo = `🤖 Análise ${dadosOntem.dia_semana} ${dataOntem}`
     const discordOk = await enviarDiscord(titulo, analise)
     
-    // 7. Salvar no banco
+    // 7. Salvar insight no banco
+    const impacto = contexto.comparacao_meta < -20 ? 'alto' : contexto.comparacao_meta < -10 ? 'medio' : 'baixo'
+    const prioridade = contexto.comparacao_meta < -20 ? 1 : contexto.comparacao_meta < -10 ? 2 : 3
+    
     await supabase.from('agente_insights').insert({
       bar_id: barId,
-      tipo: 'analise_diaria_profunda',
+      tipo: 'analise_diaria',
+      categoria: 'operacional',
       titulo: `${dadosOntem.dia_semana} ${dataOntem} - ${dadosOntem.nome_evento}`,
       descricao: analise,
-      criticidade: contexto.comparacao_meta < -20 ? 'alta' : contexto.comparacao_meta < -10 ? 'media' : 'baixa',
-      dados: { 
+      impacto: impacto,
+      prioridade: prioridade,
+      dados_suporte: { 
         evento: dadosOntem, 
         contexto, 
         semana_passada: dadosSemanaPassada,
-        historico_atracao: historicoAtracao
+        historico_atracao: historicoAtracao,
+        estatisticas: estatisticasMesmoDia
       },
-      origem_ia: true
+      acao_sugerida: contexto.comparacao_meta < -10 
+        ? 'Revisar estratégia de atração e promoção para este dia da semana'
+        : 'Manter estratégia atual',
+      visualizado: false,
+      arquivado: false
     })
+    
+    // 8. Detectar padrões se houver histórico suficiente
+    if (estatisticasMesmoDia.datas_comparadas.length >= 4) {
+      // Padrão: Tendência identificada
+      if (estatisticasMesmoDia.tendencia !== 'estavel') {
+        await supabase.from('agente_padroes_detectados').insert({
+          bar_id: barId,
+          tipo: 'tendencia_faturamento',
+          descricao: `${dadosOntem.dia_semana} apresenta tendência de ${estatisticasMesmoDia.tendencia === 'subindo' ? 'crescimento' : estatisticasMesmoDia.tendencia === 'caindo' ? 'queda' : 'volatilidade'} nas últimas semanas`,
+          dados_suporte: {
+            dia_semana: dadosOntem.dia_semana,
+            tendencia: estatisticasMesmoDia.tendencia,
+            media: estatisticasMesmoDia.media_faturamento,
+            datas: estatisticasMesmoDia.datas_comparadas
+          },
+          confianca: estatisticasMesmoDia.datas_comparadas.length >= 4 ? 0.85 : 0.6,
+          ocorrencias: estatisticasMesmoDia.datas_comparadas.length,
+          status: 'ativo'
+        })
+      }
+      
+      // Padrão: Atração de destaque
+      if (dadosOntem.custo_artistico > 0) {
+        const roiAtracao = ((dadosOntem.faturamento_bruto - dadosOntem.custo_artistico) / dadosOntem.custo_artistico * 100)
+        if (roiAtracao > 300) {
+          await supabase.from('agente_padroes_detectados').insert({
+            bar_id: barId,
+            tipo: 'atracao_alta_performance',
+            descricao: `${dadosOntem.atracao_principal} apresentou ROI excepcional de ${roiAtracao.toFixed(0)}%`,
+            dados_suporte: {
+              atracao: dadosOntem.atracao_principal,
+              roi: roiAtracao,
+              faturamento: dadosOntem.faturamento_bruto,
+              custo: dadosOntem.custo_artistico,
+              data: dataOntem
+            },
+            confianca: 0.95,
+            ocorrencias: 1,
+            status: 'ativo'
+          })
+        }
+      }
+    }
     
     console.log('✅ Análise diária profunda concluída')
     console.log(`📢 Discord: ${discordOk ? 'Enviado' : 'Falhou'}`)

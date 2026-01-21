@@ -233,6 +233,21 @@ async function fetchFatPorHoraComDivisao(
   );
 }
 
+// Função para buscar PRODPORHORA com divisão quando a query for muito grande
+async function fetchProdPorHoraComDivisao(
+  baseUrl: string, 
+  dataDate: string, 
+  empId: string, 
+  sessionToken: string,
+  generateTimestamp: () => string
+): Promise<any> {
+  // Query 102 = ProdPorHora no ContaHub
+  return fetchComDivisaoPorLocal(
+    baseUrl, dataDate, empId, sessionToken, generateTimestamp,
+    102, 'prodporhora', '&produto=&grupo='
+  );
+}
+
 // Função para buscar PERIODO com divisão quando a query for muito grande
 async function fetchPeriodoComDivisao(
   baseUrl: string, 
@@ -374,7 +389,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // 1. COLETA E ARMAZENAMENTO DE JSON BRUTO
     console.log('\n📥 FASE 1: Coletando e salvando JSONs brutos...');
     
-    const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'vendas'];
+    const dataTypes = ['analitico', 'fatporhora', 'pagamentos', 'periodo', 'tempo', 'prodporhora', 'vendas'];
     
     // Converter data para formato ContaHub (DD.MM.YYYY)
     const contahubDate = toContaHubDateFormat(data_date);
@@ -533,6 +548,25 @@ Deno.serve(async (req: Request): Promise<Response> => {
                 phase: 'collection', 
                 data_type: 'periodo', 
                 error: periodoError instanceof Error ? periodoError.message : String(periodoError) 
+              });
+            }
+            continue;
+            
+          case 'prodporhora':
+            // Usar função com divisão para evitar erro "Resultado muito grande"
+            try {
+              const prodPorHoraData = await fetchProdPorHoraComDivisao(
+                contahubBaseUrl, data_date, emp_id, sessionToken, generateDynamicTimestamp
+              );
+              const saveResultProdPorHora = await saveRawDataOnly(supabase, 'prodporhora', prodPorHoraData, data_date, bar_id);
+              results.collected.push(saveResultProdPorHora);
+              console.log(`✅ prodporhora: JSON bruto salvo (${saveResultProdPorHora.record_count} registros)`);
+            } catch (prodPorHoraError) {
+              console.error(`❌ Erro ao buscar prodporhora:`, prodPorHoraError);
+              results.errors.push({ 
+                phase: 'collection', 
+                data_type: 'prodporhora', 
+                error: prodPorHoraError instanceof Error ? prodPorHoraError.message : String(prodPorHoraError) 
               });
             }
             continue;

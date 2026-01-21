@@ -101,8 +101,10 @@ export async function POST(request: NextRequest) {
       bar_id = 3
     } = body;
 
-    // BUILD_VERSION: 2026-01-20-v3-VALOR-NEGATIVO
-    console.log(`[NIBO-SCHEDULES-V3] Criando agendamento: ${description}, valor=${value}, tipo=debit`);
+    // BUILD_VERSION: 2026-01-21-v4-DEBUG-PAYLOAD
+    console.log(`[NIBO-SCHEDULES-V4] ========== NOVA REQUISIÇÃO ==========`);
+    console.log(`[NIBO-SCHEDULES-V4] Body recebido:`, JSON.stringify(body, null, 2));
+    console.log(`[NIBO-SCHEDULES-V4] value raw:`, value, typeof value);
 
     // Validações
     if (!stakeholderId || !dueDate || !value) {
@@ -176,7 +178,11 @@ export async function POST(request: NextRequest) {
       schedulePayload.reference = reference;
     }
 
-    console.log('[NIBO-SCHEDULES] Payload para NIBO:', JSON.stringify(schedulePayload, null, 2));
+    console.log('[NIBO-SCHEDULES-V4] ========== PAYLOAD FINAL ==========');
+    console.log('[NIBO-SCHEDULES-V4] Payload para NIBO:', JSON.stringify(schedulePayload, null, 2));
+    console.log('[NIBO-SCHEDULES-V4] Valor na categoria:', schedulePayload.categories[0].value);
+    console.log('[NIBO-SCHEDULES-V4] Tipo do valor:', typeof schedulePayload.categories[0].value);
+    console.log('[NIBO-SCHEDULES-V4] É negativo?:', schedulePayload.categories[0].value < 0);
 
     // Endpoint /schedules/debit para AGENDAR despesas (não paga imediatamente)
     const response = await fetch(`${NIBO_BASE_URL}/schedules/debit?apitoken=${credencial.api_token}`, {
