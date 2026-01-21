@@ -233,7 +233,7 @@ export async function GET(request: NextRequest) {
     const barId = searchParams.get('bar_id') || '3';
     
     const hoje = new Date();
-    const previsoes = [];
+    const previsoes: any[] = [];
     
     // Gerar previsões para os próximos 7 dias
     for (let i = 0; i < 7; i++) {
