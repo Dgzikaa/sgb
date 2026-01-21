@@ -106,7 +106,14 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Gerar análise com IA (se disponível)
-    let analiseIA = null;
+    let analiseIA: {
+      previsao_faturamento?: number;
+      previsao_publico?: number;
+      confianca?: number;
+      fatores_positivos?: string[];
+      fatores_negativos?: string[];
+      recomendacao?: string;
+    } | null = null;
     
     if (GEMINI_API_KEY && historicoMesmoDia.length >= 3) {
       try {

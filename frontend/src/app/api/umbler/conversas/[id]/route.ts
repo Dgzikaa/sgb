@@ -41,7 +41,13 @@ export async function GET(
     }
 
     // Buscar dados do cliente no ContaHub se tiver correlação
-    let clienteContahub = null;
+    let clienteContahub: {
+      id: any;
+      cliente_nome: any;
+      cliente_cpf: any;
+      data_atendimento: any;
+      vr_pagamentos: any;
+    } | null = null;
     if (conversa.cliente_contahub_id) {
       const { data: cliente } = await supabase
         .from('contahub_periodo')

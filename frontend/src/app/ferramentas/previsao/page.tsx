@@ -71,7 +71,7 @@ export default function PrevisaoDemandaPage() {
     try {
       // Buscar previsões para os próximos 7 dias
       const hoje = new Date();
-      const promises = [];
+      const promises: Promise<any>[] = [];
       
       for (let i = 0; i < 7; i++) {
         const data = new Date(hoje);
@@ -89,8 +89,8 @@ export default function PrevisaoDemandaPage() {
       
       const results = await Promise.all(promises);
       const previsoesValidas = results
-        .filter(r => r.success)
-        .map(r => r.data);
+        .filter((r: any) => r.success)
+        .map((r: any) => r.data);
       
       setPrevisoes(previsoesValidas);
     } catch (error) {

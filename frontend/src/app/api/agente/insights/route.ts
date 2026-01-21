@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     if (insightsError) throw insightsError;
 
     // Buscar padrões detectados
-    let padroes = null;
+    let padroes: any[] | null = null;
     if (incluirPadroes) {
       const { data: padroesData } = await supabase
         .from('agente_padroes_detectados')
