@@ -190,6 +190,7 @@ export default function CampanhasPage() {
   const [templateSelecionado, setTemplateSelecionado] = useState('');
   const [mensagemCustom, setMensagemCustom] = useState('');
   const [cupomDesconto, setCupomDesconto] = useState(20);
+  const [cupomValidade, setCupomValidade] = useState(7);
   const [executarAgora, setExecutarAgora] = useState(true);
   const [limiteEnvios, setLimiteEnvios] = useState<number | undefined>(undefined);
 
@@ -773,25 +774,25 @@ export default function CampanhasPage() {
               </CardContent>
             </Card>
           </div>
+        )}
 
-          {/* Alerta se Umbler não configurado */}
-          {!loading && !umblerConfig?.configurado && (
-            <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 mb-6">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-                  <div>
-                    <p className="font-medium text-yellow-800 dark:text-yellow-200">
-                      Integração Umbler não configurada
-                    </p>
-                    <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                      Configure as credenciais da Umbler Talk para habilitar o disparo em massa via WhatsApp.
-                    </p>
-                  </div>
+        {/* Alerta se Umbler não configurado */}
+        {!loading && !umblerConfig?.configurado && (
+          <Card className="bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 mb-6">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-3">
+                <AlertCircle className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+                <div>
+                  <p className="font-medium text-yellow-800 dark:text-yellow-200">
+                    Integração Umbler não configurada
+                  </p>
+                  <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                    Configure as credenciais da Umbler Talk para habilitar o disparo em massa via WhatsApp.
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Lista de Campanhas */}
