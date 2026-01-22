@@ -205,6 +205,13 @@ const defaultSidebarItems: SidebarItem[] = [
           permission: 'financeiro_agendamento',
         },
         {
+          icon: FileSearch,
+          label: 'Consultas NIBO',
+          href: '/ferramentas/consultas',
+          description: 'Consulta de lançamentos retroativos',
+          permission: 'financeiro_agendamento',
+        },
+        {
           icon: Users,
           label: 'NPS Funcionários',
           href: '/ferramentas/nps',
