@@ -7,7 +7,8 @@ const supabase = createClient(
 );
 
 // ⚡ Função otimizada para buscar dados com paginação (contorna limite de 1000 do Supabase)
-async function fetchAllData(query: any) {
+// IMPORTANTE: queryBuilder deve ser uma função que retorna uma nova query a cada chamada
+async function fetchAllDataWithBuilder(queryBuilder: () => any) {
   let allData: any[] = [];
   let from = 0;
   const limit = 1000;
@@ -17,10 +18,12 @@ async function fetchAllData(query: any) {
   while (iterations < MAX_ITERATIONS) {
     iterations++;
     
+    // Criar uma NOVA query a cada iteração (resolve problema de reutilização)
+    const query = queryBuilder();
     const { data, error } = await query.range(from, from + limit - 1);
     
     if (error) {
-      console.error(`❌ Erro na paginação:`, error);
+      console.error(`❌ Erro na paginação (iteração ${iterations}):`, error);
       throw error;
     }
     
@@ -29,6 +32,7 @@ async function fetchAllData(query: any) {
     }
     
     allData.push(...data);
+    console.log(`📦 Lote ${iterations}: ${data.length} registros (total: ${allData.length})`);
     
     if (data.length < limit) {
       break; // Última página
@@ -198,30 +202,35 @@ export async function POST(request: NextRequest) {
 
     console.log(`🔍 Buscando histórico de stockout: ${data_inicio} até ${data_fim}`);
 
-    // ⚡ Buscar dados históricos com paginação otimizada
-    let query = supabase
-      .from('contahub_stockout')
-      .select('data_consulta, prd_ativo, prd_venda, loc_desc, prd_desc')
-      .eq('prd_ativo', 'S') // Apenas produtos ativos
-      .gte('data_consulta', data_inicio)
-      .lte('data_consulta', data_fim)
-      .eq('bar_id', bar_id)
-      .order('data_consulta', { ascending: true });
+    // ⚡ QueryBuilder: função que cria uma nova query a cada chamada
+    // Isso é necessário porque o Supabase não permite reutilizar queries com .range()
+    const createQuery = () => {
+      let query = supabase
+        .from('contahub_stockout')
+        .select('data_consulta, prd_ativo, prd_venda, loc_desc, prd_desc')
+        .eq('prd_ativo', 'S') // Apenas produtos ativos
+        .gte('data_consulta', data_inicio)
+        .lte('data_consulta', data_fim)
+        .eq('bar_id', bar_id)
+        .order('data_consulta', { ascending: true });
 
-    // Aplicar filtros base
-    query = aplicarFiltrosBase(query);
+      // Aplicar filtros base
+      query = aplicarFiltrosBase(query);
 
-    // Aplicar filtros adicionais do usuário se existirem
-    if (filtros.length > 0) {
-      filtros.forEach((filtro: string) => {
-        if (filtro !== 'sem_local') {
-          query = query.neq('loc_desc', filtro);
-        }
-      });
-    }
+      // Aplicar filtros adicionais do usuário se existirem
+      if (filtros.length > 0) {
+        filtros.forEach((filtro: string) => {
+          if (filtro !== 'sem_local') {
+            query = query.neq('loc_desc', filtro);
+          }
+        });
+      }
+      
+      return query;
+    };
 
     // Buscar todos os dados com paginação automática
-    const dadosHistoricos = await fetchAllData(query);
+    const dadosHistoricos = await fetchAllDataWithBuilder(createQuery);
 
     if (!dadosHistoricos || dadosHistoricos.length === 0) {
       return NextResponse.json({
