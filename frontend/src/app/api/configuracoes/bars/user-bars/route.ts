@@ -31,10 +31,10 @@ export async function GET(request: NextRequest) {
       console.log('🔗 API: Cliente Supabase conectado');
     }
 
-    // Buscar os bares do usuário
+    // Buscar os bares do usuário com módulos permitidos
     const { data: userData, error: userError } = await supabase
       .from('usuarios_bar')
-      .select('id, email, nome, role, bar_id')
+      .select('id, email, nome, role, bar_id, modulos_permitidos')
       .eq('email', user.email)
       .eq('ativo', true);
 
@@ -94,9 +94,19 @@ export async function GET(request: NextRequest) {
       console.log('✅ API: Bares encontrados:', barsData);
     }
 
+    // Enriquecer os dados dos bares com modulos_permitidos do usuário
+    const barsEnriquecidos = (barsData || []).map((bar: { id: number; nome: string }) => {
+      const userBarData = userData.find((u: any) => u.bar_id === bar.id);
+      return {
+        ...bar,
+        modulos_permitidos: userBarData?.modulos_permitidos || [],
+        role: userBarData?.role || 'funcionario',
+      };
+    });
+
     return NextResponse.json({
       success: true,
-      bars: barsData || [],
+      bars: barsEnriquecidos,
       userData: userData,
     });
   } catch (error) {

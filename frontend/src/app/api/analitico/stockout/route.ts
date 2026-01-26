@@ -79,6 +79,13 @@ export async function POST(request: NextRequest) {
         .not('prd_desc', 'ilike', '%[DD]%')  // Dose Dupla
         .not('prd_desc', 'ilike', '%[IN]%'); // Insumos
       
+      // PRODUTOS HAPPY HOUR (excluir independente do formato)
+      // Esses produtos não devem entrar no stockout pois às 20h já não estão mais disponíveis
+      query = query
+        .not('prd_desc', 'ilike', '%Happy Hour%')
+        .not('prd_desc', 'ilike', '%HappyHour%')
+        .not('prd_desc', 'ilike', '%Happy-Hour%');
+      
       // CATEGORIAS A IGNORAR (por descrição do produto)
       query = query
         .not('prd_desc', 'ilike', '%Balde%')     // Baldes

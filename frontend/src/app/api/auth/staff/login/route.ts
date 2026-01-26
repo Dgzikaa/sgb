@@ -25,10 +25,10 @@ export async function POST(request: NextRequest) {
 
     // Buscar funcionário no banco de dados
     const { data: funcionario, error: funcionarioError } = await supabase
-      .from('usuarios')
-      .select('id, nome, email, senha_hash, tipo, status, bar_id')
+      .from('usuarios_bar')
+      .select('id, nome, email, senha_hash, role, ativo, bar_id')
       .eq('email', email.toLowerCase())
-      .eq('status', 'ativo')
+      .eq('ativo', true)
       .single()
 
     if (funcionarioError || !funcionario) {
@@ -39,21 +39,23 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se é funcionário (não admin)
-    if (funcionario.tipo !== 'funcionario') {
+    if (funcionario.role === 'admin') {
       return NextResponse.json(
         { error: 'Acesso negado - Esta área é restrita a funcionários' },
         { status: 403 }
       )
     }
 
-    // Verificar senha
-    const senhaValida = await bcrypt.compare(senha, funcionario.senha_hash)
-    
-    if (!senhaValida) {
-      return NextResponse.json(
-        { error: 'Credenciais inválidas' },
-        { status: 401 }
-      )
+    // Verificar senha (se houver hash de senha)
+    if (funcionario.senha_hash) {
+      const senhaValida = await bcrypt.compare(senha, funcionario.senha_hash)
+      
+      if (!senhaValida) {
+        return NextResponse.json(
+          { error: 'Credenciais inválidas' },
+          { status: 401 }
+        )
+      }
     }
 
     // Gerar token JWT
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
         email: funcionario.email,
         nome: funcionario.nome,
         bar_id: funcionario.bar_id,
-        tipo: funcionario.tipo
+        role: funcionario.role
       },
       JWT_SECRET,
       { expiresIn: '8h' } // Token válido por 8 horas

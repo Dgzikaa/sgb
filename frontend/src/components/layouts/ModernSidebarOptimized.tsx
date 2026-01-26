@@ -119,6 +119,7 @@ const defaultSidebarItems: SidebarItem[] = [
       { icon: Users, label: 'NPS Funcionários', href: '/ferramentas/nps', permission: 'gestao' },
       { icon: TrendingUp, label: 'CMV Semanal', href: '/ferramentas/cmv-semanal', permission: 'gestao' },
       { icon: AlertTriangle, label: 'Stockout', href: '/ferramentas/stockout', permission: 'gestao' },
+      { icon: FileSearch, label: 'Consultas', href: '/ferramentas/consultas', permission: 'financeiro_agendamento' },
       { icon: DollarSign, label: 'DRE', href: '/ferramentas/dre', permission: 'dashboard_financeiro_mensal' },
       { icon: Wallet, label: 'CFP - Finanças', href: '/fp', description: 'Controle Financeiro Pessoal', permission: 'home' },
     ],

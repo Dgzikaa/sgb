@@ -59,6 +59,13 @@ const aplicarFiltrosBase = (query: any) => {
     .not('prd_desc', 'ilike', '%[DD]%')  // Dose Dupla
     .not('prd_desc', 'ilike', '%[IN]%'); // Insumos
   
+  // PRODUTOS HAPPY HOUR (excluir independente do formato)
+  // Esses produtos não devem entrar no stockout pois às 20h já não estão mais disponíveis
+  query = query
+    .not('prd_desc', 'ilike', '%Happy Hour%')
+    .not('prd_desc', 'ilike', '%HappyHour%')
+    .not('prd_desc', 'ilike', '%Happy-Hour%');
+  
   // CATEGORIAS A IGNORAR (por descrição do produto)
   query = query
     .not('prd_desc', 'ilike', '%Balde%')     // Baldes
@@ -161,35 +168,14 @@ function getInicioFimSemana(data: string): { inicio: string; fim: string } {
   };
 }
 
-// Mapeamento de locais para categorias
-const GRUPOS_LOCAIS: Record<string, { nome: string; locais: string[] }> = {
-  drink: {
-    nome: 'Drink / Bebida',
-    locais: ['preshh', 'mexido', 'batidos', 'montados', 'shot e dose', 'drink', 'bebida']
-  },
-  bar: {
-    nome: 'Bar',
-    locais: ['chopp', 'baldes', 'bar']
-  },
-  cozinha: {
-    nome: 'Cozinha',
-    locais: ['cozinha', 'cozinha 1', 'cozinha 2', 'chapeira', 'chapa']
-  }
-};
+// Locais são usados diretamente dos dados - cada bar tem seus próprios locais
+// Exemplo Deboche: Bar, Cozinha, Cozinha 2, Salao
+// Exemplo Ordinário: Preshh, Mexido, Batidos, Montados, Chopp, Cozinha 1, Cozinha 2
 
-// Função para classificar local em categoria
-function classificarLocal(locDesc: string | null): string {
-  if (!locDesc) return 'outros';
-  
-  const localLower = locDesc.toLowerCase();
-  
-  for (const [categoria, config] of Object.entries(GRUPOS_LOCAIS)) {
-    if (config.locais.some(loc => localLower.includes(loc))) {
-      return categoria;
-    }
-  }
-  
-  return 'outros';
+// Função para obter o local normalizado (usa o loc_desc diretamente)
+function obterLocal(locDesc: string | null): string {
+  if (!locDesc) return 'Sem local definido';
+  return locDesc.trim();
 }
 
 export async function POST(request: NextRequest) {
@@ -393,7 +379,7 @@ export async function POST(request: NextRequest) {
 
     const dadosPorCategoria = new Map<string, StatsCategoria>();
     dadosValidosFiltrados.forEach(item => {
-      const categoria = classificarLocal(item.loc_desc);
+      const categoria = obterLocal(item.loc_desc);
       const dataConsulta = item.data_consulta;
       
       if (!dadosPorCategoria.has(categoria)) {
@@ -456,10 +442,10 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    // Calcular médias por categoria (dividir pelo número de dias)
+    // Calcular médias por local (dividir pelo número de dias)
     const analisePorLocal = Array.from(dadosPorCategoria.entries())
-      .filter(([categoria]) => categoria !== 'outros') // Remover categoria "outros"
-      .map(([categoria, stats]) => {
+      .filter(([local]) => local !== 'Sem local definido') // Remover locais sem definição
+      .map(([local, stats]) => {
         const totalDiasAnalise = historicoDiario.length;
         const mediaTotalProdutos = Math.round(stats.total_produtos / totalDiasAnalise);
         const mediaDisponiveis = Math.round(stats.disponiveis / totalDiasAnalise);
@@ -469,7 +455,7 @@ export async function POST(request: NextRequest) {
           ((mediaIndisponiveis / mediaTotalProdutos) * 100).toFixed(2) : '0.00';
         
         return {
-          local: GRUPOS_LOCAIS[categoria]?.nome || categoria,
+          local: local, // Usar o nome do local diretamente
           total_produtos: mediaTotalProdutos,
           produtos_disponiveis: mediaDisponiveis,
           produtos_indisponiveis: mediaIndisponiveis,

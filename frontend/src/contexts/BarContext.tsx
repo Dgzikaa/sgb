@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import {
   createContext,
@@ -13,6 +13,8 @@ import { useUser } from '@/contexts/UserContext';
 interface Bar {
   id: number;
   nome: string;
+  modulos_permitidos?: string[] | Record<string, any>;
+  role?: string;
 }
 
 interface BarContextType {
@@ -37,6 +39,31 @@ export function BarProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     // Resetar favicon para default
     updateFavicon();
+  };
+
+  // Função auxiliar para sincronizar as permissões do bar selecionado no localStorage
+  const syncBarPermissions = (bar: Bar) => {
+    if (typeof window === 'undefined') return;
+    
+    if (bar.modulos_permitidos) {
+      try {
+        const storedUserData = localStorage.getItem('sgb_user');
+        if (storedUserData) {
+          const userData = JSON.parse(storedUserData);
+          // Atualizar as permissões com as do bar selecionado
+          userData.modulos_permitidos = bar.modulos_permitidos;
+          userData.role = bar.role || userData.role;
+          userData.bar_id = bar.id;
+          localStorage.setItem('sgb_user', JSON.stringify(userData));
+          
+          // Disparar evento para notificar o usePermissions e outros hooks
+          window.dispatchEvent(new CustomEvent('userDataUpdated'));
+          console.log('✅ Permissões sincronizadas para o bar:', bar.nome);
+        }
+      } catch (e) {
+        console.error('❌ Erro ao sincronizar permissões do bar:', e);
+      }
+    }
   };
 
   useEffect(() => {
@@ -80,18 +107,19 @@ export function BarProvider({ children }: { children: ReactNode }) {
                   const selectedBarId = localStorage.getItem(
                     'sgb_selected_bar_id'
                   );
+                  let barToSelect: Bar;
                   if (selectedBarId) {
-                    const selectedBar = userData.availableBars.find(
+                    const foundBar = userData.availableBars.find(
                       (bar: Bar) => bar.id === parseInt(selectedBarId)
                     );
-                    if (selectedBar) {
-                      setSelectedBar(selectedBar);
-                    } else {
-                      setSelectedBar(userData.availableBars[0]);
-                    }
+                    barToSelect = foundBar || userData.availableBars[0];
                   } else {
-                    setSelectedBar(userData.availableBars[0]);
+                    barToSelect = userData.availableBars[0];
                   }
+                  
+                  setSelectedBar(barToSelect);
+                  // Sincronizar permissões do bar selecionado
+                  syncBarPermissions(barToSelect);
 
                   setIsLoading(false);
                   return;
@@ -128,18 +156,19 @@ export function BarProvider({ children }: { children: ReactNode }) {
                 const selectedBarId = localStorage.getItem(
                   'sgb_selected_bar_id'
                 );
+                let barToSelect: Bar;
                 if (selectedBarId) {
-                  const selectedBar = userData.availableBars.find(
+                  const foundBar = userData.availableBars.find(
                     (bar: Bar) => bar.id === parseInt(selectedBarId)
                   );
-                  if (selectedBar) {
-                    setSelectedBar(selectedBar);
-                  } else {
-                    setSelectedBar(userData.availableBars[0]);
-                  }
+                  barToSelect = foundBar || userData.availableBars[0];
                 } else {
-                  setSelectedBar(userData.availableBars[0]);
+                  barToSelect = userData.availableBars[0];
                 }
+                
+                setSelectedBar(barToSelect);
+                // Sincronizar permissões do bar selecionado
+                syncBarPermissions(barToSelect);
 
                 setIsLoading(false);
                 return;
@@ -194,23 +223,20 @@ export function BarProvider({ children }: { children: ReactNode }) {
                 const selectedBarId = localStorage.getItem(
                   'sgb_selected_bar_id'
                 );
+                let barToSelect: Bar;
                 if (selectedBarId) {
-                  const selectedBar = data.bars.find(
+                  const foundBar = data.bars.find(
                     (bar: Bar) => bar.id === parseInt(selectedBarId)
                   );
-                  if (selectedBar) {
-                    setSelectedBar(selectedBar);
-                    updateFavicon(selectedBar.nome);
-                  } else {
-                    const defaultBar = data.bars[0];
-                    setSelectedBar(defaultBar);
-                    updateFavicon(defaultBar.nome);
-                  }
+                  barToSelect = foundBar || data.bars[0];
                 } else {
-                  const defaultBar = data.bars[0];
-                  setSelectedBar(defaultBar);
-                  updateFavicon(defaultBar.nome);
+                  barToSelect = data.bars[0];
                 }
+                
+                setSelectedBar(barToSelect);
+                updateFavicon(barToSelect.nome);
+                // Sincronizar permissões do bar selecionado
+                syncBarPermissions(barToSelect);
 
                 setIsLoading(false);
                 return;
@@ -325,6 +351,9 @@ export function BarProvider({ children }: { children: ReactNode }) {
       localStorage.setItem('sgb_selected_bar_id', bar.id.toString());
       // Atualizar favicon baseado no bar selecionado
       updateFavicon(bar.nome);
+      
+      // Sincronizar permissões do bar selecionado
+      syncBarPermissions(bar);
       
       // Se o bar mudou, recarregar a página para atualizar os dados
       if (previousBarId !== undefined && previousBarId !== bar.id) {

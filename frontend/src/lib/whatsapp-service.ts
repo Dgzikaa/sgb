@@ -1,4 +1,4 @@
-﻿import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { getSupabaseClient } from '@/lib/supabase';
 
 // ========================================
@@ -453,7 +453,7 @@ export class WhatsAppNotificationService {
       }
 
       const { data: usuario } = await supabase
-        .from('usuarios')
+        .from('usuarios_bar')
         .select('id, nome, email, user_id')
         .eq('user_id', notificacao.usuario_id.toString())
         .single();

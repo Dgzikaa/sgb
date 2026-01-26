@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         for (const userId of userIds) {
           try {
             const { error } = await supabase
-              .from('usuarios')
+              .from('usuarios_bar')
               .delete()
               .eq('id', userId);
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       case 'activate':
         try {
           const { error } = await supabase
-            .from('usuarios')
+            .from('usuarios_bar')
             .update({ ativo: true, updated_at: new Date().toISOString() })
             .in('id', userIds);
 
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       case 'deactivate':
         try {
           const { error } = await supabase
-            .from('usuarios')
+            .from('usuarios_bar')
             .update({ ativo: false, updated_at: new Date().toISOString() })
             .in('id', userIds);
 
@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
 
         try {
           const { error } = await supabase
-            .from('usuarios')
+            .from('usuarios_bar')
             .update({
               role: data.role,
               updated_at: new Date().toISOString(),
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
 
         try {
           const { error } = await supabase
-            .from('usuarios')
+            .from('usuarios_bar')
             .update({
               bar_id: data.bar_id,
               updated_at: new Date().toISOString(),
@@ -163,7 +163,7 @@ export async function POST(request: NextRequest) {
       case 'export':
         try {
           const { data: users, error } = await supabase
-            .from('usuarios')
+            .from('usuarios_bar')
             .select(
               `
               id,
@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
               email,
               role,
               ativo,
-              created_at,
+              criado_em,
               bars (nome)
             `
             )
@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
             Papel: user.role,
             Ativo: user.ativo ? 'Sim' : 'Não',
             Bar: user.bars?.[0]?.nome || 'N/A',
-            'Criado em': new Date(user.created_at).toLocaleDateString('pt-BR'),
+            'Criado em': new Date(user.criado_em).toLocaleDateString('pt-BR'),
           }));
 
           return NextResponse.json({

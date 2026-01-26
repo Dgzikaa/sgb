@@ -16,9 +16,9 @@ export async function GET(request: NextRequest) {
 
     // Buscar CPF do usuário
     const { data: userData } = await supabase
-      .from('usuarios')
+      .from('usuarios_bar')
       .select('cpf')
-      .eq('id', session.user.id)
+      .eq('user_id', session.user.id)
       .single()
 
     if (!userData?.cpf) {

@@ -12,12 +12,13 @@ interface ContaHubCredentials {
   username: string;
   password: string;
   base_url: string;
+  empresa_id: string | null;
 }
 
 async function getContaHubCredentials(barId: number): Promise<ContaHubCredentials> {
   const { data, error } = await supabase
     .from('api_credentials')
-    .select('username, password, base_url')
+    .select('username, password, base_url, empresa_id')
     .eq('sistema', 'contahub')
     .eq('bar_id', barId)
     .eq('ativo', true)
@@ -30,6 +31,25 @@ async function getContaHubCredentials(barId: number): Promise<ContaHubCredential
   return data;
 }
 
+// Função para extrair o ID da empresa do username (formato: usuario@empresa)
+function getEmpresaId(credentials: ContaHubCredentials): string {
+  // Prioridade 1: usar empresa_id se estiver preenchido
+  if (credentials.empresa_id) {
+    return credentials.empresa_id;
+  }
+  
+  // Prioridade 2: extrair do username (formato: usuario@empresa)
+  if (credentials.username && credentials.username.includes('@')) {
+    const empresaId = credentials.username.split('@')[1];
+    if (empresaId) {
+      return empresaId;
+    }
+  }
+  
+  // Fallback: lançar erro pois não temos o ID da empresa
+  throw new Error('ID da empresa não encontrado nas credenciais. Preencha empresa_id ou use formato usuario@empresa no username.');
+}
+
 async function fetchContaHubStockout(
   credentials: ContaHubCredentials,
   date: string,
@@ -38,14 +58,17 @@ async function fetchContaHubStockout(
   // URL CORRETA para buscar produtos (não vendas!)
   const url = `${credentials.base_url}/rest/contahub.cmds.ProdutoCmd/getProdutos/${timestamp}`;
   
+  // Extrair ID da empresa dinamicamente das credenciais
+  const empresaId = getEmpresaId(credentials);
+  
   const params = new URLSearchParams({
-    emp: '3768', // ID da empresa
+    emp: empresaId, // ID da empresa extraído das credenciais
     prd_desc: ' ', // Buscar todos os produtos
     grp: '-29', // Todos os grupos
     nfe: '1'
   });
 
-  console.log(`🔍 Buscando produtos do ContaHub para análise de stockout em ${date}`);
+  console.log(`🔍 Buscando produtos do ContaHub para análise de stockout em ${date} (empresa: ${empresaId})`);
   console.log(`🔗 URL: ${url}?${params}`);
   
   const response = await fetch(`${url}?${params}`, {
@@ -65,7 +88,16 @@ async function fetchContaHubStockout(
 }
 
 async function saveStockoutData(barId: number, date: string, hour: string, data: any[]): Promise<number> {
-  const records = data.map(item => ({
+  // Filtrar produtos Happy Hour (não devem entrar no stockout)
+  const termosExcluidos = ['happy hour', 'happyhour', 'happy-hour'];
+  const filteredData = data.filter(item => {
+    const prdDesc = (item.prd_desc || '').toLowerCase();
+    return !termosExcluidos.some(termo => prdDesc.includes(termo));
+  });
+  
+  console.log(`🔍 Filtrando Happy Hour: ${data.length} produtos -> ${filteredData.length} (excluídos: ${data.length - filteredData.length})`);
+  
+  const records = filteredData.map(item => ({
     bar_id: barId,
     data_consulta: date,
     hora_consulta: hour,

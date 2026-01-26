@@ -217,9 +217,9 @@ export class SessionManager {
       );
 
       const { data, error } = await supabase
-        .from('usuarios')
+        .from('usuarios_bar')
         .select('mfa_enabled')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       return data?.mfa_enabled || false;

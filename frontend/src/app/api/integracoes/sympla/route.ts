@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar se o usuário tem permissão de admin
     const { data: usuario } = await supabase
-      .from('usuarios')
+      .from('usuarios_bar')
       .select('nivel_acesso')
       .eq('user_id', user.id)
       .single();
