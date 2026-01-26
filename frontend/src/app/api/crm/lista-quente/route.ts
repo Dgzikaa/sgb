@@ -210,14 +210,30 @@ export async function GET(request: NextRequest) {
     
     console.log(`📊 Total de registros encontrados: ${todosRegistros.length}`);
     
-    // Mapear clientes únicos por telefone normalizado
+    // Mapear clientes únicos por telefone normalizado OU por nome (para quem não tem telefone)
     const clientesMap = new Map<string, ClienteProcessado>();
+    let registrosSemIdentificador = 0;
+    let registrosComTelefone = 0;
+    let registrosSemTelefone = 0;
     
     todosRegistros.forEach(registro => {
       const telefoneNorm = registro.cli_fone_norm || normalizarTelefone(registro.cli_fone);
+      const nomeRegistro = (registro.cli_nome || '').trim().toLowerCase();
       
-      // Ignorar registros sem telefone válido
-      if (!telefoneNorm || telefoneNorm.length < 8) return;
+      // Usar telefone como chave principal, ou nome normalizado como fallback
+      let chaveCliente = '';
+      if (telefoneNorm && telefoneNorm.length >= 8) {
+        chaveCliente = `tel_${telefoneNorm}`;
+        registrosComTelefone++;
+      } else if (nomeRegistro && nomeRegistro.length > 2) {
+        // Usar nome como fallback para clientes sem telefone
+        chaveCliente = `nome_${nomeRegistro}`;
+        registrosSemTelefone++;
+      } else {
+        // Ignorar registros sem identificador válido
+        registrosSemIdentificador++;
+        return;
+      }
       
       const nome = extrairNome(registro);
       const email = registro.cli_email || '';
@@ -228,8 +244,8 @@ export async function GET(request: NextRequest) {
       const pessoas = parseFloat(registro.pessoas || 1);
       const dataVisita = new Date(registro.dt_gerencial + 'T12:00:00Z');
       
-      if (!clientesMap.has(telefoneNorm)) {
-        clientesMap.set(telefoneNorm, {
+      if (!clientesMap.has(chaveCliente)) {
+        clientesMap.set(chaveCliente, {
           nome: nome || 'Cliente',
           email: email,
           telefone: telefone,
@@ -251,7 +267,7 @@ export async function GET(request: NextRequest) {
         });
       }
       
-      const cliente = clientesMap.get(telefoneNorm)!;
+      const cliente = clientesMap.get(chaveCliente)!;
       
       // Atualizar dados básicos
       if (cliente.nome === 'Cliente' && nome) cliente.nome = nome;
@@ -295,6 +311,9 @@ export async function GET(request: NextRequest) {
     });
     
     console.log(`👥 Clientes únicos encontrados: ${clientesMap.size}`);
+    console.log(`   - Registros com telefone: ${registrosComTelefone}`);
+    console.log(`   - Registros sem telefone (usando nome): ${registrosSemTelefone}`);
+    console.log(`   - Registros ignorados (sem identificador): ${registrosSemIdentificador}`);
     
     // Aplicar todos os filtros
     let clientesFiltrados = Array.from(clientesMap.values());
@@ -388,6 +407,9 @@ export async function GET(request: NextRequest) {
     }
     
     console.log(`✅ Clientes após filtros: ${clientesFiltrados.length}`);
+    console.log(`   - Com telefone válido: ${clientesFiltrados.filter(c => c.telefone && c.telefone.length >= 8).length}`);
+    console.log(`   - Com email válido: ${clientesFiltrados.filter(c => c.email && c.email.includes('@')).length}`);
+    console.log(`   - Critérios: janela=${criterios.diasJanela}d, minVisitas=${criterios.minVisitasTotal}`);
     
     // Se foi especificado um dia da semana, filtrar por ele
     if (criterios.diaSemana) {
@@ -455,6 +477,53 @@ export async function GET(request: NextRequest) {
     }
     
     // Se apenas resumo, retornar resumo por dia da semana
+    // MAS se formato é CSV, exportar todos os clientes sem filtro de dia
+    if (!criterios.diaSemana && (formatoParam === 'csv' || formatoParam === 'csv_completo')) {
+      // Ordenar por total de visitas
+      clientesFiltrados.sort((a, b) => b.visitas.length - a.visitas.length);
+      
+      const listaExportacao = clientesFiltrados.map(cliente => ({
+        Nome: cliente.nome,
+        Email: cliente.email,
+        Telefone: cliente.telefone,
+        TotalVisitas: cliente.visitas.length,
+        TicketMedio: Math.round(cliente.ticketMedio * 100) / 100,
+        GastoTotal: Math.round(cliente.totalGasto * 100) / 100,
+        MediaPessoas: Math.round(cliente.mediaPessoas * 10) / 10,
+        UltimaVisita: cliente.ultimaVisita?.toISOString().split('T')[0] || '',
+        DiasFrequentados: cliente.diasDiferentesFrequentados,
+      }));
+      
+      if (formatoParam === 'csv') {
+        const csvHeader = 'Nome,Email,Telefone\n';
+        const csvRows = listaExportacao.map(c => 
+          `"${c.Nome}","${c.Email}","${c.Telefone}"`
+        ).join('\n');
+        
+        return new NextResponse(csvHeader + csvRows, {
+          headers: {
+            'Content-Type': 'text/csv; charset=utf-8',
+            'Content-Disposition': `attachment; filename="lista-clientes-${hoje.toISOString().split('T')[0]}.csv"`
+          }
+        });
+      }
+      
+      // CSV Completo
+      if (formatoParam === 'csv_completo') {
+        const csvHeader = 'Nome,Email,Telefone,TotalVisitas,TicketMedio,GastoTotal,MediaPessoas,UltimaVisita,DiasFrequentados\n';
+        const csvRows = listaExportacao.map(c => 
+          `"${c.Nome}","${c.Email}","${c.Telefone}",${c.TotalVisitas},${c.TicketMedio},${c.GastoTotal},${c.MediaPessoas},"${c.UltimaVisita}",${c.DiasFrequentados}`
+        ).join('\n');
+        
+        return new NextResponse(csvHeader + csvRows, {
+          headers: {
+            'Content-Type': 'text/csv; charset=utf-8',
+            'Content-Disposition': `attachment; filename="lista-clientes-completa-${hoje.toISOString().split('T')[0]}.csv"`
+          }
+        });
+      }
+    }
+    
     if (apenasResumo || !criterios.diaSemana) {
       const resumoPorDia: Record<string, any> = {};
       

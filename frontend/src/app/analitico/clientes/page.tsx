@@ -497,6 +497,56 @@ export default function ClientesPage() {
     }
   }, [selectedBar, segmentoDia, segmentoClientes.length, construirUrlSegmentacao, toast])
 
+  // Exportar TODOS os clientes do segmento (sem filtro de dia)
+  const downloadCSVTodos = useCallback(async (completo: boolean = false) => {
+    if (!selectedBar) {
+      toast({
+        title: "Selecione um bar",
+        description: "Escolha um bar para baixar o CSV",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    try {
+      const formato = completo ? 'csv_completo' : 'csv'
+      // Passa undefined como dia para exportar TODOS os clientes
+      const url = construirUrlSegmentacao(undefined, formato)
+      
+      toast({
+        title: "Gerando exportação...",
+        description: "Isso pode levar alguns segundos",
+      })
+      
+      const response = await fetch(url)
+      
+      if (!response.ok) {
+        throw new Error('Erro ao baixar CSV')
+      }
+      
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = downloadUrl
+      a.download = `lista-clientes-completa-${new Date().toISOString().split('T')[0]}.csv`
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(downloadUrl)
+      document.body.removeChild(a)
+      
+      toast({
+        title: "CSV exportado!",
+        description: `Lista completa de clientes exportada com sucesso`,
+      })
+    } catch (err) {
+      toast({
+        title: "Erro ao exportar",
+        description: err instanceof Error ? err.message : 'Erro desconhecido',
+        variant: "destructive"
+      })
+    }
+  }, [selectedBar, construirUrlSegmentacao, toast])
+
   const salvarSegmento = useCallback(async () => {
     if (!selectedBar || !nomeSegmento.trim()) {
       toast({
@@ -1884,6 +1934,26 @@ export default function ClientesPage() {
                           </>
                         )}
                       </Button>
+                      
+                      {/* Botões de Exportação Direta */}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          onClick={() => downloadCSVTodos(false)}
+                          variant="outline"
+                          className="border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-900/20"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Exportar Lista
+                        </Button>
+                        <Button
+                          onClick={() => downloadCSVTodos(true)}
+                          variant="outline"
+                          className="border-blue-500 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                        >
+                          <FileSpreadsheet className="h-4 w-4 mr-2" />
+                          CSV Completo
+                        </Button>
+                      </div>
                       
                       <div className="flex items-center gap-2">
                         <Input 
