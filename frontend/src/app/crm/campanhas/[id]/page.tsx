@@ -127,6 +127,13 @@ interface AnaliseCampanha {
       pessoas: number;
       horario: string;
     }>;
+    quem_recebeu_e_reservou?: Array<{
+      nome: string;
+      telefone?: string;
+      pessoas: number;
+      horario: string;
+      leu?: boolean;
+    }>;
   };
 }
 

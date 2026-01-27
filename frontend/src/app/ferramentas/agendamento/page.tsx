@@ -74,9 +74,9 @@ interface PagamentoAgendamento {
   inter_aprovacao_id?: string;
   bar_id?: number;
   bar_nome?: string;
-  criado_por_id?: string;
+  criado_por_id?: number;
   criado_por_nome?: string;
-  atualizado_por_id?: string;
+  atualizado_por_id?: number;
   atualizado_por_nome?: string;
   created_at: string;
   updated_at: string;
@@ -508,7 +508,7 @@ export default function AgendamentoPage() {
     }
 
     const now = new Date().toISOString();
-    const usuarioNome = user?.name || user?.email || 'Usuário';
+    const usuarioNome = user?.nome || user?.email || 'Usuário';
     const usuarioId = user?.id;
     
     // Buscar nomes de categoria e centro de custo
@@ -615,7 +615,7 @@ export default function AgendamentoPage() {
                       stakeholder_id: stakeholder.id,
                       updated_at: new Date().toISOString(),
                       atualizado_por_id: user?.id,
-                      atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                      atualizado_por_nome: user?.nome || user?.email || 'Usuário',
                     }
                   : p
               )
@@ -709,7 +709,7 @@ export default function AgendamentoPage() {
                   inter_aprovacao_id: data.data?.codigoSolicitacao || '',
                   updated_at: new Date().toISOString(),
                   atualizado_por_id: user?.id,
-                  atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                  atualizado_por_nome: user?.nome || user?.email || 'Usuário',
                 }
               : p
           )
@@ -743,7 +743,7 @@ export default function AgendamentoPage() {
                 status: 'erro_inter' as any, // Status customizado para erro apenas no Inter
                 updated_at: new Date().toISOString(),
                 atualizado_por_id: user?.id,
-                atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                atualizado_por_nome: user?.nome || user?.email || 'Usuário',
               }
             : p
         )
@@ -835,7 +835,7 @@ export default function AgendamentoPage() {
         bar_id: barIdFinal,
         bar_nome: pagamento.bar_nome || barNome,
         criado_por_id: pagamento.criado_por_id || user?.id,
-        criado_por_nome: pagamento.criado_por_nome || user?.name || user?.email,
+        criado_por_nome: pagamento.criado_por_nome || user?.nome || user?.email,
       };
 
       const response = await fetch('/api/financeiro/nibo/schedules', {
@@ -862,7 +862,7 @@ export default function AgendamentoPage() {
                   nibo_agendamento_id: data.data.id,
                   updated_at: new Date().toISOString(),
                   atualizado_por_id: user?.id,
-                  atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                  atualizado_por_nome: user?.nome || user?.email || 'Usuário',
                 }
               : p
           )
@@ -884,7 +884,7 @@ export default function AgendamentoPage() {
                 status: 'erro',
                 updated_at: new Date().toISOString(),
                 atualizado_por_id: user?.id,
-                atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                atualizado_por_nome: user?.nome || user?.email || 'Usuário',
               }
             : p
         )
@@ -1184,7 +1184,7 @@ export default function AgendamentoPage() {
                     codigo_solic: data.data?.codigoSolicitacao,
                     updated_at: new Date().toISOString(),
                     atualizado_por_id: user?.id,
-                    atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                    atualizado_por_nome: user?.nome || user?.email || 'Usuário',
                   }
                 : p
             )
@@ -1200,7 +1200,7 @@ export default function AgendamentoPage() {
                     status: 'erro_inter' as const, 
                     updated_at: new Date().toISOString(),
                     atualizado_por_id: user?.id,
-                    atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                    atualizado_por_nome: user?.nome || user?.email || 'Usuário',
                   }
                 : p
             )
@@ -1219,7 +1219,7 @@ export default function AgendamentoPage() {
                   status: 'erro_inter' as const, 
                   updated_at: new Date().toISOString(),
                   atualizado_por_id: user?.id,
-                  atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                  atualizado_por_nome: user?.nome || user?.email || 'Usuário',
                 }
               : p
           )
