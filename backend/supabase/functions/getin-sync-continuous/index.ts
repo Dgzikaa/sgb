@@ -6,40 +6,49 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Interface corrigida para refletir a estrutura REAL da API do GetIn
 interface GetinReservation {
   id: string
-  unit_id: string
-  unit_name: string
-  sector_id: string
-  sector_name: string
-  customer_name: string
-  customer_email: string
-  customer_phone: string
   date: string
   time: string
   people: number
   status: string
   discount: number
-  no_show: boolean
-  no_show_tax: number
-  no_show_hours: number
-  no_show_eligible: boolean
-  confirmation_sent: boolean
-  nps_answered: boolean
-  nps_url: string
   info: string
+  // Dados do cliente - nomes corretos da API
+  name: string           // customer_name
+  email: string          // customer_email  
+  mobile: string         // customer_phone
+  // Dados da unit - objeto aninhado
   unit: {
+    id: string
+    name: string
     cover_image: string
     profile_image: string
     full_address: string
-    zipcode: string
+    zipcode?: string
     cuisine_name: string
     city_name: string
-    coordinates: {
+    coordinates?: {
       lat: number
       lng: number
     }
   }
+  // Dados do setor - objeto aninhado
+  sector: {
+    id: string
+    name: string
+  }
+  // Campos opcionais
+  monetize?: any
+  custom_fields?: any[]
+  confirmation_sent?: boolean
+  nps_answered?: boolean
+  nps_url?: string
+  no_show?: boolean
+  no_show_tax?: number
+  no_show_hours?: number
+  no_show_eligible?: boolean
 }
 
 interface GetinResponse {
@@ -62,16 +71,12 @@ serve(async (req) => {
   }
 
   try {
-    // Log de autorização para debug
-    const authHeader = req.headers.get('authorization')
-    console.log('🔐 Authorization header:', authHeader ? 'Presente' : 'Ausente')
-    // Log da requisição para debug
-    console.log('📥 Requisição recebida:', {
-      method: req.method,
-      url: req.url,
-      headers: Object.fromEntries(req.headers.entries())
-    })
-    console.log('🚀 Iniciando sincronização contínua GET IN')
+    console.log('🚀 Iniciando sincronização GET IN (modo unit_id mapping)')
+
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     // Parse body para parâmetros opcionais
     let bodyParams: { start_date?: string; end_date?: string } = {}
@@ -86,90 +91,79 @@ serve(async (req) => {
       console.log('📝 Sem body ou body inválido, usando padrão')
     }
 
-    // Initialize Supabase client
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-    
-    console.log('🔐 Configurações:', {
-      supabaseUrl: supabaseUrl ? 'Configurada' : 'Não encontrada',
-      supabaseKey: supabaseKey ? 'Configurada' : 'Não encontrada'
-    })
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    // Get Getin credentials
-    console.log('🔍 Buscando credenciais GET IN...')
+    // Buscar credenciais GET IN (única API key para todas as units)
     const { data: credenciais, error: credError } = await supabase
       .from('api_credentials')
-      .select('username, api_token')
+      .select('api_token')
       .eq('sistema', 'getin')
       .eq('ativo', true)
+      .limit(1)
       .single()
+
+    if (credError || !credenciais?.api_token) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Credenciais GET IN não encontradas' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+
+    // Buscar mapeamento unit_id -> bar_id da tabela getin_units
+    const { data: unitsMapping, error: unitsError } = await supabase
+      .from('getin_units')
+      .select('unit_id, bar_id, name')
     
-    console.log('🔐 Resultado da busca:', {
-      encontrou: !!credenciais,
-      erro: credError?.message,
-      username: credenciais?.username
-    })
-
-    if (credError || !credenciais) {
-      throw new Error('Credenciais do Getin não encontradas')
+    if (unitsError) {
+      console.warn('⚠️ Erro ao buscar getin_units:', unitsError)
     }
-
-    if (!credenciais.api_token) {
-      throw new Error('API Token do Getin não configurado')
+    
+    // Criar mapa de unit_id -> bar_id
+    const unitToBarMap = new Map<string, number>()
+    const unitToNameMap = new Map<string, string>()
+    if (unitsMapping) {
+      for (const unit of unitsMapping) {
+        unitToBarMap.set(unit.unit_id, unit.bar_id)
+        unitToNameMap.set(unit.unit_id, unit.name)
+      }
     }
+    console.log(`📍 Mapeamento de units carregado: ${unitToBarMap.size} units`)
 
-    console.log('✅ Credenciais encontradas:', { 
-      sistema: 'getin', 
-      ambiente: 'producao', 
-      username: credenciais.username 
-    })
-
-    // Calculate date range: usar parâmetros ou padrão (today - 30) to (today + 30)
+    // Calculate date range
     let startDate: string
     let endDate: string
-    let modoSync: string
 
     if (bodyParams.start_date && bodyParams.end_date) {
-      // Modo retroativo com datas customizadas
       startDate = bodyParams.start_date
       endDate = bodyParams.end_date
-      modoSync = 'RETROATIVO'
-      console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (RETROATIVO)`)
-      console.log(`📋 Modo: Sincronização RETROATIVA - Datas customizadas`)
+      console.log(`📅 Período: ${startDate} a ${endDate} (RETROATIVO)`)
     } else {
-      // Modo padrão: 60 dias (30 dias atrás + 30 dias à frente)
       const hoje = new Date()
       const dataInicio = new Date(hoje)
-      dataInicio.setDate(hoje.getDate() - 30) // 30 dias atrás
-      
+      dataInicio.setDate(hoje.getDate() - 30)
       const dataFim = new Date(hoje)
-      dataFim.setDate(hoje.getDate() + 30) // Hoje + 30 dias
-
+      dataFim.setDate(hoje.getDate() + 30)
       startDate = dataInicio.toISOString().split('T')[0]
       endDate = dataFim.toISOString().split('T')[0]
-      modoSync = 'COMPLETA'
-      console.log(`📅 Período de sincronização: ${startDate} a ${endDate} (60 dias)`)
-      console.log(`📋 Modo: Sincronização COMPLETA - Últimos 30 dias + Próximos 30 dias`)
+      console.log(`📅 Período: ${startDate} a ${endDate} (60 dias)`)
     }
 
+    // Contadores
     let totalReservas = 0
-    let totalSalvas = 0
     let totalNovas = 0
     let totalAtualizadas = 0
     let totalErros = 0
+    let totalSemMapeamento = 0
     let currentPage = 1
     let hasMorePages = true
+    const unitsEncontradas = new Set<string>()
+    const resultadosPorBar = new Map<number, { novas: number; atualizadas: number; erros: number }>()
 
     // Process all pages
     while (hasMorePages) {
-      console.log(`📡 Buscando reservas: ${startDate} a ${endDate} (página ${currentPage})`)
-
       const getinUrl = new URL('https://api.getinapis.com/apis/v2/reservations')
       getinUrl.searchParams.set('start_date', startDate)
       getinUrl.searchParams.set('end_date', endDate)
       getinUrl.searchParams.set('page', currentPage.toString())
-      getinUrl.searchParams.set('per_page', '50') // Máximo real da API
+      getinUrl.searchParams.set('per_page', '50')
 
       const response = await fetch(getinUrl.toString(), {
         method: 'GET',
@@ -182,62 +176,71 @@ serve(async (req) => {
       })
 
       if (!response.ok) {
-        throw new Error(`Erro na API Getin: ${response.status} - ${response.statusText}`)
-      }
-
-      const data: GetinResponse = await response.json()
-      
-      if (!data.success) {
-        console.error('❌ API Getin retornou erro:', data)
-        break
-      }
-      
-      if (!data.data || data.data.length === 0) {
-        console.log('📭 Nenhuma reserva encontrada nesta página')
+        const errorText = await response.text()
+        console.error(`❌ Erro na API Getin: ${response.status} - ${errorText}`)
         break
       }
 
-      console.log(`✅ ${data.data.length} reservas encontradas na página ${currentPage}`)
-      console.log(`📊 Paginação: ${data.pagination?.current_page || currentPage}/${data.pagination?.last_page || 'undefined'} (total: ${data.pagination?.total || 'undefined'})`)
-      console.log(`🔍 Debug paginação:`, {
-        current_page: data.pagination?.current_page || currentPage,
-        last_page: data.pagination?.last_page || 'undefined',
-        total: data.pagination?.total || 'undefined',
-        per_page: data.pagination?.per_page || 'undefined',
-        is_last_page: data.pagination?.is_last_page || false,
-        hasMorePages: data.pagination ? !data.pagination.is_last_page : false
-      })
+      let data: GetinResponse
+      try {
+        data = await response.json()
+      } catch (jsonError) {
+        console.error('❌ Erro ao parsear resposta JSON da API Getin')
+        break
+      }
+      
+      if (!data || !data.success || !data.data || data.data.length === 0) {
+        console.log('📭 Sem mais reservas ou resposta inválida')
+        break
+      }
 
+      console.log(`📄 Página ${currentPage}: ${data.data.length} reservas`)
       totalReservas += data.data.length
-
-      // Process reservations in batches
-      console.log(`📊 Processando ${data.data.length} reservas da página ${currentPage}...`)
 
       for (const reserva of data.data) {
         try {
-          // Check if reservation already exists and when it was created
+          // Extrair unit_id do objeto unit (estrutura correta da API)
+          const unitId = reserva.unit?.id || null
+          const unitName = reserva.unit?.name || null
+          
+          // Registrar unit encontrada
+          if (unitId) {
+            unitsEncontradas.add(unitId)
+          }
+
+          // Determinar bar_id pelo mapeamento de unit_id
+          let barId = unitId ? unitToBarMap.get(unitId) : null
+          
+          // Se não encontrou mapeamento, registrar nova unit para análise
+          if (!barId && unitId) {
+            totalSemMapeamento++
+            console.warn(`⚠️ Unit sem mapeamento: ${unitId} (${unitName})`)
+            // Usar bar_id = null para identificar depois
+            barId = undefined
+          }
+
           const { data: existingReservation } = await supabase
             .from('getin_reservations')
-            .select('reservation_id, created_at, updated_at')
+            .select('reservation_id, created_at')
             .eq('reservation_id', reserva.id)
             .single()
 
-          // Consider as new if: doesn't exist OR was created today
           const today = new Date().toISOString().split('T')[0]
           const isNewReservation = !existingReservation || 
             (existingReservation.created_at && 
              existingReservation.created_at.split('T')[0] === today)
 
+          // Mapeamento CORRIGIDO - usando campos reais da API GetIn
           const reservaData = {
             reservation_id: reserva.id,
-            unit_id: reserva.unit_id,
-            unit_name: reserva.unit_name,
-            sector_id: reserva.sector_id,
-            sector_name: reserva.sector_name,
-            bar_id: 3, // Ordinário Bar
-            customer_name: reserva.customer_name,
-            customer_email: reserva.customer_email,
-            customer_phone: reserva.customer_phone,
+            unit_id: unitId,                              // de reserva.unit.id
+            unit_name: unitName,                          // de reserva.unit.name
+            sector_id: reserva.sector?.id || null,        // de reserva.sector.id
+            sector_name: reserva.sector?.name || null,    // de reserva.sector.name
+            bar_id: barId || null,
+            customer_name: reserva.name || null,          // de reserva.name (NÃO customer_name)
+            customer_email: reserva.email || null,        // de reserva.email (NÃO customer_email)
+            customer_phone: reserva.mobile || null,       // de reserva.mobile (NÃO customer_phone)
             reservation_date: reserva.date,
             reservation_time: reserva.time,
             people: reserva.people,
@@ -263,7 +266,6 @@ serve(async (req) => {
             updated_at: new Date().toISOString()
           }
 
-          // Upsert reservation
           const { error: upsertError } = await supabase
             .from('getin_reservations')
             .upsert(reservaData, {
@@ -272,79 +274,87 @@ serve(async (req) => {
             })
 
           if (upsertError) {
-            console.error(`❌ Erro ao salvar ${reserva.id}:`, upsertError.message)
             totalErros++
           } else {
-            if (isNewReservation) {
-              totalNovas++
-              console.log(`🆕 ${reserva.id} - ${reserva.customer_name} (${reserva.date}) - NOVA`)
+            // Contabilizar por bar
+            if (barId) {
+              const stats = resultadosPorBar.get(barId) || { novas: 0, atualizadas: 0, erros: 0 }
+              if (isNewReservation) {
+                stats.novas++
+                totalNovas++
+              } else {
+                stats.atualizadas++
+                totalAtualizadas++
+              }
+              resultadosPorBar.set(barId, stats)
             } else {
-              totalAtualizadas++
-              console.log(`🔄 ${reserva.id} - ${reserva.customer_name} (${reserva.date}) - ATUALIZADA`)
+              if (isNewReservation) totalNovas++
+              else totalAtualizadas++
             }
-            totalSalvas++
           }
 
         } catch (error) {
-          console.error(`❌ Erro ao processar reserva ${reserva.id}:`, error)
           totalErros++
         }
       }
 
-      // Check if there are more pages using correct API response
       hasMorePages = data.pagination ? !data.pagination.is_last_page : false
-      
-      console.log(`🔍 Debug paginação detalhada:`, {
-        is_last_page: data.pagination?.is_last_page,
-        hasMorePages: hasMorePages,
-        currentPage: currentPage,
-        nextPage: currentPage + 1
-      })
-      
       currentPage++
 
-      // Rate limiting - wait 2 seconds between pages
       if (hasMorePages) {
-        console.log(`⏳ Aguardando próxima página... (${currentPage} -> ${currentPage + 1})`)
-        await new Promise(resolve => setTimeout(resolve, 2000))
-      } else {
-        console.log(`🏁 Última página processada: ${currentPage}`)
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
     }
 
-    // Log sync completion
-    const agora = new Date()
-    const proximaExecucao = new Date(agora.getTime() + (4 * 60 * 60 * 1000)) // +4 horas
+    // Log units encontradas que não têm mapeamento
+    const unitsSemMapeamento: string[] = []
+    for (const unitId of unitsEncontradas) {
+      if (!unitToBarMap.has(unitId)) {
+        unitsSemMapeamento.push(unitId)
+      }
+    }
 
-    console.log('\n🎉 SINCRONIZAÇÃO CONTÍNUA CONCLUÍDA:')
-    console.log('================================================================================')
-    console.log(`📊 Reservas encontradas: ${totalReservas}`)
-    console.log(`🆕 Reservas novas: ${totalNovas}`)
-    console.log(`🔄 Reservas atualizadas: ${totalAtualizadas}`)
-    console.log(`✅ Total salvas: ${totalSalvas}`)
-    console.log(`❌ Erros: ${totalErros}`)
-    console.log(`⏱️  Duração: ${Math.round((Date.now() - agora.getTime()) / 1000)}s`)
-    console.log(`📅 Período: ${startDate} a ${endDate}`)
-    console.log(`🕐 Próxima execução: ${proximaExecucao.toLocaleString('pt-BR')}`)
-    console.log('================================================================================')
+    if (unitsSemMapeamento.length > 0) {
+      console.log(`\n⚠️ UNITS SEM MAPEAMENTO (precisam ser adicionadas em getin_units):`)
+      for (const unitId of unitsSemMapeamento) {
+        console.log(`   - ${unitId}`)
+      }
+    }
 
-    // Log sync result to getin_sync_logs table
+    // Preparar resultado por bar
+    const resultadosArray = Array.from(resultadosPorBar.entries()).map(([barId, stats]) => ({
+      bar_id: barId,
+      novas: stats.novas,
+      atualizadas: stats.atualizadas,
+      erros: stats.erros
+    }))
+
+    console.log(`\n${'='.repeat(60)}`)
+    console.log(`📊 RESUMO DA SINCRONIZAÇÃO`)
+    console.log(`   📋 Total reservas: ${totalReservas}`)
+    console.log(`   🆕 Novas: ${totalNovas}`)
+    console.log(`   🔄 Atualizadas: ${totalAtualizadas}`)
+    console.log(`   ❌ Erros: ${totalErros}`)
+    console.log(`   ⚠️ Sem mapeamento: ${totalSemMapeamento}`)
+    console.log(`   🏪 Units encontradas: ${unitsEncontradas.size}`)
+    console.log(`${'='.repeat(60)}`)
+
+    // Log sync result
     try {
-      await supabase
-        .from('getin_sync_logs')
-        .insert({
-          status: totalErros === 0 ? 'sucesso' : 'erro_parcial',
-          reservas_extraidas: totalReservas,
-          reservas_novas: totalNovas,
-          reservas_atualizadas: totalAtualizadas,
-          detalhes: {
-            periodo_inicio: startDate,
-            periodo_fim: endDate,
-            total_erros: totalErros,
-            duracao_segundos: Math.round((Date.now() - agora.getTime()) / 1000),
-            proxima_execucao: proximaExecucao.toISOString()
-          }
-        })
+      await supabase.from('getin_sync_logs').insert({
+        status: totalErros === 0 ? 'sucesso' : 'erro_parcial',
+        reservas_extraidas: totalReservas,
+        reservas_novas: totalNovas,
+        reservas_atualizadas: totalAtualizadas,
+        detalhes: {
+          periodo_inicio: startDate,
+          periodo_fim: endDate,
+          total_erros: totalErros,
+          units_encontradas: Array.from(unitsEncontradas),
+          units_sem_mapeamento: unitsSemMapeamento,
+          resultados_por_bar: resultadosArray
+        }
+      })
     } catch (logError) {
       console.warn('⚠️ Erro ao registrar log:', logError)
     }
@@ -352,16 +362,18 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         success: true,
-        message: 'Sincronização contínua GET IN concluída',
-        stats: {
-          total_encontrados: totalReservas,
-          total_novas: totalNovas,
-          total_atualizadas: totalAtualizadas,
-          total_salvos: totalSalvas,
-          total_erros: totalErros,
-          periodo: `${startDate} a ${endDate}`,
-          proxima_execucao: proximaExecucao.toISOString()
-        }
+        message: `Sincronização GET IN concluída`,
+        totais: {
+          reservas: totalReservas,
+          novas: totalNovas,
+          atualizadas: totalAtualizadas,
+          erros: totalErros,
+          sem_mapeamento: totalSemMapeamento
+        },
+        units_encontradas: Array.from(unitsEncontradas),
+        units_sem_mapeamento: unitsSemMapeamento,
+        resultados_por_bar: resultadosArray,
+        periodo: `${startDate} a ${endDate}`
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -369,13 +381,14 @@ serve(async (req) => {
       },
     )
 
-  } catch (error) {
-    console.error('❌ Erro na sincronização:', error)
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error || 'Erro desconhecido')
+    console.error('❌ Erro na sincronização:', errorMessage)
     
     return new Response(
       JSON.stringify({
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
         timestamp: new Date().toISOString()
       }),
       {

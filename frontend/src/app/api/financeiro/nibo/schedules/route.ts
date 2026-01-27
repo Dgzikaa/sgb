@@ -89,19 +89,33 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const {
       stakeholderId,
+      stakeholder_nome,
       dueDate,
       scheduleDate,
       categoria_id,
+      categoria_nome,
       centro_custo_id,
+      centro_custo_nome,
       categories,
       accrualDate,
       value,
       description,
       reference,
-      bar_id = 3
+      bar_id,
+      bar_nome,
+      criado_por_id,
+      criado_por_nome
     } = body;
 
-    // BUILD_VERSION: 2026-01-21-v4-DEBUG-PAYLOAD
+    // VALIDAÇÃO CRÍTICA: bar_id é obrigatório
+    if (!bar_id) {
+      return NextResponse.json(
+        { success: false, error: 'bar_id é obrigatório. Selecione um bar.' },
+        { status: 400 }
+      );
+    }
+
+    // BUILD_VERSION: 2026-01-21-v10-DEBUG-BODY-STRING
     console.log(`[NIBO-SCHEDULES-V4] ========== NOVA REQUISIÇÃO ==========`);
     console.log(`[NIBO-SCHEDULES-V4] Body recebido:`, JSON.stringify(body, null, 2));
     console.log(`[NIBO-SCHEDULES-V4] value raw:`, value, typeof value);
@@ -133,43 +147,46 @@ export async function POST(request: NextRequest) {
     }
 
     // Preparar payload para NIBO - endpoint /schedules/debit para AGENDAMENTO de despesas
-    // IMPORTANTE: Para débitos (despesas), o valor deve ser NEGATIVO
-    const valorNumerico = Math.abs(parseFloat(String(value)));
-    const valorNegativo = valorNumerico * -1; // NIBO exige valor negativo para /schedules/debit
+    // CONFIRMADO: NIBO exige valor NEGATIVO para /schedules/debit
+    const valorNumerico = parseFloat((Math.abs(parseFloat(String(value)))).toFixed(2));
+    const valorNegativo = valorNumerico * -1; // DEVE ser negativo!
     
-    console.log('[NIBO-SCHEDULES-V3] Valor NEGATIVO calculado:', valorNegativo, '(original:', value, ', numerico:', valorNumerico, ')');
+    console.log('[NIBO-SCHEDULES-V7] Valor calculado:', {
+      original: value,
+      numerico: valorNumerico,
+      negativo: valorNegativo,
+      eh_negativo: valorNegativo < 0
+    });
     
-    // Garantir que o valor é realmente negativo
-    if (valorNegativo >= 0) {
-      console.error('[NIBO-SCHEDULES-V3] ERRO: Valor não está negativo!', valorNegativo);
-      return NextResponse.json(
-        { success: false, error: `Erro interno: valor deveria ser negativo mas é ${valorNegativo}` },
-        { status: 500 }
-      );
-    }
-    
-    // Montar objeto de categoria com valor NEGATIVO
+    // Montar objeto de categoria com valor NEGATIVO (obrigatório para /schedules/debit)
+    // V10: Testando se value precisa ser string (como costCenters.value)
     const categoryItem: any = {
-      categoryId: categoria_id, // camelCase para /schedules
-      value: valorNegativo, // Valor NEGATIVO para débitos
+      categoryId: categoria_id,
+      value: valorNegativo, // number negativo
       description: description || 'Pagamento'
     };
     
+    // DEBUG V10: Logar o JSON exato que será enviado
+    console.log('[NIBO-SCHEDULES-V10] categoryItem.value:', categoryItem.value, 'tipo:', typeof categoryItem.value);
+    
     // Payload para /schedules/debit
+    // V9: Removido 'value' do nível raiz (não existe na doc), adicionado costCenterValueType
     const schedulePayload: any = {
       stakeholderId: stakeholderId,
-      dueDate: dueDate, // Data de vencimento
-      scheduleDate: scheduleDate || dueDate, // Data do agendamento
-      accrualDate: accrualDate || dueDate, // Data de competência
+      dueDate: dueDate,
+      scheduleDate: scheduleDate || dueDate,
+      accrualDate: accrualDate || dueDate, // string
       description: description || 'Pagamento agendado',
       categories: [categoryItem]
     };
 
-    // Adicionar centro de custo se fornecido (com valor negativo)
+    // Adicionar centro de custo se fornecido
+    // IMPORTANTE: costCenterValueType = 0 significa "valor" (não percentagem)
     if (centro_custo_id) {
+      schedulePayload.costCenterValueType = 0; // 0 = valor, 1 = percentagem
       schedulePayload.costCenters = [{
-        costCenterId: centro_custo_id, // camelCase para /schedules
-        value: valorNegativo
+        costCenterId: centro_custo_id,
+        value: String(valorNegativo) // Doc diz que é string!
       }];
     }
 
@@ -178,12 +195,30 @@ export async function POST(request: NextRequest) {
       schedulePayload.reference = reference;
     }
 
-    console.log('[NIBO-SCHEDULES-V4] ========== PAYLOAD FINAL ==========');
-    console.log('[NIBO-SCHEDULES-V4] Payload para NIBO:', JSON.stringify(schedulePayload, null, 2));
-    console.log('[NIBO-SCHEDULES-V4] Valor na categoria:', schedulePayload.categories[0].value);
-    console.log('[NIBO-SCHEDULES-V4] Tipo do valor:', typeof schedulePayload.categories[0].value);
-    console.log('[NIBO-SCHEDULES-V4] É negativo?:', schedulePayload.categories[0].value < 0);
+    console.log('[NIBO-SCHEDULES-V9] ========== PAYLOAD FINAL ==========');
+    console.log('[NIBO-SCHEDULES-V9] Payload para NIBO:', JSON.stringify(schedulePayload, null, 2));
+    console.log('[NIBO-SCHEDULES-V9] Valor na categoria:', schedulePayload.categories[0].value);
+    console.log('[NIBO-SCHEDULES-V9] Tipo do valor:', typeof schedulePayload.categories[0].value);
+    console.log('[NIBO-SCHEDULES-V9] É negativo?:', schedulePayload.categories[0].value < 0);
+    console.log('[NIBO-SCHEDULES-V9] costCenterValueType:', schedulePayload.costCenterValueType);
 
+    // Verificação de segurança - garantir que valor é negativo antes de enviar
+    if (schedulePayload.categories[0].value >= 0) {
+      console.error('[NIBO-SCHEDULES-V9] ERRO CRÍTICO: Valor não é negativo!', schedulePayload.categories[0].value);
+      return NextResponse.json({
+        success: false,
+        error: 'Erro interno: valor deve ser negativo para agendamento de débito',
+        debug: {
+          valor_recebido: value,
+          valor_calculado: schedulePayload.categories[0].value
+        }
+      }, { status: 400 });
+    }
+
+    // V10: Log do body exato antes de enviar
+    const bodyString = JSON.stringify(schedulePayload);
+    console.log('[NIBO-SCHEDULES-V10] Body string exato:', bodyString);
+    
     // Endpoint /schedules/debit para AGENDAR despesas (não paga imediatamente)
     const response = await fetch(`${NIBO_BASE_URL}/schedules/debit?apitoken=${credencial.api_token}`, {
       method: 'POST',
@@ -192,7 +227,7 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
         'apitoken': credencial.api_token
       },
-      body: JSON.stringify(schedulePayload)
+      body: bodyString
     });
 
     if (!response.ok) {
@@ -204,13 +239,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const niboData = await response.json();
-    console.log('[NIBO-SCHEDULES] Agendamento criado no NIBO:', niboData.id || niboData.scheduleId);
+    // NIBO retorna o ID como texto puro (UUID), não como JSON
+    const responseText = await response.text();
+    console.log('[NIBO-SCHEDULES] Resposta do NIBO (raw):', responseText);
+    
+    // Tentar parsear como JSON primeiro, senão usar o texto como ID
+    let niboId: string;
+    let niboData: any = {};
+    
+    try {
+      niboData = JSON.parse(responseText);
+      niboId = niboData.id || niboData.scheduleId || niboData.Id || niboData.ScheduleId || responseText.replace(/"/g, '');
+    } catch {
+      // Resposta é texto puro (UUID)
+      niboId = responseText.replace(/"/g, '').trim();
+      niboData = { id: niboId };
+    }
+    
+    console.log('[NIBO-SCHEDULES] Agendamento criado no NIBO, ID:', niboId);
 
     // Salvar no banco local para tracking (salva valor POSITIVO para exibição)
+    // Só salva se tiver um ID válido
+    if (!niboId) {
+      console.warn('[NIBO-SCHEDULES] NIBO não retornou ID do agendamento, pulando salvamento local');
+    }
+    
     const { error: insertError } = await supabase.from('nibo_agendamentos').insert({
-      nibo_id: niboData.id || niboData.scheduleId,
+      nibo_id: niboId || `temp-${Date.now()}`, // Fallback temporário se não tiver ID
       bar_id,
+      bar_nome: bar_nome || null,
       tipo: 'despesa',
       status: 'pendente',
       valor: valorNumerico, // Salva positivo para exibição
@@ -218,8 +275,13 @@ export async function POST(request: NextRequest) {
       data_pagamento: null,
       descricao: description,
       categoria_id,
+      categoria_nome: categoria_nome || null,
       stakeholder_id: stakeholderId,
+      stakeholder_nome: stakeholder_nome || null,
       centro_custo_id,
+      centro_custo_nome: centro_custo_nome || null,
+      criado_por_id: criado_por_id || null,
+      criado_por_nome: criado_por_nome || null,
       criado_em: new Date().toISOString(),
       atualizado_em: new Date().toISOString()
     });
@@ -232,7 +294,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        id: niboData.id || niboData.scheduleId,
+        id: niboId,
         ...niboData
       }
     });

@@ -13,10 +13,14 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Configuração da planilha
-const SPREADSHEET_ID = '1QhuD52kQrdCv4XMfKR5NSRMttx6NzVBZO0S8ajQK1H8';
-const API_KEY = 'AIzaSyBKprFuR1gpvoTB4hV16rKlBk3oF0v1BhQ';
-const BAR_ID = 3; // Ordinário Bar
+// Configurações padrão (fallback) - preferir buscar do banco
+const DEFAULT_API_KEY = 'AIzaSyBKprFuR1gpvoTB4hV16rKlBk3oF0v1BhQ';
+
+// Interface para configuração do bar
+interface BarSheetsConfig {
+  spreadsheet_id: string;
+  api_key: string;
+}
 
 /**
  * Converter valor monetário BR para número
@@ -79,10 +83,33 @@ function converterData(dataStr: string | null | undefined): string | null {
 }
 
 /**
+ * Buscar configuração de Sheets do banco para o bar específico
+ */
+async function getBarSheetsConfig(supabase: any, barId: number): Promise<BarSheetsConfig> {
+  const { data, error } = await supabase
+    .from('api_credentials')
+    .select('configuracoes, api_key')
+    .eq('sistema', 'google_sheets')
+    .eq('bar_id', barId)
+    .eq('ativo', true)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Configuração de Google Sheets não encontrada para bar_id=${barId}`);
+  }
+
+  const config = data.configuracoes || {};
+  return {
+    spreadsheet_id: config.spreadsheet_id || config.cmv_spreadsheet_id,
+    api_key: data.api_key || DEFAULT_API_KEY
+  };
+}
+
+/**
  * Buscar dados do Google Sheets
  */
-async function buscarDadosSheets(range: string): Promise<any[][]> {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${encodeURIComponent(range)}?key=${API_KEY}`;
+async function buscarDadosSheets(range: string, spreadsheetId: string, apiKey: string): Promise<any[][]> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}?key=${apiKey}`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Erro ao acessar planilha: ${response.status}`);
@@ -109,7 +136,7 @@ function encontrarColunaSemana(cabecalho: string[], semana: number): number {
 /**
  * Processar dados de uma semana
  */
-async function processarSemana(linhas: any[][], colunaIdx: number, semana: number, ano: number) {
+async function processarSemana(linhas: any[][], colunaIdx: number, semana: number, ano: number, barId: number) {
   // Estrutura da planilha CMV Semanal:
   // Linha 1: Cabeçalho (Semana XX)
   // Linha 2: Data início (de)
@@ -162,7 +189,7 @@ async function processarSemana(linhas: any[][], colunaIdx: number, semana: numbe
   const gap = cmvLimpoPercent - cmvTeoricoPercent;
 
   return {
-    bar_id: BAR_ID,
+    bar_id: barId,
     ano,
     semana,
     data_inicio: dataInicio,
@@ -193,20 +220,54 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔄 Sincronizando CMV do Google Sheets...');
-    
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Parâmetros opcionais
+    // Parâmetros - bar_id é opcional (se não passar, processa todos)
     const body = await req.json().catch(() => ({}));
-    const semanaEspecifica = body.semana; // Opcional: processar apenas uma semana
-    const anoEspecifico = body.ano || new Date().getFullYear();
+    const { bar_id, semana: semanaEspecifica, ano } = body;
+    const anoEspecifico = ano || new Date().getFullYear();
+    
+    // Buscar bares para processar
+    const { data: todosOsBares } = await supabase
+      .from('bars')
+      .select('id, nome')
+      .eq('ativo', true);
+    
+    if (!todosOsBares?.length) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Nenhum bar ativo' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    const baresParaProcessar = bar_id 
+      ? todosOsBares.filter(b => b.id === bar_id)
+      : todosOsBares;
+
+    console.log(`🔄 Sincronizando CMV para ${baresParaProcessar.length} bar(es)...`);
+    
+    const resultadosPorBar: any[] = [];
+    
+    // ====== LOOP POR CADA BAR ======
+    for (const bar of baresParaProcessar) {
+      console.log(`\n🏪 Processando CMV para: ${bar.nome} (ID: ${bar.id})`);
+      
+      let sheetsConfig;
+      try {
+        sheetsConfig = await getBarSheetsConfig(supabase, bar.id);
+      } catch (e) {
+        console.log(`⚠️ Configuração de Sheets não encontrada para ${bar.nome}, pulando...`);
+        resultadosPorBar.push({ bar_id: bar.id, bar_nome: bar.nome, success: false, error: 'Config não encontrada' });
+        continue;
+      }
+      
+      console.log(`📋 Planilha: ${sheetsConfig.spreadsheet_id}`);
 
     // Buscar dados da aba CMV Semanal (range amplo para pegar todas as semanas)
     console.log('📊 Buscando dados da aba CMV Semanal...');
-    const linhas = await buscarDadosSheets("'CMV Semanal'!A1:DZ25");
+    const linhas = await buscarDadosSheets("'CMV Semanal'!A1:DZ25", sheetsConfig.spreadsheet_id, sheetsConfig.api_key);
     
     if (linhas.length < 15) {
       throw new Error('Planilha com dados insuficientes');
@@ -243,7 +304,7 @@ serve(async (req) => {
       }
 
       try {
-        const dados = await processarSemana(linhas, i, semana, ano);
+        const dados = await processarSemana(linhas, i, semana, ano, bar.id);
         
         // Só salvar se tiver CMV real válido (diferente de zero)
         // Valores negativos também são válidos (significa estoque aumentou)
@@ -268,14 +329,26 @@ serve(async (req) => {
       }
     }
 
-    console.log(`\n✅ Sincronização concluída: ${semanasProcessadas.length} semanas processadas`);
+      console.log(`✅ ${bar.nome}: ${semanasProcessadas.length} semanas processadas`);
+      
+      resultadosPorBar.push({
+        bar_id: bar.id,
+        bar_nome: bar.nome,
+        success: true,
+        semanas_processadas: semanasProcessadas.length,
+        resultados
+      });
+    }
+    // ====== FIM DO LOOP ======
+
+    console.log(`\n✅ Sincronização concluída para ${baresParaProcessar.length} bar(es)`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `${semanasProcessadas.length} semanas sincronizadas do Google Sheets`,
-        semanas: semanasProcessadas,
-        resultados
+        message: `CMV sincronizado para ${baresParaProcessar.length} bar(es)`,
+        bares_processados: baresParaProcessar.length,
+        resultados_por_bar: resultadosPorBar
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

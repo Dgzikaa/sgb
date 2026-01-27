@@ -39,8 +39,10 @@ import {
   Trash2,
   Phone,
   AlertCircle,
-  Zap
+  Zap,
+  BarChart3
 } from 'lucide-react';
+import Link from 'next/link';
 
 interface Campanha {
   id: string;
@@ -440,6 +442,15 @@ export default function CampanhasPage() {
           </div>
 
           <div className="flex gap-2">
+            <Link href="/crm/campanhas/analise">
+              <Button 
+                variant="outline"
+                className="border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20"
+              >
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Análise de Campanhas
+              </Button>
+            </Link>
             <Button 
               onClick={() => window.location.href = '/crm/conversas'}
               variant="outline"

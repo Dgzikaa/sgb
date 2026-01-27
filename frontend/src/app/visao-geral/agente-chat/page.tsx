@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useBarContext } from '@/contexts/BarContext'
+import { useUser } from '@/contexts/UserContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,11 +26,30 @@ interface Mensagem {
 
 export default function AgenteChatPage() {
   const { selectedBar } = useBarContext()
+  const { user } = useUser()
   const [mensagem, setMensagem] = useState('')
   const [conversas, setConversas] = useState<Mensagem[]>([])
   const [loading, setLoading] = useState(false)
   const [loadingHistorico, setLoadingHistorico] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Criar header de autenticação
+  const getAuthHeaders = () => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json'
+    }
+    
+    if (user) {
+      const userData = {
+        ...user,
+        bar_id: selectedBar,
+        user_id: (user as any).user_id || user.id?.toString()
+      }
+      headers['x-user-data'] = encodeURIComponent(JSON.stringify(userData))
+    }
+    
+    return headers
+  }
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -50,7 +70,9 @@ export default function AgenteChatPage() {
 
     try {
       setLoadingHistorico(true)
-      const response = await fetch(`/api/agente/chat?bar_id=${selectedBar}&limit=30`)
+      const response = await fetch(`/api/agente/chat?bar_id=${selectedBar}&limit=30`, {
+        headers: getAuthHeaders()
+      })
       const data = await response.json()
 
       if (data.success && data.conversas) {
@@ -82,10 +104,13 @@ export default function AgenteChatPage() {
   const enviarMensagem = async () => {
     if (!mensagem.trim() || !selectedBar || loading) return
 
+    // Armazenar mensagem antes de limpar o input
+    const mensagemEnviar = mensagem.trim()
+    
     const mensagemUsuario: Mensagem = {
       id: Date.now(),
       tipo: 'usuario',
-      conteudo: mensagem,
+      conteudo: mensagemEnviar,
       timestamp: new Date().toISOString()
     }
 
@@ -96,10 +121,10 @@ export default function AgenteChatPage() {
     try {
       const response = await fetch('/api/agente/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           bar_id: selectedBar,
-          mensagem: mensagem
+          mensagem: mensagemEnviar
         })
       })
 
@@ -109,10 +134,13 @@ export default function AgenteChatPage() {
         throw new Error(data.error || 'Erro ao enviar mensagem')
       }
 
+      // Garantir que temos uma resposta válida
+      const respostaTexto = data.resposta || data.message || 'Desculpe, não consegui processar sua pergunta. Tente novamente.'
+
       const respostaAgente: Mensagem = {
         id: Date.now() + 1,
         tipo: 'agente',
-        conteudo: data.resposta,
+        conteudo: respostaTexto,
         timestamp: new Date().toISOString(),
         aprendizado_detectado: data.aprendizado_detectado,
         acao_sugerida: data.acao_sugerida,

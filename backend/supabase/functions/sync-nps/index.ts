@@ -25,10 +25,10 @@ function getCredentials() {
   }
 }
 
-// ID do arquivo do Google Drive - NPS
-// https://docs.google.com/spreadsheets/d/1GSsU3G2uEl6RHkQUop_WDWjzLBsMVomJN-rf-_J8Sx4/edit?resourcekey=&pli=1&gid=38070213#gid=38070213
-const FILE_ID = '1GSsU3G2uEl6RHkQUop_WDWjzLBsMVomJN-rf-_J8Sx4'
-const SHEET_NAME = 'Respostas ao formulário 1'
+// FILE_ID e SHEET_NAME serão buscados do banco por bar_id
+// Configuração padrão (fallback para bar_id=3)
+const DEFAULT_FILE_ID = '1GSsU3G2uEl6RHkQUop_WDWjzLBsMVomJN-rf-_J8Sx4'
+const DEFAULT_SHEET_NAME = 'Respostas ao formulário 1'
 
 interface NPSRow {
   bar_id: number
@@ -130,22 +130,64 @@ serve(async (req) => {
   }
 
   try {
-    // Permitir acesso sem autenticação para pg_cron
-    const authHeader = req.headers.get('authorization')
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    
-    // Log para debugging
+    // Parâmetros - bar_id é opcional (se não passar, processa todos)
+    const body = await req.json().catch(() => ({}))
+    const { bar_id } = body
+
     console.log('🔄 Iniciando sincronização do NPS...')
-    console.log('🔐 Auth presente:', !!authHeader)
+    
+    // Inicializar Supabase
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Buscar bares para processar
+    const { data: todosOsBares } = await supabase
+      .from('bars')
+      .select('id, nome')
+      .eq('ativo', true)
+    
+    if (!todosOsBares?.length) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Nenhum bar ativo encontrado' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const baresParaProcessar = bar_id 
+      ? todosOsBares.filter(b => b.id === bar_id)
+      : todosOsBares
+    
+    console.log(`🏪 Processando ${baresParaProcessar.length} bar(es)`)
 
     // 1. Obter Access Token
     console.log('🔑 Obtendo Access Token...')
     const accessToken = await getAccessToken()
     console.log('✅ Token obtido!')
 
-    // 2. Baixar arquivo Excel do Google Drive
-    console.log('📥 Baixando arquivo Excel...')
-    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${FILE_ID}/export?mimeType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+    const resultadosPorBar: any[] = []
+    
+    // ====== LOOP POR CADA BAR ======
+    for (const bar of baresParaProcessar) {
+      console.log(`\n🏪 Processando NPS para: ${bar.nome} (ID: ${bar.id})`)
+      
+      // Buscar configuração do arquivo NPS para este bar
+      const { data: config } = await supabase
+        .from('api_credentials')
+        .select('configuracoes')
+        .eq('sistema', 'google_sheets')
+        .eq('bar_id', bar.id)
+        .eq('ativo', true)
+        .single()
+      
+      const fileId = config?.configuracoes?.nps_file_id || DEFAULT_FILE_ID
+      const sheetName = config?.configuracoes?.nps_sheet_name || DEFAULT_SHEET_NAME
+      
+      console.log(`📋 Arquivo: ${fileId}`)
+
+      // 2. Baixar arquivo Excel do Google Drive
+      const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
     
     const fileResponse = await fetch(downloadUrl, {
       headers: { 'Authorization': `Bearer ${accessToken}` },
@@ -165,9 +207,9 @@ serve(async (req) => {
     console.log(`📑 Abas encontradas: ${workbook.SheetNames.join(', ')}`)
 
     // Encontrar aba "Respostas ao formulário 1"
-    let targetSheet = workbook.Sheets[SHEET_NAME]
+    let targetSheet = workbook.Sheets[sheetName]
     if (!targetSheet) {
-      console.warn(`⚠️ Aba "${SHEET_NAME}" não encontrada, buscando alternativas...`)
+      console.warn(`⚠️ Aba "${sheetName}" não encontrada, buscando alternativas...`)
       // Tentar encontrar por nome parcial
       const npsSheetName = workbook.SheetNames.find(name => 
         name.toLowerCase().includes('respostas') || 
@@ -328,7 +370,7 @@ serve(async (req) => {
         const resultadoPercentual = (mediaGeral / 5) * 100
 
         const registro: NPSRow = {
-          bar_id: 3,
+          bar_id: bar.id,
           data_pesquisa: dataFormatada,
           setor: 'TODOS',
           quorum: 1,
@@ -404,14 +446,30 @@ serve(async (req) => {
       console.log(`✅ Lote ${Math.floor(i / BATCH_SIZE) + 1}: ${insertedData?.length || 0} registros inseridos`)
     }
 
-    console.log(`✅ Total: ${totalInserted} registros inseridos/atualizados`)
+    console.log(`✅ Total: ${totalInserted} registros inseridos/atualizados para ${bar.nome}`)
+    
+    resultadosPorBar.push({
+      bar_id: bar.id,
+      bar_nome: bar.nome,
+      processados: registros.length,
+      inseridos: totalInserted
+    })
+    }
+    // ====== FIM DO LOOP DE BARES ======
+
+    const totalProcessados = resultadosPorBar.reduce((acc, r) => acc + r.processados, 0)
+    const totalInseridos = resultadosPorBar.reduce((acc, r) => acc + r.inseridos, 0)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `${registros.length} registros processados, ${totalInserted} inseridos/atualizados`,
-        total: registros.length,
-        inserted: totalInserted
+        message: `NPS sincronizado: ${baresParaProcessar.length} bar(es), ${totalProcessados} processados, ${totalInseridos} inseridos`,
+        bares_processados: baresParaProcessar.length,
+        resultados_por_bar: resultadosPorBar,
+        totais: {
+          processados: totalProcessados,
+          inseridos: totalInseridos
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

@@ -147,21 +147,9 @@ interface HistoricoData {
   }>;
 }
 
-// Mapeamento de locais para categorias
-const GRUPOS_LOCAIS = {
-  drink: {
-    nome: 'Drink / Bebida',
-    locais: ['preshh', 'mexido', 'batidos', 'montados', 'shot e dose', 'drink', 'bebida']
-  },
-  bar: {
-    nome: 'Bar',
-    locais: ['chopp', 'baldes', 'bar']
-  },
-  cozinha: {
-    nome: 'Cozinha',
-    locais: ['cozinha 1', 'cozinha 2', 'cozinha']
-  }
-};
+// Locais são carregados dinamicamente da API - cada bar tem seus próprios locais
+// Exemplo Deboche: Bar, Cozinha, Cozinha 2, Salao
+// Exemplo Ordinário: Preshh, Mexido, Batidos, Montados, Chopp, Cozinha 1, Cozinha 2
 
 export default function StockoutPage() {
   const { setPageTitle } = usePageTitle();
@@ -488,94 +476,64 @@ export default function StockoutPage() {
     return 'badge-error';
   };
 
-  // Função para agrupar locais da análise
+  // Função para listar locais da análise (dinâmico por bar)
   const agruparLocaisPorCategoria = () => {
     if (!stockoutData?.analise_por_local) return [];
 
-    // Se estiver no modo período, os dados já vêm agrupados por categoria
+    // Se estiver no modo período, usar dados já agrupados
     if (modoAnalise === 'periodo') {
       return stockoutData.analise_por_local
-        .filter((item: any) => {
-          // Filtrar apenas as categorias principais
-          const nomesCategoriasValidas = Object.values(GRUPOS_LOCAIS).map(g => g.nome);
-          return nomesCategoriasValidas.includes(item.local);
-        })
-        .map((item: any) => {
-          // Encontrar a chave da categoria pelo nome
-          const categoriaKey = Object.entries(GRUPOS_LOCAIS).find(
-            ([_, grupo]) => grupo.nome === item.local
-          )?.[0] || '';
-
-          return {
-            key: categoriaKey,
-            nome: item.local,
-            locais: [item],
-            total_produtos: item.total_produtos || 0,
-            disponiveis: item.produtos_disponiveis || 0,
-            indisponiveis: item.produtos_indisponiveis || 0,
-            perc_stockout: parseFloat((item.percentual_stockout || '0%').replace('%', ''))
-          };
-        });
+        .filter((item: any) => item.local && item.local !== 'Sem local definido')
+        .map((item: any) => ({
+          key: item.local.toLowerCase().replace(/\s+/g, '_'),
+          nome: item.local,
+          locais: [item],
+          total_produtos: item.total_produtos || 0,
+          disponiveis: item.produtos_disponiveis || 0,
+          indisponiveis: item.produtos_indisponiveis || 0,
+          perc_stockout: parseFloat((item.percentual_stockout || '0%').replace('%', ''))
+        }))
+        .sort((a: any, b: any) => b.perc_stockout - a.perc_stockout);
     }
 
-    // Modo data única - agrupar manualmente
-    const grupos: Record<string, any> = {};
-
-    stockoutData.analise_por_local.forEach((local: any) => {
-      const localProducao = local.local_producao || local.loc_desc || '';
-      if (!localProducao) return; // Pular se não tiver local
-      
-      const localNormalizado = localProducao.toLowerCase().trim();
-      
-      // Encontrar em qual grupo o local pertence
-      let grupoEncontrado = '';
-      Object.entries(GRUPOS_LOCAIS).forEach(([key, grupo]) => {
-        if (grupo.locais.some(l => localNormalizado.includes(l.toLowerCase()))) {
-          grupoEncontrado = key;
-        }
-      });
-
-      if (grupoEncontrado) {
-        if (!grupos[grupoEncontrado]) {
-          grupos[grupoEncontrado] = {
-            nome: GRUPOS_LOCAIS[grupoEncontrado as keyof typeof GRUPOS_LOCAIS].nome,
-            locais: [],
-            total_produtos: 0,
-            disponiveis: 0,
-            indisponiveis: 0
-          };
-        }
-
-        grupos[grupoEncontrado].locais.push(local);
-        grupos[grupoEncontrado].total_produtos += local.total_produtos || 0;
-        grupos[grupoEncontrado].disponiveis += local.disponiveis || 0;
-        grupos[grupoEncontrado].indisponiveis += local.indisponiveis || 0;
-      }
-    });
-
-    // Calcular percentual de stockout para cada grupo
-    return Object.entries(grupos).map(([key, grupo]) => ({
-      key,
-      ...grupo,
-      perc_stockout: grupo.total_produtos > 0 
-        ? parseFloat(((grupo.indisponiveis / grupo.total_produtos) * 100).toFixed(1))
-        : 0
-    }));
+    // Modo data única - usar locais diretamente da API
+    return stockoutData.analise_por_local
+      .filter((local: any) => {
+        const localProducao = local.local_producao || local.loc_desc || '';
+        return localProducao && localProducao !== 'Sem local definido';
+      })
+      .map((local: any) => {
+        const localProducao = local.local_producao || local.loc_desc || '';
+        return {
+          key: localProducao.toLowerCase().replace(/\s+/g, '_'),
+          nome: localProducao,
+          locais: [local],
+          total_produtos: local.total_produtos || 0,
+          disponiveis: local.disponiveis || 0,
+          indisponiveis: local.indisponiveis || 0,
+          perc_stockout: local.perc_stockout || 0
+        };
+      })
+      .sort((a: any, b: any) => b.perc_stockout - a.perc_stockout);
   };
 
-  // Função para filtrar produtos por local selecionado
+  // Função para filtrar produtos por local selecionado (dinâmico)
   const getProdutosPorLocal = () => {
     if (!localSelecionado || !stockoutData) {
       return { disponiveis: [], indisponiveis: [] };
     }
 
-    const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
-    if (!grupoSelecionado) return { disponiveis: [], indisponiveis: [] };
+    // Encontrar o nome do local selecionado
+    const gruposAtuais = agruparLocaisPorCategoria();
+    const grupoSelecionadoData = gruposAtuais.find((g: any) => g.key === localSelecionado);
+    if (!grupoSelecionadoData) return { disponiveis: [], indisponiveis: [] };
+
+    const nomeLocal = grupoSelecionadoData.nome;
 
     // Se estiver no modo período e tiver dados de analise_por_local com produtos_por_dia
     if (modoAnalise === 'periodo' && stockoutData.analise_por_local) {
       const localData = stockoutData.analise_por_local.find(
-        (item: any) => item.local === grupoSelecionado.nome
+        (item: any) => item.local === nomeLocal
       );
       
       if (localData) {
@@ -602,31 +560,35 @@ export default function StockoutPage() {
       }
     }
 
-    // Modo data única - usar o método original
+    // Modo data única - filtrar por nome exato do local
     const disponiveis = (stockoutData.produtos?.ativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+      return localProduto === nomeLocal.toLowerCase().trim();
     });
 
     const indisponiveis = (stockoutData.produtos?.inativos || []).filter(produto => {
       const localProduto = (produto.loc_desc || produto.local_producao || '').toLowerCase().trim();
-      return grupoSelecionado.locais.some(l => localProduto.includes(l.toLowerCase()));
+      return localProduto === nomeLocal.toLowerCase().trim();
     });
 
     return { disponiveis, indisponiveis };
   };
   
-  // Função para pegar os dias disponíveis de uma categoria
+  // Função para pegar os dias disponíveis de uma categoria (dinâmico)
   const getDiasDaCategoria = () => {
     if (!localSelecionado || !stockoutData?.analise_por_local || modoAnalise !== 'periodo') {
       return [];
     }
     
-    const grupoSelecionado = GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS];
-    if (!grupoSelecionado) return [];
+    // Encontrar o nome do local selecionado
+    const gruposAtuais = agruparLocaisPorCategoria();
+    const grupoSelecionadoData = gruposAtuais.find((g: any) => g.key === localSelecionado);
+    if (!grupoSelecionadoData) return [];
+    
+    const nomeLocal = grupoSelecionadoData.nome;
     
     const localData = stockoutData.analise_por_local.find(
-      (item: any) => item.local === grupoSelecionado.nome
+      (item: any) => item.local === nomeLocal
     );
     
     return localData?.produtos_por_dia || [];
@@ -892,7 +854,7 @@ export default function StockoutPage() {
                                 <CardTitle className="card-title-dark text-base sm:text-lg flex items-center gap-2">
                                   <Package className="h-4 w-4 sm:h-5 sm:w-5" />
                                   <span className="line-clamp-1">
-                                    {GRUPOS_LOCAIS[localSelecionado as keyof typeof GRUPOS_LOCAIS]?.nome}
+                                    {agruparLocaisPorCategoria().find((g: any) => g.key === localSelecionado)?.nome || localSelecionado}
                                   </span>
                                 </CardTitle>
                                 <CardDescription className="card-description-dark text-xs sm:text-sm mt-1">

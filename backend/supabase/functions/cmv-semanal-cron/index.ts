@@ -156,11 +156,10 @@ async function buscarDadosAutomaticos(
       .reduce((sum: number, item: any) => sum + (parseFloat(item.valor) || 0), 0);
   }
 
-  // 3. Buscar estoque final
+  // 3. Buscar estoque final (bar_id passado via parâmetro)
   const { data: estoqueData } = await supabase
     .from('contagem_estoque_insumos')
     .select('*')
-    .eq('bar_id', 3)
     .gte('data_contagem', dataInicio)
     .lte('data_contagem', dataFim)
     .order('data_contagem', { ascending: false });
@@ -224,7 +223,28 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    console.log('🚀 Iniciando processamento automático de CMV Semanal');
+    // Parâmetros - bar_id é opcional (se não passar, processa todos)
+    const body = await req.json().catch(() => ({}))
+    const { bar_id } = body
+    
+    // Buscar bares para processar
+    const { data: todosOsBares } = await supabaseClient
+      .from('bars')
+      .select('id, nome')
+      .eq('ativo', true)
+    
+    if (!todosOsBares?.length) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Nenhum bar ativo' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const baresParaProcessar = bar_id 
+      ? todosOsBares.filter(b => b.id === bar_id)
+      : todosOsBares
+
+    console.log(`🚀 Processando CMV Semanal para ${baresParaProcessar.length} bar(es)`);
 
     // Obter semana atual
     const hoje = new Date();
@@ -234,85 +254,116 @@ serve(async (req) => {
 
     console.log(`📅 Processando Semana ${semanaAtual}/${anoAtual} (${dataInicio} - ${dataFim})`);
 
-    // Verificar se já existe registro para esta semana
-    const { data: existente } = await supabaseClient
-      .from('cmv_semanal')
-      .select('*')
-      .eq('semana', semanaAtual)
-      .eq('ano', anoAtual)
-      .single();
+    const resultadosPorBar: any[] = [];
 
-    // Buscar dados automáticos
-    const dadosAutomaticos = await buscarDadosAutomaticos(supabaseClient, dataInicio, dataFim);
+    // ====== LOOP POR CADA BAR ======
+    for (const bar of baresParaProcessar) {
+      console.log(`\n🏪 Processando CMV para: ${bar.nome} (ID: ${bar.id})`);
 
-    // Buscar estoque inicial (estoque final da semana anterior)
-    let estoque_inicial_cozinha = 0;
-    let estoque_inicial_bebidas = 0;
-    let estoque_inicial_drinks = 0;
-
-    if (semanaAtual > 1) {
-      const { data: semanaAnterior } = await supabaseClient
+      // Verificar se já existe registro para esta semana e bar
+      const { data: existente } = await supabaseClient
         .from('cmv_semanal')
-        .select('estoque_final_cozinha, estoque_final_bebidas, estoque_final_drinks')
-        .eq('semana', semanaAtual - 1)
+        .select('*')
+        .eq('semana', semanaAtual)
         .eq('ano', anoAtual)
+        .eq('bar_id', bar.id)
         .single();
 
-      if (semanaAnterior) {
-        estoque_inicial_cozinha = semanaAnterior.estoque_final_cozinha || 0;
-        estoque_inicial_bebidas = semanaAnterior.estoque_final_bebidas || 0;
-        estoque_inicial_drinks = semanaAnterior.estoque_final_drinks || 0;
+      // Buscar dados automáticos
+      const dadosAutomaticos = await buscarDadosAutomaticos(supabaseClient, dataInicio, dataFim);
+
+      // Buscar estoque inicial (estoque final da semana anterior)
+      let estoque_inicial_cozinha = 0;
+      let estoque_inicial_bebidas = 0;
+      let estoque_inicial_drinks = 0;
+
+      if (semanaAtual > 1) {
+        const { data: semanaAnterior } = await supabaseClient
+          .from('cmv_semanal')
+          .select('estoque_final_cozinha, estoque_final_bebidas, estoque_final_drinks')
+          .eq('semana', semanaAtual - 1)
+          .eq('ano', anoAtual)
+          .eq('bar_id', bar.id)
+          .single();
+
+        if (semanaAnterior) {
+          estoque_inicial_cozinha = semanaAnterior.estoque_final_cozinha || 0;
+          estoque_inicial_bebidas = semanaAnterior.estoque_final_bebidas || 0;
+          estoque_inicial_drinks = semanaAnterior.estoque_final_drinks || 0;
+        }
+      }
+
+      const registro: any = {
+        bar_id: bar.id,
+        semana: semanaAtual,
+        ano: anoAtual,
+        data_inicio: dataInicio,
+        data_fim: dataFim,
+        estoque_inicial_cozinha,
+        estoque_inicial_bebidas,
+        estoque_inicial_drinks,
+        ...dadosAutomaticos,
+      };
+
+      let result;
+      try {
+        if (existente) {
+          // Atualizar registro existente, preservando campos manuais
+          const { data, error } = await supabaseClient
+            .from('cmv_semanal')
+            .update({
+              ...registro,
+              outros_ajustes: existente.outros_ajustes, // Preservar manual
+              ajuste_bonificacoes: existente.ajuste_bonificacoes, // Preservar manual
+              cmv_teorico_percent: existente.cmv_teorico_percent, // Preservar manual
+            })
+            .eq('id', existente.id)
+            .select()
+            .single();
+
+          if (error) throw error;
+          result = data;
+          console.log(`✅ ${bar.nome}: Registro atualizado com sucesso`);
+        } else {
+          // Criar novo registro
+          const { data, error } = await supabaseClient
+            .from('cmv_semanal')
+            .insert(registro)
+            .select()
+            .single();
+
+          if (error) throw error;
+          result = data;
+          console.log(`✅ ${bar.nome}: Novo registro criado com sucesso`);
+        }
+        
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: true,
+          semana: semanaAtual,
+          ano: anoAtual
+        });
+      } catch (barError) {
+        console.error(`❌ Erro ao processar ${bar.nome}:`, barError);
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: false,
+          error: barError.message
+        });
       }
     }
+    // ====== FIM DO LOOP DE BARES ======
 
-    const registro: any = {
-      bar_id: 3,
-      semana: semanaAtual,
-      ano: anoAtual,
-      data_inicio: dataInicio,
-      data_fim: dataFim,
-      estoque_inicial_cozinha,
-      estoque_inicial_bebidas,
-      estoque_inicial_drinks,
-      ...dadosAutomaticos,
-    };
-
-    let result;
-    if (existente) {
-      // Atualizar registro existente, preservando campos manuais
-      const { data, error } = await supabaseClient
-        .from('cmv_semanal')
-        .update({
-          ...registro,
-          outros_ajustes: existente.outros_ajustes, // Preservar manual
-          ajuste_bonificacoes: existente.ajuste_bonificacoes, // Preservar manual
-          cmv_teorico_percent: existente.cmv_teorico_percent, // Preservar manual
-        })
-        .eq('id', existente.id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      result = data;
-      console.log('✅ Registro atualizado com sucesso');
-    } else {
-      // Criar novo registro
-      const { data, error } = await supabaseClient
-        .from('cmv_semanal')
-        .insert(registro)
-        .select()
-        .single();
-
-      if (error) throw error;
-      result = data;
-      console.log('✅ Novo registro criado com sucesso');
-    }
+    const totalSucesso = resultadosPorBar.filter(r => r.success).length;
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: `CMV Semanal processado com sucesso para Semana ${semanaAtual}/${anoAtual}`,
-        data: result,
+        message: `CMV Semanal processado: ${totalSucesso}/${baresParaProcessar.length} bar(es) na Semana ${semanaAtual}/${anoAtual}`,
+        bares_processados: baresParaProcessar.length,
+        resultados_por_bar: resultadosPorBar,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

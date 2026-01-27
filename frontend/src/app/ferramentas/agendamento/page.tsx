@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePageTitle } from '@/contexts/PageTitleContext';
+import { useBar } from '@/contexts/BarContext';
+import { useUser } from '@/contexts/UserContext';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import {
   Card,
@@ -41,6 +43,8 @@ import {
   Edit,
   RefreshCw,
   Wrench,
+  Loader2,
+  Banknote,
 } from 'lucide-react';
 import { useToast } from '@/components/ui/toast';
 
@@ -54,7 +58,9 @@ interface PagamentoAgendamento {
   data_pagamento: string;
   data_competencia: string;
   categoria_id: string;
+  categoria_nome?: string;
   centro_custo_id: string;
+  centro_custo_nome?: string;
   codigo_solic?: string;
   status:
     | 'pendente'
@@ -66,6 +72,12 @@ interface PagamentoAgendamento {
   stakeholder_id?: string;
   nibo_agendamento_id?: string;
   inter_aprovacao_id?: string;
+  bar_id?: number;
+  bar_nome?: string;
+  criado_por_id?: string;
+  criado_por_nome?: string;
+  atualizado_por_id?: string;
+  atualizado_por_nome?: string;
   created_at: string;
   updated_at: string;
 }
@@ -91,6 +103,19 @@ export default function AgendamentoPage() {
   const router = useRouter();
   const { setPageTitle } = usePageTitle();
   const { showToast } = useToast();
+  const { selectedBar } = useBar();
+  const { user } = useUser();
+
+  // ID do bar selecionado - SEM FALLBACK para evitar usar credenciais erradas
+  const barId = selectedBar?.id;
+  const barNome = selectedBar?.nome;
+
+  // Estado para verificar se o bar tem credenciais configuradas
+  const [credenciaisDisponiveis, setCredenciaisDisponiveis] = useState<{
+    nibo: boolean;
+    inter: boolean;
+    verificado: boolean;
+  }>({ nibo: false, inter: false, verificado: false });
 
   // Helper function para toast
   const toast = useCallback((options: {
@@ -109,6 +134,7 @@ export default function AgendamentoPage() {
   const [pagamentos, setPagamentos] = useState<PagamentoAgendamento[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [lastSave, setLastSave] = useState<string>('');
+  const [pagandoPixId, setPagandoPixId] = useState<string | null>(null); // ID do pagamento sendo processado no Inter
 
   // Modal de edição
   const [modalEdicao, setModalEdicao] = useState(false);
@@ -179,20 +205,54 @@ export default function AgendamentoPage() {
   const [centrosCusto, setCentrosCusto] = useState<any[]>([]);
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
 
+  // Função para verificar se o bar tem credenciais configuradas
+  const verificarCredenciaisBar = useCallback(async () => {
+    if (!barId) {
+      setCredenciaisDisponiveis({ nibo: false, inter: false, verificado: true });
+      return;
+    }
+
+    try {
+      // Verificar credenciais NIBO e Inter para o bar selecionado
+      const response = await fetch(`/api/financeiro/verificar-credenciais?bar_id=${barId}`);
+      const data = await response.json();
+      
+      setCredenciaisDisponiveis({
+        nibo: data.nibo || false,
+        inter: data.inter || false,
+        verificado: true,
+      });
+
+      if (!data.nibo || !data.inter) {
+        console.warn(`[AGENDAMENTO] Bar ${barId} (${barNome}) não tem todas as credenciais:`, data);
+      }
+    } catch (error) {
+      console.error('Erro ao verificar credenciais:', error);
+      setCredenciaisDisponiveis({ nibo: false, inter: false, verificado: true });
+    }
+  }, [barId, barNome]);
+
+  // Verificar credenciais quando o bar mudar
+  useEffect(() => {
+    verificarCredenciaisBar();
+  }, [verificarCredenciaisBar]);
+
   // Função para carregar categorias e centros de custo
   const loadCategoriasECentrosCusto = useCallback(async () => {
+    if (!barId) return;
+    
     setIsLoadingOptions(true);
     try {
-      // Carregar categorias
-      const categoriasResponse = await fetch('/api/financeiro/nibo/categorias');
+      // Carregar categorias passando o bar_id
+      const categoriasResponse = await fetch(`/api/financeiro/nibo/categorias?bar_id=${barId}`);
       const categoriasData = await categoriasResponse.json();
       if (categoriasData.categorias) {
         setCategorias(categoriasData.categorias);
       }
 
-      // Carregar centros de custo
+      // Carregar centros de custo passando o bar_id
       const centrosCustoResponse = await fetch(
-        '/api/financeiro/nibo/centros-custo'
+        `/api/financeiro/nibo/centros-custo?bar_id=${barId}`
       );
       const centrosCustoData = await centrosCustoResponse.json();
       if (centrosCustoData.centrosCusto) {
@@ -208,7 +268,7 @@ export default function AgendamentoPage() {
     } finally {
       setIsLoadingOptions(false);
     }
-  }, [toast]);
+  }, [toast, barId]);
 
   // Funções de persistência
   const saveToLocalStorage = useCallback(() => {
@@ -403,6 +463,16 @@ export default function AgendamentoPage() {
 
   // Funções de manipulação
   const adicionarPagamento = () => {
+    // VALIDAÇÃO CRÍTICA: Verificar se o bar está selecionado
+    if (!barId) {
+      toast({
+        title: '❌ Nenhum bar selecionado',
+        description: 'Selecione um bar no menu superior antes de adicionar pagamentos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (
       !novoPagamento.cpf_cnpj ||
       !novoPagamento.nome_beneficiario ||
@@ -438,6 +508,13 @@ export default function AgendamentoPage() {
     }
 
     const now = new Date().toISOString();
+    const usuarioNome = user?.name || user?.email || 'Usuário';
+    const usuarioId = user?.id;
+    
+    // Buscar nomes de categoria e centro de custo
+    const categoriaSelecionada = categorias.find(c => c.nibo_id === novoPagamento.categoria_id || c.id === novoPagamento.categoria_id);
+    const centroCustoSelecionado = centrosCusto.find(c => c.nibo_id === novoPagamento.centro_custo_id || c.id === novoPagamento.centro_custo_id);
+    
     const novo: PagamentoAgendamento = {
       id: Date.now().toString(),
       cpf_cnpj: removerFormatacao(novoPagamento.cpf_cnpj), // Salvar sem formatação
@@ -448,8 +525,16 @@ export default function AgendamentoPage() {
       data_pagamento: novoPagamento.data_pagamento,
       data_competencia: novoPagamento.data_competencia,
       categoria_id: novoPagamento.categoria_id,
+      categoria_nome: categoriaSelecionada?.categoria_nome || categoriaSelecionada?.name || categoriaSelecionada?.nome || '',
       centro_custo_id: novoPagamento.centro_custo_id,
+      centro_custo_nome: centroCustoSelecionado?.nome || centroCustoSelecionado?.name || '',
       status: 'pendente',
+      bar_id: barId,
+      bar_nome: barNome || '',
+      criado_por_id: usuarioId,
+      criado_por_nome: usuarioNome,
+      atualizado_por_id: usuarioId,
+      atualizado_por_nome: usuarioNome,
       created_at: now,
       updated_at: now,
     };
@@ -474,6 +559,26 @@ export default function AgendamentoPage() {
   };
 
   const agendarPagamentos = async () => {
+    // VALIDAÇÃO CRÍTICA: Verificar se o bar está selecionado
+    if (!barId) {
+      toast({
+        title: '❌ Nenhum bar selecionado',
+        description: 'Selecione um bar antes de processar pagamentos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // VALIDAÇÃO CRÍTICA: Verificar se tem credenciais do NIBO
+    if (!credenciaisDisponiveis.nibo) {
+      toast({
+        title: '❌ Credenciais NIBO não configuradas',
+        description: `O bar "${barNome}" não possui credenciais NIBO configuradas. Configure antes de continuar.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (pagamentos.length === 0) {
       toast({
         title: '❌ Lista vazia',
@@ -509,6 +614,8 @@ export default function AgendamentoPage() {
                       status: 'agendado',
                       stakeholder_id: stakeholder.id,
                       updated_at: new Date().toISOString(),
+                      atualizado_por_id: user?.id,
+                      atualizado_por_nome: user?.name || user?.email || 'Usuário',
                     }
                   : p
               )
@@ -571,6 +678,8 @@ export default function AgendamentoPage() {
         destinatario: pagamento.nome_beneficiario,
         chave: pagamento.chave_pix,
         data_pagamento: pagamento.data_pagamento,
+        bar_id: pagamento.bar_id || barId,
+        agendamento_id: pagamento.nibo_agendamento_id, // Para vincular o código de solicitação ao agendamento
       };
 
       console.log('📤 Dados sendo enviados para o Inter:', dadosInter);
@@ -599,6 +708,8 @@ export default function AgendamentoPage() {
                   ...p,
                   inter_aprovacao_id: data.data?.codigoSolicitacao || '',
                   updated_at: new Date().toISOString(),
+                  atualizado_por_id: user?.id,
+                  atualizado_por_nome: user?.name || user?.email || 'Usuário',
                 }
               : p
           )
@@ -631,6 +742,8 @@ export default function AgendamentoPage() {
                 ...p,
                 status: 'erro_inter' as any, // Status customizado para erro apenas no Inter
                 updated_at: new Date().toISOString(),
+                atualizado_por_id: user?.id,
+                atualizado_por_nome: user?.name || user?.email || 'Usuário',
               }
             : p
         )
@@ -680,6 +793,12 @@ export default function AgendamentoPage() {
     stakeholder: Stakeholder
   ) => {
     try {
+      // VALIDAÇÃO CRÍTICA: Verificar bar_id do pagamento
+      const barIdFinal = pagamento.bar_id || barId;
+      if (!barIdFinal) {
+        throw new Error('Bar não identificado. Certifique-se de que o pagamento tem um bar associado.');
+      }
+
       // Validar que a categoria foi selecionada (OBRIGATÓRIO no NIBO)
       if (!pagamento.categoria_id) {
         throw new Error('Categoria é obrigatória. Selecione uma categoria antes de agendar no NIBO.');
@@ -700,16 +819,23 @@ export default function AgendamentoPage() {
 
       const agendamento = {
         stakeholderId: stakeholder.id,
+        stakeholder_nome: stakeholder.name || pagamento.nome_beneficiario,
         dueDate: dataPagamento,
         scheduleDate: dataPagamento,
         categoria_id: pagamento.categoria_id,
+        categoria_nome: pagamento.categoria_nome,
         centro_custo_id: pagamento.centro_custo_id || '',
+        centro_custo_nome: pagamento.centro_custo_nome,
         accrualDate: dataCompetencia,
         value: valorNumerico,
         description:
           pagamento.descricao ||
           `Pagamento PIX para ${pagamento.nome_beneficiario}`,
         reference: pagamento.codigo_solic || undefined,
+        bar_id: barIdFinal,
+        bar_nome: pagamento.bar_nome || barNome,
+        criado_por_id: pagamento.criado_por_id || user?.id,
+        criado_por_nome: pagamento.criado_por_nome || user?.name || user?.email,
       };
 
       const response = await fetch('/api/financeiro/nibo/schedules', {
@@ -735,6 +861,8 @@ export default function AgendamentoPage() {
                   ...p,
                   nibo_agendamento_id: data.data.id,
                   updated_at: new Date().toISOString(),
+                  atualizado_por_id: user?.id,
+                  atualizado_por_nome: user?.name || user?.email || 'Usuário',
                 }
               : p
           )
@@ -755,6 +883,8 @@ export default function AgendamentoPage() {
                 ...p,
                 status: 'erro',
                 updated_at: new Date().toISOString(),
+                atualizado_por_id: user?.id,
+                atualizado_por_nome: user?.name || user?.email || 'Usuário',
               }
             : p
         )
@@ -952,6 +1082,171 @@ export default function AgendamentoPage() {
     });
   };
 
+  // Função para pagar TODOS os agendados no Inter de uma vez
+  const pagarAgendadosInter = async () => {
+    // VALIDAÇÃO CRÍTICA: Verificar se o bar está selecionado
+    if (!barId) {
+      toast({
+        title: '❌ Nenhum bar selecionado',
+        description: 'Selecione um bar antes de processar pagamentos',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // VALIDAÇÃO CRÍTICA: Verificar se tem credenciais do Inter
+    if (!credenciaisDisponiveis.inter) {
+      toast({
+        title: '❌ Credenciais Inter não configuradas',
+        description: `O bar "${barNome}" não possui credenciais Inter (certificados PIX) configuradas. Configure antes de continuar.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    const agendados = pagamentos.filter(p => p.status === 'agendado');
+    
+    if (agendados.length === 0) {
+      toast({
+        title: 'Nenhum pagamento agendado',
+        description: 'Não há pagamentos com status "agendado" para processar',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Verificar se todos os pagamentos são do bar atual
+    const pagamentosOutroBar = agendados.filter(p => p.bar_id && p.bar_id !== barId);
+    if (pagamentosOutroBar.length > 0) {
+      toast({
+        title: '⚠️ Pagamentos de outro bar detectados',
+        description: `${pagamentosOutroBar.length} pagamento(s) pertencem a outro bar. Selecione o bar correto ou remova-os.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Verificar se todos têm chave PIX
+    const semChavePix = agendados.filter(p => !p.chave_pix);
+    if (semChavePix.length > 0) {
+      toast({
+        title: 'Chave PIX faltando',
+        description: `${semChavePix.length} pagamento(s) não possuem chave PIX cadastrada`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setPagandoPixId('all'); // Indicador de que está processando todos
+    let sucessos = 0;
+    let erros = 0;
+
+    toast({
+      title: 'Iniciando processamento...',
+      description: `Enviando ${agendados.length} pagamento(s) PIX para o Inter`,
+    });
+
+    for (const pagamento of agendados) {
+      try {
+        // Extrair valor numérico
+        const valorLimpo = pagamento.valor.replace(/[^\d,.-]/g, '').replace(',', '.');
+        const valorNumerico = parseFloat(valorLimpo);
+
+        if (isNaN(valorNumerico) || valorNumerico <= 0) {
+          throw new Error('Valor inválido para pagamento');
+        }
+
+        const response = await fetch('/api/financeiro/inter/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            valor: valorNumerico.toString(),
+            destinatario: pagamento.nome_beneficiario,
+            chave: pagamento.chave_pix,
+            data_pagamento: pagamento.data_pagamento,
+            descricao: pagamento.descricao || `Pagamento para ${pagamento.nome_beneficiario}`,
+            bar_id: pagamento.bar_id || barId,
+            agendamento_id: pagamento.nibo_agendamento_id, // Para vincular o código de solicitação ao agendamento
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Atualizar status do pagamento
+          setPagamentos(prev =>
+            prev.map(p =>
+              p.id === pagamento.id
+                ? {
+                    ...p,
+                    status: 'aguardando_aprovacao' as const,
+                    inter_aprovacao_id: data.data?.codigoSolicitacao,
+                    codigo_solic: data.data?.codigoSolicitacao,
+                    updated_at: new Date().toISOString(),
+                    atualizado_por_id: user?.id,
+                    atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                  }
+                : p
+            )
+          );
+          sucessos++;
+        } else {
+          // Atualizar status para erro
+          setPagamentos(prev =>
+            prev.map(p =>
+              p.id === pagamento.id
+                ? { 
+                    ...p, 
+                    status: 'erro_inter' as const, 
+                    updated_at: new Date().toISOString(),
+                    atualizado_por_id: user?.id,
+                    atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                  }
+                : p
+            )
+          );
+          erros++;
+          console.error(`Erro ao enviar PIX para ${pagamento.nome_beneficiario}:`, data.error);
+        }
+      } catch (error: any) {
+        console.error(`Erro ao enviar PIX para ${pagamento.nome_beneficiario}:`, error);
+        
+        setPagamentos(prev =>
+          prev.map(p =>
+            p.id === pagamento.id
+              ? { 
+                  ...p, 
+                  status: 'erro_inter' as const, 
+                  updated_at: new Date().toISOString(),
+                  atualizado_por_id: user?.id,
+                  atualizado_por_nome: user?.name || user?.email || 'Usuário',
+                }
+              : p
+          )
+        );
+        erros++;
+      }
+
+      // Pequeno delay entre requisições para não sobrecarregar a API
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    setPagandoPixId(null);
+
+    if (erros === 0) {
+      toast({
+        title: '✅ Todos os PIX enviados!',
+        description: `${sucessos} pagamento(s) enviados para aprovação no Inter`,
+      });
+    } else {
+      toast({
+        title: '⚠️ Processamento concluído com erros',
+        description: `${sucessos} sucesso(s), ${erros} erro(s)`,
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Função para processar dados colados automaticamente
   const processarDadosAutomatico = async (conta: 'Ordinário' | 'Deboche') => {
     if (dadosPlanilha.length === 0) {
@@ -1122,6 +1417,18 @@ export default function AgendamentoPage() {
                 )}
               </div>
             </div>
+
+            {/* Indicador de bar ativo - só mostra se tudo estiver ok */}
+            {barId && credenciaisDisponiveis.verificado && credenciaisDisponiveis.nibo && credenciaisDisponiveis.inter && (
+              <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-sm text-green-700 dark:text-green-300 font-medium">
+                    Bar ativo: {barNome} - Credenciais NIBO e Inter configuradas
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col lg:flex-row gap-6">
@@ -1176,6 +1483,20 @@ export default function AgendamentoPage() {
                     </span>
                   </div>
 
+                  <div className="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/20 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                        <Clock className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                        Aguardando Aprovação
+                      </span>
+                    </div>
+                    <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                      {metricas.aguardandoAprovacao}
+                    </span>
+                  </div>
+
                   <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
@@ -1208,11 +1529,30 @@ export default function AgendamentoPage() {
                   <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
                     <Button
                       onClick={agendarPagamentos}
-                      disabled={isProcessing || metricas.pendentes === 0}
+                      disabled={isProcessing || metricas.pendentes === 0 || !credenciaisDisponiveis.nibo || !barId}
                       className="w-full btn-primary"
+                      title={!credenciaisDisponiveis.nibo ? 'Credenciais NIBO não configuradas para este bar' : ''}
                     >
                       <Play className="w-4 h-4 mr-2" />
                       Agendar no NIBO
+                    </Button>
+                    <Button
+                      onClick={pagarAgendadosInter}
+                      disabled={isProcessing || pagandoPixId !== null || metricas.agendados === 0 || !credenciaisDisponiveis.inter || !barId}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white disabled:bg-gray-400"
+                      title={!credenciaisDisponiveis.inter ? 'Credenciais Inter não configuradas para este bar' : ''}
+                    >
+                      {pagandoPixId ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Processando PIX...
+                        </>
+                      ) : (
+                        <>
+                          <Banknote className="w-4 h-4 mr-2" />
+                          Pagar Agendados no Inter ({metricas.agendados})
+                        </>
+                      )}
                     </Button>
                   </div>
                 </CardContent>
@@ -1221,7 +1561,58 @@ export default function AgendamentoPage() {
 
             {/* Conteúdo Principal */}
             <div className="flex-1">
-              {/* Tabs de Funcionalidades */}
+              {/* Bloquear tudo se não houver bar ou credenciais */}
+              {/* Estado de loading enquanto verifica credenciais */}
+              {!credenciaisDisponiveis.verificado ? (
+                <Card className="card-dark border-0 shadow-lg">
+                  <CardContent className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <Loader2 className="w-12 h-12 text-blue-600 dark:text-blue-400 animate-spin" />
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        Verificando credenciais...
+                      </h2>
+                      <p className="text-gray-600 dark:text-gray-400">
+                        Aguarde enquanto verificamos as configurações do bar selecionado.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (!barId || !credenciaisDisponiveis.nibo || !credenciaisDisponiveis.inter) ? (
+                <Card className="card-dark border-0 shadow-lg">
+                  <CardContent className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="p-4 bg-red-100 dark:bg-red-900/30 rounded-full">
+                        <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
+                      </div>
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                        {!barId ? 'Nenhum bar selecionado' : 'Credenciais incompletas'}
+                      </h2>
+                      <p className="text-gray-600 dark:text-gray-400 max-w-md">
+                        {!barId 
+                          ? 'Selecione um bar no menu superior para começar a usar a ferramenta de agendamento.'
+                          : `O bar "${barNome}" não possui todas as credenciais configuradas.`
+                        }
+                      </p>
+                      {barId && (
+                        <div className="flex flex-col gap-2 text-sm">
+                          <div className={`flex items-center gap-2 ${credenciaisDisponiveis.nibo ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {credenciaisDisponiveis.nibo ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                            <span>NIBO: {credenciaisDisponiveis.nibo ? 'Configurado' : 'Não configurado'}</span>
+                          </div>
+                          <div className={`flex items-center gap-2 ${credenciaisDisponiveis.inter ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                            {credenciaisDisponiveis.inter ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+                            <span>Inter (PIX): {credenciaisDisponiveis.inter ? 'Configurado' : 'Não configurado'}</span>
+                          </div>
+                        </div>
+                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
+                        Entre em contato com o administrador para configurar as credenciais faltantes.
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+              /* Tabs de Funcionalidades */
               <Tabs defaultValue="manual" className="space-y-6">
                 <TabsList className="grid w-full grid-cols-3 bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
                   <TabsTrigger
@@ -1790,6 +2181,26 @@ export default function AgendamentoPage() {
                                     {pagamento.chave_pix || 'Não informada'}
                                   </div>
                                 </div>
+                                {/* Segunda linha: Categoria, Centro de Custo, Bar, Usuário */}
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm text-gray-600 dark:text-gray-400 mt-2">
+                                  <div>
+                                    <span className="font-medium">Categoria:</span>{' '}
+                                    {pagamento.categoria_nome || 'N/A'}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Centro de Custo:</span>{' '}
+                                    {pagamento.centro_custo_nome || 'N/A'}
+                                  </div>
+                                  <div className={pagamento.bar_id && pagamento.bar_id !== barId ? 'text-orange-600 dark:text-orange-400 font-semibold' : ''}>
+                                    <span className="font-medium">Bar:</span>{' '}
+                                    {pagamento.bar_nome || 'Não definido'}
+                                    {pagamento.bar_id && pagamento.bar_id !== barId && (
+                                      <span className="ml-2 text-xs bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300 px-1 rounded">
+                                        Bar diferente!
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                                 {pagamento.descricao && (
                                   <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">
                                     <span className="font-medium">
@@ -1798,15 +2209,23 @@ export default function AgendamentoPage() {
                                     {pagamento.descricao}
                                   </div>
                                 )}
-                                <div className="mt-2 text-xs text-gray-500 dark:text-gray-500">
-                                  Criado:{' '}
-                                  {new Date(
-                                    pagamento.created_at
-                                  ).toLocaleString('pt-BR')}{' '}
-                                  | Atualizado:{' '}
-                                  {new Date(
-                                    pagamento.updated_at
-                                  ).toLocaleString('pt-BR')}
+                                <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-500 grid grid-cols-2 gap-1">
+                                  <div>
+                                    <span className="font-medium">Criado:</span>{' '}
+                                    {new Date(pagamento.created_at).toLocaleString('pt-BR')}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Criado por:</span>{' '}
+                                    {pagamento.criado_por_nome || 'Não registrado'}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Atualizado:</span>{' '}
+                                    {new Date(pagamento.updated_at).toLocaleString('pt-BR')}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Atualizado por:</span>{' '}
+                                    {pagamento.atualizado_por_nome || 'Não registrado'}
+                                  </div>
                                 </div>
                               </div>
                               <div className="flex items-center gap-2 ml-4">
@@ -1827,6 +2246,7 @@ export default function AgendamentoPage() {
                   </Card>
                 </TabsContent>
               </Tabs>
+              )}
             </div>
           </div>
         </div>

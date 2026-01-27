@@ -120,128 +120,171 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🚀 Iniciando sincronização NPS Reservas...')
-
-    // Obter access token
-    const accessToken = await getAccessToken()
-    
-    // Baixar arquivo do Google Drive como Excel
-    const driveUrl = `https://www.googleapis.com/drive/v3/files/${FILE_ID}/export?mimeType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
-    const fileResponse = await fetch(driveUrl, {
-      headers: { Authorization: `Bearer ${accessToken}` }
-    })
-    
-    if (!fileResponse.ok) {
-      throw new Error(`Erro ao baixar arquivo: ${fileResponse.status} ${fileResponse.statusText}`)
-    }
-    
-    const arrayBuffer = await fileResponse.arrayBuffer()
-    const workbook = read(new Uint8Array(arrayBuffer))
-    
-    // Pegar primeira aba
-    const firstSheetName = workbook.SheetNames[0]
-    const worksheet = workbook.Sheets[firstSheetName]
-    const data = utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][]
-    
-    console.log(`📊 Total de linhas encontradas: ${data.length}`)
-    
-    if (data.length <= 1) {
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Nenhum dado para processar' 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
+    // Parâmetros - bar_id é opcional (se não passar, processa todos)
+    const body = await req.json().catch(() => ({}))
+    const { bar_id } = body
 
     // Conectar ao Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const registrosProcessados: any[] = []
-    let atualizados = 0
+    // Buscar bares para processar
+    const { data: todosOsBares } = await supabase
+      .from('bars')
+      .select('id, nome')
+      .eq('ativo', true)
+    
+    if (!todosOsBares?.length) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Nenhum bar ativo encontrado' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const baresParaProcessar = bar_id 
+      ? todosOsBares.filter(b => b.id === bar_id)
+      : todosOsBares
 
-    // Processar cada linha (pular header)
-    for (let i = 1; i < data.length; i++) {
-      const row = data[i]
-      
-      if (!row || row.length === 0) continue
+    console.log(`🚀 Iniciando sincronização NPS Reservas para ${baresParaProcessar.length} bar(es)...`)
 
-      // Estrutura da planilha de reservas:
-      // Col 0: Carimbo de data/hora (MM/DD/YYYY HH:MM:SS - formato americano)
-      // Col 1: Dia da semana
-      // Col 2: Avaliação (0-10)
-      // Col 3: Comentários (opcional)
+    // Obter access token
+    const accessToken = await getAccessToken()
+
+    const resultadosPorBar: any[] = []
+
+    // ====== LOOP POR CADA BAR ======
+    for (const bar of baresParaProcessar) {
+      console.log(`\n🏪 Processando NPS Reservas para: ${bar.nome} (ID: ${bar.id})`)
       
-      // Extrair data do carimbo (coluna 0) - FORMATO AMERICANO MM/DD/YYYY
-      let dataFormatada = ''
-      const carimbo = String(row[0] || '').trim()
-      
-      if (carimbo) {
-        // Formato: "MM/DD/YYYY HH:MM:SS" (americano)
-        const dateMatch = carimbo.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+      try {
+        // Buscar configuração do arquivo NPS Reservas para este bar
+        const { data: config } = await supabase
+          .from('api_credentials')
+          .select('configuracoes')
+          .eq('sistema', 'google_sheets')
+          .eq('bar_id', bar.id)
+          .eq('ativo', true)
+          .single()
         
-        if (dateMatch) {
-          const month = dateMatch[1].padStart(2, '0')  // Primeiro número = MÊS
-          const day = dateMatch[2].padStart(2, '0')    // Segundo número = DIA
-          const year = dateMatch[3]
-          dataFormatada = `${year}-${month}-${day}`
+        const fileId = config?.configuracoes?.nps_reservas_file_id || FILE_ID
+        console.log(`📋 Usando arquivo: ${fileId}`)
+    
+        // Baixar arquivo do Google Drive como Excel
+        const driveUrl = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`
+        const fileResponse = await fetch(driveUrl, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        })
+        
+        if (!fileResponse.ok) {
+          throw new Error(`Erro ao baixar arquivo: ${fileResponse.status} ${fileResponse.statusText}`)
+        }
+        
+        const arrayBuffer = await fileResponse.arrayBuffer()
+        const workbook = read(new Uint8Array(arrayBuffer))
+        
+        // Pegar primeira aba
+        const firstSheetName = workbook.SheetNames[0]
+        const worksheet = workbook.Sheets[firstSheetName]
+        const data = utils.sheet_to_json(worksheet, { header: 1, raw: false }) as any[][]
+        
+        console.log(`📊 Total de linhas encontradas: ${data.length}`)
+        
+        if (data.length <= 1) {
+          resultadosPorBar.push({
+            bar_id: bar.id,
+            bar_nome: bar.nome,
+            success: true,
+            processados: 0,
+            inseridos: 0,
+            message: 'Nenhum dado para processar'
+          })
+          continue
+        }
+
+        let atualizados = 0
+
+        // Processar cada linha (pular header)
+        for (let i = 1; i < data.length; i++) {
+          const row = data[i]
           
-          if (i <= 5) {
-            console.log(`✅ Linha ${i}: "${carimbo}" (MM/DD/YYYY) → ${dataFormatada}`)
+          if (!row || row.length === 0) continue
+
+          // Extrair data do carimbo (coluna 0) - FORMATO AMERICANO MM/DD/YYYY
+          let dataFormatada = ''
+          const carimbo = String(row[0] || '').trim()
+          
+          if (carimbo) {
+            const dateMatch = carimbo.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/)
+            
+            if (dateMatch) {
+              const month = dateMatch[1].padStart(2, '0')
+              const day = dateMatch[2].padStart(2, '0')
+              const year = dateMatch[3]
+              dataFormatada = `${year}-${month}-${day}`
+            }
+          }
+
+          if (!dataFormatada) continue
+
+          // Extrair avaliação (coluna 2)
+          const nota = parseValue(row[2])
+          const dia_semana = row[1] ? String(row[1]).trim() : null
+          const comentarios = row[3] ? String(row[3]).trim() : null
+
+          // Inserir na tabela nps_reservas
+          const novoRegistro = {
+            bar_id: bar.id,
+            data_pesquisa: dataFormatada,
+            nota,
+            dia_semana,
+            comentarios
+          }
+
+          const { error: erroInsert } = await supabase
+            .from('nps_reservas')
+            .insert(novoRegistro)
+            .select()
+
+          if (!erroInsert) {
+            atualizados++
           }
         }
-      }
 
-      if (!dataFormatada) {
-        console.log(`⚠️ Linha ${i}: Data inválida - pulando`)
-        continue
-      }
-
-      // Extrair avaliação (coluna 2)
-      const nota = parseValue(row[2])
-      const dia_semana = row[1] ? String(row[1]).trim() : null
-      const comentarios = row[3] ? String(row[3]).trim() : null
-
-      // Inserir na tabela nps_reservas
-      const novoRegistro = {
-        bar_id: 3,
-        data_pesquisa: dataFormatada,
-        nota,
-        dia_semana,
-        comentarios
-      }
-
-      const { error: erroInsert } = await supabase
-        .from('nps_reservas')
-        .insert(novoRegistro)
-        .select()
-
-      if (erroInsert) {
-        // Ignorar duplicatas
-        if (erroInsert.code === '23505') {
-          if (i <= 5) {
-            console.log(`⚠️ Linha ${i}: Registro duplicado - pulando`)
-          }
-        } else {
-          console.error(`❌ Erro ao inserir linha ${i}:`, erroInsert)
-        }
-      } else {
-        atualizados++
-        if (i <= 5) {
-          console.log(`✅ Inserido: ${dataFormatada} → Nota: ${nota}, Dia: ${dia_semana}`)
-        }
+        console.log(`✅ ${bar.nome}: ${atualizados} registros inseridos`)
+        
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: true,
+          processados: data.length - 1,
+          inseridos: atualizados
+        })
+      } catch (barError) {
+        console.error(`❌ Erro ao processar ${bar.nome}:`, barError)
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: false,
+          error: barError.message
+        })
       }
     }
+    // ====== FIM DO LOOP DE BARES ======
 
-    console.log(`✅ Sincronização concluída! ${atualizados} registros atualizados`)
+    const totalProcessados = resultadosPorBar.reduce((acc, r) => acc + (r.processados || 0), 0)
+    const totalInseridos = resultadosPorBar.reduce((acc, r) => acc + (r.inseridos || 0), 0)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `${data.length - 1} registros processados, ${atualizados} atualizados com NPS Reservas`
+        message: `NPS Reservas: ${baresParaProcessar.length} bar(es), ${totalProcessados} processados, ${totalInseridos} inseridos`,
+        bares_processados: baresParaProcessar.length,
+        resultados_por_bar: resultadosPorBar,
+        totais: {
+          processados: totalProcessados,
+          inseridos: totalInseridos
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

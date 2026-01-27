@@ -16,11 +16,22 @@ export async function GET(request: NextRequest) {
 
     console.log(`[NIBO-CATEGORIAS] Buscando categorias, bar_id=${barId}, ativo=${ativo}`);
 
-    // Buscar categorias da tabela nibo_categorias
+    // Validar bar_id - OBRIGATÓRIO para separar dados por bar
+    if (!barId) {
+      return NextResponse.json({
+        success: false,
+        error: 'bar_id é obrigatório',
+        categorias: [],
+        total: 0
+      }, { status: 400 });
+    }
+
+    // Buscar categorias da tabela nibo_categorias FILTRADAS POR BAR
     // IMPORTANTE: usar nibo_id como identificador para a API do NIBO
     let query = supabase
       .from('nibo_categorias')
-      .select('id, nibo_id, categoria_nome, categoria_macro, ativo, criado_em, atualizado_em')
+      .select('id, nibo_id, bar_id, categoria_nome, categoria_macro, ativo, criado_em, atualizado_em')
+      .eq('bar_id', parseInt(barId))
       .order('categoria_macro')
       .order('categoria_nome');
 

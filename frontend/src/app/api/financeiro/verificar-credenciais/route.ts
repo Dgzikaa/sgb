@@ -1,0 +1,73 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+export const dynamic = 'force-dynamic';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// GET - Verificar se um bar tem credenciais configuradas
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const barId = parseInt(searchParams.get('bar_id') || '0');
+
+    if (!barId) {
+      return NextResponse.json({
+        success: false,
+        error: 'bar_id é obrigatório',
+        nibo: false,
+        inter: false,
+      });
+    }
+
+    console.log(`[VERIFICAR-CREDENCIAIS] Verificando credenciais para bar_id=${barId}`);
+
+    // Verificar credencial NIBO
+    const { data: niboCredencial } = await supabase
+      .from('api_credentials')
+      .select('id, sistema')
+      .eq('sistema', 'nibo')
+      .eq('bar_id', barId)
+      .eq('ativo', true)
+      .single();
+
+    // Verificar credencial Inter
+    const { data: interCredencial } = await supabase
+      .from('api_credentials')
+      .select('id, sistema')
+      .eq('sistema', 'inter')
+      .eq('bar_id', barId)
+      .eq('ativo', true)
+      .single();
+
+    const resultado = {
+      success: true,
+      bar_id: barId,
+      nibo: !!niboCredencial,
+      inter: !!interCredencial,
+      mensagem: !niboCredencial && !interCredencial
+        ? 'Nenhuma credencial configurada para este bar'
+        : !niboCredencial
+        ? 'Credencial NIBO não configurada'
+        : !interCredencial
+        ? 'Credencial Inter não configurada'
+        : 'Todas as credenciais configuradas',
+    };
+
+    console.log(`[VERIFICAR-CREDENCIAIS] Resultado:`, resultado);
+
+    return NextResponse.json(resultado);
+
+  } catch (error) {
+    console.error('[VERIFICAR-CREDENCIAIS] Erro:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Erro ao verificar credenciais',
+      nibo: false,
+      inter: false,
+    });
+  }
+}

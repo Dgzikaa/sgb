@@ -157,11 +157,11 @@ async function buscarTodosPedidos(eventoId: string, token: string) {
 }
 
 // Função para inserir eventos no banco (processamento em lotes)
-async function inserirEventos(supabase: any, eventos: any[]) {
-  console.log(`\n📊 Inserindo ${eventos.length} eventos no banco...`);
+async function inserirEventos(supabase: any, eventos: any[], barId: number) {
+  console.log(`\n📊 Inserindo ${eventos.length} eventos no banco (bar_id: ${barId})...`);
   
   const eventosParaInserir = eventos.map((evento: any) => ({
-    bar_id: 3, // Ordi
+    bar_id: barId,
     evento_sympla_id: evento.id,
     reference_id: evento.reference_id,
     nome_evento: evento.name,
@@ -195,11 +195,11 @@ async function inserirEventos(supabase: any, eventos: any[]) {
 }
 
 // Função para inserir participantes no banco (processamento em lotes)
-async function inserirParticipantes(supabase: any, eventoId: string, participantes: any[]) {
-  console.log(`\n👥 Inserindo ${participantes.length} participantes do evento ${eventoId}...`);
+async function inserirParticipantes(supabase: any, eventoId: string, participantes: any[], barId: number) {
+  console.log(`\n👥 Inserindo ${participantes.length} participantes do evento ${eventoId} (bar_id: ${barId})...`);
   
   const participantesParaInserir = participantes.map((participante: any) => ({
-    bar_id: 3, // Ordi
+    bar_id: barId,
     participante_sympla_id: participante.id,
     evento_sympla_id: participante.event_id,
     pedido_id: participante.order_id,
@@ -247,11 +247,11 @@ async function inserirParticipantes(supabase: any, eventoId: string, participant
 }
 
 // Função para inserir pedidos no banco (processamento em lotes)
-async function inserirPedidos(supabase: any, eventoId: string, pedidos: any[]) {
-  console.log(`\n💰 Inserindo ${pedidos.length} pedidos do evento ${eventoId}...`);
+async function inserirPedidos(supabase: any, eventoId: string, pedidos: any[], barId: number) {
+  console.log(`\n💰 Inserindo ${pedidos.length} pedidos do evento ${eventoId} (bar_id: ${barId})...`);
   
   const pedidosParaInserir = pedidos.map((pedido: any) => ({
-    bar_id: 3, // Ordi
+    bar_id: barId,
     pedido_sympla_id: pedido.id,
     evento_sympla_id: pedido.event_id,
     data_pedido: pedido.order_date ? new Date(pedido.order_date).toISOString() : null,
@@ -326,239 +326,201 @@ Deno.serve(async (req: Request) => {
   try {
     console.log('🎪 INICIANDO SYMPLA SYNC');
 
-    // Pegar parâmetros da requisição
-    const requestBody = await req.json().catch(() => ({}));
-    // filtro_eventos vazio ou null = sem filtro de nome (pega todos)
-    const { filtro_eventos = '', data_inicio, data_fim } = requestBody;
-    
     // Supabase connection
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
+    // Pegar parâmetros da requisição
+    const requestBody = await req.json().catch(() => ({}));
+    // filtro_eventos vazio ou null = sem filtro de nome (pega todos)
+    // bar_id é opcional - se não passar, processa todos os bares ativos
+    const { filtro_eventos = '', data_inicio, data_fim, bar_id } = requestBody;
+    
+    // Buscar bares para processar
+    const { data: todosOsBares, error: baresError } = await supabase
+      .from('bars')
+      .select('id, nome')
+      .eq('ativo', true);
+    
+    if (baresError || !todosOsBares?.length) {
+      return Response.json({
+        success: false,
+        error: 'Nenhum bar ativo encontrado'
+      }, { status: 400, headers: corsHeaders });
+    }
+    
+    // Se passou bar_id específico, filtra; senão processa todos
+    const baresParaProcessar = bar_id 
+      ? todosOsBares.filter(b => b.id === bar_id)
+      : todosOsBares;
+    
+    console.log(`🏪 Processando ${baresParaProcessar.length} bar(es): ${baresParaProcessar.map(b => b.nome).join(', ')}`);
+
     // Calcular período de datas
     let dataInicioPeriodo: Date;
     let dataFimPeriodo: Date;
     
     if (data_inicio && data_fim) {
-      // Usar datas customizadas
       dataInicioPeriodo = new Date(data_inicio);
       dataInicioPeriodo.setHours(0, 0, 0, 0);
-      
       dataFimPeriodo = new Date(data_fim);
       dataFimPeriodo.setHours(23, 59, 59, 999);
-      
       console.log(`📅 Usando período customizado: ${data_inicio} a ${data_fim}`);
     } else {
-      // Calcular últimos 14 dias automaticamente (igual ao Yuzer)
       const hoje = new Date();
-      
       dataInicioPeriodo = new Date(hoje);
-      dataInicioPeriodo.setDate(hoje.getDate() - 14); // 14 dias atrás
+      dataInicioPeriodo.setDate(hoje.getDate() - 14);
       dataInicioPeriodo.setHours(0, 0, 0, 0);
-      
       dataFimPeriodo = new Date(hoje);
       dataFimPeriodo.setHours(23, 59, 59, 999);
-      
       console.log(`📅 Usando últimos 14 dias: ${dataInicioPeriodo.toISOString().split('T')[0]} a ${dataFimPeriodo.toISOString().split('T')[0]}`);
     }
 
-    // Buscar todos os eventos
     const dataInicioStr = dataInicioPeriodo.toISOString().split('T')[0];
     const dataFimStr = dataFimPeriodo.toISOString().split('T')[0];
     
-    // Obter token do Sympla do banco
-    const symplaToken = await getSymplaTokenFromDB(supabase, 3);
+    // Resultado consolidado de todos os bares
+    const resultadosPorBar: any[] = [];
+    let totalGeralEventos = 0;
+    let totalGeralParticipantes = 0;
+    let totalGeralPedidos = 0;
     
-    console.log(`🔍 Buscando eventos...`);
-    const todosEventos = await buscarTodosEventos(symplaToken);
-    
-    // Filtrar eventos por nome (opcional) e período
-    const eventosParaSincronizar = todosEventos.filter((evento: any) => {
-      // Se filtro_eventos estiver vazio, aceita todos os nomes
-      const temNomeCorreto = !filtro_eventos || 
-        (evento.name && evento.name.toLowerCase().includes(filtro_eventos.toLowerCase()));
-      
-      if (!temNomeCorreto || !evento.start_date) return false;
-      
-      // Filtrar por período
-      const dataEvento = new Date(evento.start_date);
-      const noPeriodo = dataEvento >= dataInicioPeriodo && dataEvento <= dataFimPeriodo;
-      
-      if (noPeriodo) {
-        console.log(`   ✅ Evento incluído: ${evento.name} - ${dataEvento.toISOString().split('T')[0]}`);
-      }
-      
-      return noPeriodo;
-    });
-
-    console.log(`🎯 ${eventosParaSincronizar.length} eventos encontrados ${filtro_eventos ? `com filtro "${filtro_eventos}"` : '(sem filtro de nome)'}`);
-    
-    if (eventosParaSincronizar.length === 0) {
-      return Response.json({
-        success: false,
-        message: `Nenhum evento encontrado ${filtro_eventos ? `com filtro "${filtro_eventos}"` : ''} no período especificado`,
-        data: {
-          total_eventos_api: todosEventos.length,
-          eventos_filtrados: 0,
-          periodo_filtro: {
-            data_inicio: dataInicioStr,
-            data_fim: dataFimStr
-          }
-        }
-      }, { 
-        headers: corsHeaders 
-      });
-    }
-
-    // Inserir eventos no banco
-    const eventosInseridos = await inserirEventos(supabase, eventosParaSincronizar);
-
-    // Processar participantes e pedidos de todos os eventos
-    console.log(`\n🔄 Processando participantes e pedidos de ${eventosParaSincronizar.length} eventos...`);
-    
-    let totalParticipantesTodos = 0;
-    let totalPedidosTodos = 0;
-    let totalCheckinsGeral = 0;
-    let totalValorBruto = 0;
-    let totalValorLiquido = 0;
-    let eventosComErro = 0;
-    
-    for (let i = 0; i < eventosParaSincronizar.length; i++) {
-      const evento = eventosParaSincronizar[i];
-      console.log(`\n📅 [${i + 1}/${eventosParaSincronizar.length}] Processando: "${evento.name}" (${evento.id})`);
+    // ====== LOOP POR CADA BAR ======
+    for (const bar of baresParaProcessar) {
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`🏪 PROCESSANDO BAR: ${bar.nome} (ID: ${bar.id})`);
+      console.log(`${'='.repeat(60)}`);
       
       try {
-        // Registrar início do processamento
-        await registrarLogSync(supabase, evento.id, 'evento', 'processando', {
-          nome_evento: evento.name,
-          data_inicio: evento.start_date
-        });
-        
-        // Buscar TODOS os participantes deste evento
-        const participantesEvento = await buscarTodosParticipantes(evento.id, symplaToken);
-        console.log(`   👥 Participantes encontrados: ${participantesEvento.length}`);
-        totalParticipantesTodos += participantesEvento.length;
-        
-        // Contar check-ins
-        const checkinsEvento = participantesEvento.filter((p: any) => p.checkin?.check_in === true).length;
-        totalCheckinsGeral += checkinsEvento;
-        
-        // Inserir participantes no banco
-        if (participantesEvento.length > 0) {
-          await inserirParticipantes(supabase, evento.id, participantesEvento);
-          
-          await registrarLogSync(supabase, evento.id, 'participantes', 'sucesso', {
-            total_participantes: participantesEvento.length,
-            total_checkins: checkinsEvento
-          });
+        // Obter token do Sympla do banco para este bar
+        let symplaToken: string;
+        try {
+          symplaToken = await getSymplaTokenFromDB(supabase, bar.id);
+        } catch (tokenError) {
+          console.log(`⚠️ Token Sympla não encontrado para ${bar.nome}, pulando...`);
+          resultadosPorBar.push({ bar_id: bar.id, bar_nome: bar.nome, success: false, error: 'Token não encontrado' });
+          continue;
         }
         
-        // Buscar TODOS os pedidos deste evento
-        const pedidosEvento = await buscarTodosPedidos(evento.id, symplaToken);
-        console.log(`   💰 Pedidos encontrados: ${pedidosEvento.length}`);
-        totalPedidosTodos += pedidosEvento.length;
+        console.log(`🔍 Buscando eventos para ${bar.nome}...`);
+        const todosEventos = await buscarTodosEventos(symplaToken);
         
-        // Calcular valores financeiros
-        let valorBrutoEvento = 0;
-        let valorLiquidoEvento = 0;
-        
-        pedidosEvento.forEach((pedido: any) => {
-          valorBrutoEvento += parseFloat(pedido.order_total_sale_price || '0');
-          valorLiquidoEvento += parseFloat(pedido.order_total_net_value || '0');
+        // Filtrar eventos por nome (opcional) e período
+        const eventosParaSincronizar = todosEventos.filter((evento: any) => {
+          const temNomeCorreto = !filtro_eventos || 
+            (evento.name && evento.name.toLowerCase().includes(filtro_eventos.toLowerCase()));
+          if (!temNomeCorreto || !evento.start_date) return false;
+          const dataEvento = new Date(evento.start_date);
+          return dataEvento >= dataInicioPeriodo && dataEvento <= dataFimPeriodo;
         });
+
+        console.log(`🎯 ${eventosParaSincronizar.length} eventos encontrados para ${bar.nome}`);
         
-        totalValorBruto += valorBrutoEvento;
-        totalValorLiquido += valorLiquidoEvento;
+        if (eventosParaSincronizar.length === 0) {
+          resultadosPorBar.push({ bar_id: bar.id, bar_nome: bar.nome, success: true, eventos: 0 });
+          continue;
+        }
+
+        // Inserir eventos no banco
+        await inserirEventos(supabase, eventosParaSincronizar, bar.id);
+
+        let totalParticipantes = 0;
+        let totalPedidos = 0;
+        let totalCheckins = 0;
+        let totalValorBruto = 0;
+        let totalValorLiquido = 0;
+        let eventosComErro = 0;
         
-        // Inserir pedidos no banco
-        if (pedidosEvento.length > 0) {
-          await inserirPedidos(supabase, evento.id, pedidosEvento);
+        for (let i = 0; i < eventosParaSincronizar.length; i++) {
+          const evento = eventosParaSincronizar[i];
           
-          await registrarLogSync(supabase, evento.id, 'pedidos', 'sucesso', {
-            total_pedidos: pedidosEvento.length,
-            valor_bruto: valorBrutoEvento,
-            valor_liquido: valorLiquidoEvento
-          });
+          try {
+            await registrarLogSync(supabase, evento.id, 'evento', 'processando', { nome_evento: evento.name });
+            
+            const participantesEvento = await buscarTodosParticipantes(evento.id, symplaToken);
+            totalParticipantes += participantesEvento.length;
+            const checkinsEvento = participantesEvento.filter((p: any) => p.checkin?.check_in === true).length;
+            totalCheckins += checkinsEvento;
+            
+            if (participantesEvento.length > 0) {
+              await inserirParticipantes(supabase, evento.id, participantesEvento, bar.id);
+            }
+            
+            const pedidosEvento = await buscarTodosPedidos(evento.id, symplaToken);
+            totalPedidos += pedidosEvento.length;
+            
+            pedidosEvento.forEach((pedido: any) => {
+              totalValorBruto += parseFloat(pedido.order_total_sale_price || '0');
+              totalValorLiquido += parseFloat(pedido.order_total_net_value || '0');
+            });
+            
+            if (pedidosEvento.length > 0) {
+              await inserirPedidos(supabase, evento.id, pedidosEvento, bar.id);
+            }
+            
+          } catch (error) {
+            eventosComErro++;
+            console.error(`❌ Erro evento ${evento.id}:`, error);
+          }
         }
         
-        console.log(`   ✅ Evento ${i + 1} processado - Participantes: ${participantesEvento.length}, Pedidos: ${pedidosEvento.length}, Check-ins: ${checkinsEvento}`);
+        // Atualizar eventos_base
+        try {
+          await supabase.rpc('update_eventos_base_with_sympla_yuzer', {
+            p_bar_id: bar.id,
+            p_data_inicio: dataInicioStr,
+            p_data_fim: dataFimStr
+          });
+        } catch (e) { console.warn('⚠️ Erro ao atualizar eventos_base'); }
         
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error(`❌ Erro ao processar evento ${evento.id}:`, error);
-        eventosComErro++;
+        console.log(`✅ ${bar.nome}: ${eventosParaSincronizar.length} eventos, ${totalParticipantes} participantes, ${totalPedidos} pedidos`);
         
-        await registrarLogSync(supabase, evento.id, 'evento', 'erro', {
-          erro: errorMessage,
-          nome_evento: evento.name
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: true,
+          eventos: eventosParaSincronizar.length,
+          participantes: totalParticipantes,
+          pedidos: totalPedidos,
+          checkins: totalCheckins,
+          valor_bruto: totalValorBruto,
+          valor_liquido: totalValorLiquido,
+          erros: eventosComErro
         });
+        
+        totalGeralEventos += eventosParaSincronizar.length;
+        totalGeralParticipantes += totalParticipantes;
+        totalGeralPedidos += totalPedidos;
+        
+      } catch (barError) {
+        const errorMsg = barError instanceof Error ? barError.message : String(barError);
+        console.error(`❌ Erro ao processar ${bar.nome}:`, errorMsg);
+        resultadosPorBar.push({ bar_id: bar.id, bar_nome: bar.nome, success: false, error: errorMsg });
       }
     }
-    
-    console.log(`\n📊 RESUMO GERAL:`);
-    console.log(`   🎪 Eventos processados: ${eventosParaSincronizar.length}`);
-    console.log(`   👥 Total participantes: ${totalParticipantesTodos}`);
-    console.log(`   💰 Total pedidos: ${totalPedidosTodos}`);
-    console.log(`   ✅ Total check-ins: ${totalCheckinsGeral}`);
-    console.log(`   💵 Valor bruto total: R$ ${totalValorBruto.toFixed(2)}`);
-    console.log(`   💰 Valor líquido total: R$ ${totalValorLiquido.toFixed(2)}`);
-    console.log(`   ❌ Eventos com erro: ${eventosComErro}`);
+    // ====== FIM DO LOOP ======
 
-    // Registrar log geral da sincronização
-    await registrarLogSync(supabase, 'GERAL', 'sync_completo', 'sucesso', {
-      eventos_processados: eventosParaSincronizar.length,
-      total_participantes: totalParticipantesTodos,
-      total_pedidos: totalPedidosTodos,
-      total_checkins: totalCheckinsGeral,
-      valor_bruto_total: totalValorBruto,
-      valor_liquido_total: totalValorLiquido,
-      eventos_com_erro: eventosComErro,
-      filtro_usado: filtro_eventos,
-      periodo_sincronizado: {
-        data_inicio: dataInicioStr,
-        data_fim: dataFimStr
-      }
-    });
-
-    // 🔄 ATUALIZAR EVENTOS_BASE COM DADOS DO SYMPLA
-    try {
-      console.log('\n🔄 Atualizando eventos_base com dados do Sympla...');
-      const { data: updateResult, error: updateError } = await supabase
-        .rpc('update_eventos_base_with_sympla_yuzer', {
-          p_bar_id: 3, // Ordinário
-          p_data_inicio: dataInicioStr,
-          p_data_fim: dataFimStr
-        });
-
-      if (updateError) {
-        console.error('❌ Erro ao atualizar eventos_base:', updateError);
-      } else {
-        console.log(`✅ eventos_base atualizado: ${updateResult?.[0]?.mensagem || 'OK'}`);
-      }
-    } catch (updateError) {
-      console.error('❌ Erro ao atualizar eventos_base:', updateError);
-    }
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`📊 RESUMO GERAL - TODOS OS BARES`);
+    console.log(`   🏪 Bares processados: ${baresParaProcessar.length}`);
+    console.log(`   🎪 Total eventos: ${totalGeralEventos}`);
+    console.log(`   👥 Total participantes: ${totalGeralParticipantes}`);
+    console.log(`   💰 Total pedidos: ${totalGeralPedidos}`);
+    console.log(`${'='.repeat(60)}`);
 
     return Response.json({
       success: true,
-      message: `Sympla sync concluído: ${eventosParaSincronizar.length} eventos processados`,
-      result: {
-        eventos_processados: eventosParaSincronizar.length,
-        total_participantes: totalParticipantesTodos,
-        total_pedidos: totalPedidosTodos,
-        total_checkins: totalCheckinsGeral,
-        valor_bruto_total: totalValorBruto,
-        valor_liquido_total: totalValorLiquido,
-        eventos_com_erro: eventosComErro,
-        percentual_checkin: totalParticipantesTodos > 0 ? 
-          Math.round((totalCheckinsGeral / totalParticipantesTodos) * 100 * 100) / 100 : 0,
-        periodo: {
-          data_inicio: dataInicioStr,
-          data_fim: dataFimStr
-        }
-      }
+      message: `Sympla sync concluído: ${baresParaProcessar.length} bar(es), ${totalGeralEventos} eventos`,
+      bares_processados: baresParaProcessar.length,
+      resultados_por_bar: resultadosPorBar,
+      totais: {
+        eventos: totalGeralEventos,
+        participantes: totalGeralParticipantes,
+        pedidos: totalGeralPedidos
+      },
+      periodo: { data_inicio: dataInicioStr, data_fim: dataFimStr }
     }, { headers: corsHeaders });
 
   } catch (error) {

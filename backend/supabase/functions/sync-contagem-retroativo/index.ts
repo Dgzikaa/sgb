@@ -10,9 +10,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const SPREADSHEET_ID = '1QhuD52kQrdCv4XMfKR5NSRMttx6NzVBZO0S8ajQK1H8';
-const API_KEY = 'AIzaSyBKprFuR1gpvoTB4hV16rKlBk3oF0v1BhQ';
-const BAR_ID = 3;
+// Configurações serão buscadas do banco de dados por bar_id
+const DEFAULT_API_KEY = 'AIzaSyBKprFuR1gpvoTB4hV16rKlBk3oF0v1BhQ';
+// BAR_ID será passado como parâmetro obrigatório
 
 interface ContagemData {
   estoque_fechado: number;

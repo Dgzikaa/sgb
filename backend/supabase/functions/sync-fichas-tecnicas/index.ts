@@ -11,8 +11,8 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from '../_shared/cors.ts'
 
-const SPREADSHEET_ID = '1klPn-uVLKeoJ9UA9TkiSYqa7sV7NdUdDEELdgd1q4b8'
-const BAR_ID = 3 // Fixo por enquanto
+// SPREADSHEET_ID será buscado do banco de dados por bar_id
+// BAR_ID é passado como parâmetro obrigatório
 
 // Credenciais da Service Account - carregadas de variável de ambiente
 function getCredentials() {
@@ -57,18 +57,62 @@ interface SheetRendimentoRow {
   tipo_producao?: string
 }
 
+// Função para buscar configuração de fichas técnicas do banco
+async function getBarFichasConfig(supabase: any, barId: number): Promise<{ spreadsheet_id: string }> {
+  const { data, error } = await supabase
+    .from('api_credentials')
+    .select('configuracoes')
+    .eq('sistema', 'google_sheets')
+    .eq('bar_id', barId)
+    .eq('ativo', true)
+    .single()
+
+  if (error || !data) {
+    throw new Error(`Configuração de Google Sheets não encontrada para bar_id=${barId}`)
+  }
+
+  const config = data.configuracoes || {}
+  const spreadsheetId = config.fichas_tecnicas_spreadsheet_id || config.spreadsheet_id
+  
+  if (!spreadsheetId) {
+    throw new Error(`spreadsheet_id não configurado para bar_id=${barId}`)
+  }
+
+  return { spreadsheet_id: spreadsheetId }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    console.log('🔄 Iniciando sincronização de fichas técnicas...')
-
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+
+    // Parâmetros - bar_id é obrigatório
+    const body = await req.json().catch(() => ({}))
+    const { bar_id } = body
+    
+    if (!bar_id) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'bar_id é obrigatório' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    console.log(`🔄 Iniciando sincronização de fichas técnicas para bar_id=${bar_id}...`)
+    
+    // Definir bar_id global para funções internas usarem
+    (globalThis as any).__current_bar_id = bar_id
+    const BAR_ID = bar_id // Manter compatibilidade com código existente
+    
+    // Buscar configuração do bar
+    const barConfig = await getBarFichasConfig(supabaseClient, bar_id)
+    const SPREADSHEET_ID = barConfig.spreadsheet_id
+    console.log(`📋 Planilha: ${SPREADSHEET_ID}`)
 
     console.log('✅ Autenticando com Service Account...')
 
@@ -305,7 +349,9 @@ async function syncReceitas(sheetData: any[][], supabaseClient: any) {
     }
   }
 
-  const bar_id = BAR_ID
+  // bar_id será passado como parâmetro global via contexto
+  // Esta função precisa receber bar_id como parâmetro
+  const bar_id = (globalThis as any).__current_bar_id || 3
   
   // Buscar TODAS as receitas de uma vez (otimização)
   const codigos = Array.from(receitasMap.keys())

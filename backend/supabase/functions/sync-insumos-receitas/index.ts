@@ -12,8 +12,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
  * Chamado automaticamente via pg_cron diariamente
  */
 
-const PLANILHA_ID = '1-BQfRTCa9U_NkRvF8Ksu5aAQYxwcNCbGfRAj_8YwvJ8';
-const BAR_ID = 3;
+// PLANILHA_ID será buscado do banco de dados por bar_id
+// BAR_ID será passado como parâmetro obrigatório
 
 interface InsumoSheet {
   codigo: string;

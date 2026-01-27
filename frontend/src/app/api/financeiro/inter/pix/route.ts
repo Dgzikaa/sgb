@@ -106,12 +106,22 @@ export async function POST(request: NextRequest) {
       destinatario,
       chave,
       data_pagamento,
-      bar_id = 3
+      bar_id,
+      agendamento_id // ID do nibo_agendamentos para atualizar com o código de solicitação
     } = body;
+
+    // Validar bar_id - OBRIGATÓRIO
+    if (!bar_id) {
+      return NextResponse.json(
+        { success: false, error: 'bar_id é obrigatório' },
+        { status: 400 }
+      );
+    }
 
     console.log('[INTER-PIX] Recebendo solicitação de PIX:', {
       valor,
       destinatario,
+      agendamento_id,
       chave,
       data_pagamento,
       bar_id
@@ -232,7 +242,7 @@ export async function POST(request: NextRequest) {
       
       console.log('[INTER-PIX] PIX enviado com sucesso:', codigoSolicitacao);
 
-      // Salvar no banco
+      // Salvar no banco pix_enviados
       const { error: insertError } = await supabase.from('pix_enviados').insert({
         txid: codigoSolicitacao,
         bar_id,
@@ -250,6 +260,27 @@ export async function POST(request: NextRequest) {
 
       if (insertError) {
         console.error('[INTER-PIX] Erro ao salvar no banco:', insertError);
+      }
+
+      // Se tiver agendamento_id, atualizar o nibo_agendamentos com o código de solicitação
+      // Isso permite que o webhook encontre o agendamento quando receber a confirmação
+      if (agendamento_id) {
+        const { error: updateError } = await supabase
+          .from('nibo_agendamentos')
+          .update({
+            inter_codigo_solicitacao: codigoSolicitacao,
+            inter_end_to_end_id: resultadoPix.data?.endToEndId || null,
+            inter_status: 'AGUARDANDO_APROVACAO',
+            status: 'aguardando_aprovacao',
+            atualizado_em: new Date().toISOString()
+          })
+          .eq('id', agendamento_id);
+
+        if (updateError) {
+          console.error('[INTER-PIX] Erro ao atualizar agendamento:', updateError);
+        } else {
+          console.log('[INTER-PIX] Agendamento atualizado com código:', codigoSolicitacao);
+        }
       }
 
       return NextResponse.json({

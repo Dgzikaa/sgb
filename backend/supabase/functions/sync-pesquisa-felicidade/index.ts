@@ -123,166 +123,221 @@ serve(async (req) => {
   }
 
   try {
-    console.log('🔄 Iniciando sincronização da Pesquisa da Felicidade...')
+    // Parâmetros - bar_id é opcional (se não passar, processa todos)
+    const body = await req.json().catch(() => ({}))
+    const { bar_id } = body
+
+    // Inicializar Supabase
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    )
+
+    // Buscar bares para processar
+    const { data: todosOsBares } = await supabaseClient
+      .from('bars')
+      .select('id, nome')
+      .eq('ativo', true)
+    
+    if (!todosOsBares?.length) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Nenhum bar ativo encontrado' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+    
+    const baresParaProcessar = bar_id 
+      ? todosOsBares.filter(b => b.id === bar_id)
+      : todosOsBares
+
+    console.log(`🔄 Iniciando sincronização da Pesquisa da Felicidade para ${baresParaProcessar.length} bar(es)...`)
 
     // 1. Obter Access Token
     console.log('🔑 Obtendo Access Token...')
     const accessToken = await getAccessToken()
     console.log('✅ Token obtido!')
 
-    // 2. Baixar arquivo Excel do Google Drive
-    console.log('📥 Baixando arquivo Excel...')
-    const downloadUrl = `https://www.googleapis.com/drive/v3/files/${FILE_ID}?alt=media`
-    
-    const fileResponse = await fetch(downloadUrl, {
-      headers: { 'Authorization': `Bearer ${accessToken}` },
-    })
+    const resultadosPorBar: any[] = []
 
-    if (!fileResponse.ok) {
-      throw new Error(`Erro ao baixar arquivo: ${fileResponse.status} ${fileResponse.statusText}`)
-    }
-
-    const arrayBuffer = await fileResponse.arrayBuffer()
-    console.log(`✅ Arquivo baixado! (${(arrayBuffer.byteLength / 1024).toFixed(2)} KB)`)
-
-    // 3. Processar Excel com SheetJS
-    console.log('📊 Processando planilha...')
-    const workbook = read(new Uint8Array(arrayBuffer), { type: 'array' })
-    
-    console.log(`📑 Abas encontradas: ${workbook.SheetNames.join(', ')}`)
-
-    // Encontrar aba
-    let targetSheet = workbook.Sheets[SHEET_NAME]
-    if (!targetSheet) {
-      console.warn(`⚠️ Aba "${SHEET_NAME}" não encontrada, usando primeira aba`)
-      targetSheet = workbook.Sheets[workbook.SheetNames[0]]
-    }
-
-    // Converter para JSON
-    const jsonData = utils.sheet_to_json(targetSheet, { 
-      header: 1,
-      defval: '',
-      raw: false
-    }) as any[][]
-
-    console.log(`📊 ${jsonData.length} linhas encontradas`)
-
-    // 4. Processar dados (pular cabeçalho - linhas 0-2)
-    const registros: PesquisaFelicidadeRow[] = []
-    
-    for (let i = 3; i < jsonData.length; i++) {
-      const row = jsonData[i]
+    // ====== LOOP POR CADA BAR ======
+    for (const bar of baresParaProcessar) {
+      console.log(`\n🏪 Processando Pesquisa da Felicidade para: ${bar.nome} (ID: ${bar.id})`)
       
-      if (!row[0] || String(row[0]).trim() === '') continue
-
       try {
-        // Processar data
-        let dataFormatada = ''
-        if (row[0]) {
-          if (typeof row[0] === 'number') {
-            // Data Excel
-            const date = new Date((row[0] - 25569) * 86400 * 1000)
-            const year = date.getFullYear()
-            const month = String(date.getMonth() + 1).padStart(2, '0')
-            const day = String(date.getDate()).padStart(2, '0')
-            dataFormatada = `${year}-${month}-${day}`
-          } else {
-            // String DD/MM/YYYY
-            const parts = String(row[0]).split('/')
-            if (parts.length === 3) {
-              dataFormatada = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
-            }
-          }
+        // Buscar configuração do arquivo para este bar
+        const { data: config } = await supabaseClient
+          .from('api_credentials')
+          .select('configuracoes')
+          .eq('sistema', 'google_sheets')
+          .eq('bar_id', bar.id)
+          .eq('ativo', true)
+          .single()
+        
+        const fileId = config?.configuracoes?.pesquisa_felicidade_file_id || FILE_ID
+        const sheetName = config?.configuracoes?.pesquisa_felicidade_sheet_name || SHEET_NAME
+        console.log(`📋 Usando arquivo: ${fileId}`)
+
+        // 2. Baixar arquivo Excel do Google Drive
+        const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
+        
+        const fileResponse = await fetch(downloadUrl, {
+          headers: { 'Authorization': `Bearer ${accessToken}` },
+        })
+
+        if (!fileResponse.ok) {
+          throw new Error(`Erro ao baixar arquivo: ${fileResponse.status} ${fileResponse.statusText}`)
         }
 
-        if (!dataFormatada) continue
+        const arrayBuffer = await fileResponse.arrayBuffer()
+        console.log(`✅ Arquivo baixado! (${(arrayBuffer.byteLength / 1024).toFixed(2)} KB)`)
 
+        // 3. Processar Excel com SheetJS
+        const workbook = read(new Uint8Array(arrayBuffer), { type: 'array' })
+
+        // Encontrar aba
+        let targetSheet = workbook.Sheets[sheetName]
+        if (!targetSheet) {
+          console.warn(`⚠️ Aba "${sheetName}" não encontrada, usando primeira aba`)
+          targetSheet = workbook.Sheets[workbook.SheetNames[0]]
+        }
+
+        // Converter para JSON
+        const jsonData = utils.sheet_to_json(targetSheet, { 
+          header: 1,
+          defval: '',
+          raw: false
+        }) as any[][]
+
+        console.log(`📊 ${jsonData.length} linhas encontradas`)
+
+        // 4. Processar dados (pular cabeçalho - linhas 0-2)
+        const registros: PesquisaFelicidadeRow[] = []
+        
         // Converter percentuais para escala de 1-5
-        // Percentuais vêm como "91,67%" -> converter para 4.58 -> arredondar para 5
         const parsePercentualToScale = (val: any): number => {
           if (!val) return 0
           const str = String(val).replace('%', '').replace(',', '.')
           const percentual = parseFloat(str)
-          // Converter percentual (0-100) para escala 1-5
-          // 0-20% = 1, 20-40% = 2, 40-60% = 3, 60-80% = 4, 80-100% = 5
           const escala = Math.ceil((percentual / 100) * 5)
-          return Math.max(1, Math.min(5, escala)) // Garantir entre 1 e 5
+          return Math.max(1, Math.min(5, escala))
+        }
+        
+        for (let i = 3; i < jsonData.length; i++) {
+          const row = jsonData[i]
+          
+          if (!row[0] || String(row[0]).trim() === '') continue
+
+          try {
+            // Processar data
+            let dataFormatada = ''
+            if (row[0]) {
+              if (typeof row[0] === 'number') {
+                const date = new Date((row[0] - 25569) * 86400 * 1000)
+                const year = date.getFullYear()
+                const month = String(date.getMonth() + 1).padStart(2, '0')
+                const day = String(date.getDate()).padStart(2, '0')
+                dataFormatada = `${year}-${month}-${day}`
+              } else {
+                const parts = String(row[0]).split('/')
+                if (parts.length === 3) {
+                  dataFormatada = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`
+                }
+              }
+            }
+
+            if (!dataFormatada) continue
+
+            const engajamento = parsePercentualToScale(row[3])
+            const pertencimento = parsePercentualToScale(row[4])
+            const relacionamento = parsePercentualToScale(row[5])
+            const lideranca = parsePercentualToScale(row[6])
+            const reconhecimento = parsePercentualToScale(row[7])
+            
+            const mediaGeral = (engajamento + pertencimento + relacionamento + lideranca + reconhecimento) / 5
+            const resultadoPercentual = (mediaGeral / 5) * 100
+
+            const registro: PesquisaFelicidadeRow = {
+              bar_id: bar.id,
+              data_pesquisa: dataFormatada,
+              setor: row[1] || 'TODOS',
+              quorum: parseInt(row[2]) || 0,
+              eu_comigo_engajamento: engajamento,
+              eu_com_empresa_pertencimento: pertencimento,
+              eu_com_colega_relacionamento: relacionamento,
+              eu_com_gestor_lideranca: lideranca,
+              justica_reconhecimento: reconhecimento,
+              media_geral: parseFloat(mediaGeral.toFixed(2)),
+              resultado_percentual: parseFloat(resultadoPercentual.toFixed(2)),
+              funcionario_nome: 'Equipe',
+            }
+
+            registros.push(registro)
+          } catch (error) {
+            console.error(`⚠️ Erro ao processar linha ${i + 1}:`, error)
+          }
         }
 
-        const engajamento = parsePercentualToScale(row[3])
-        const pertencimento = parsePercentualToScale(row[4])
-        const relacionamento = parsePercentualToScale(row[5])
-        const lideranca = parsePercentualToScale(row[6])
-        const reconhecimento = parsePercentualToScale(row[7])
-        
-        // Calcular média geral (média dos 5 indicadores)
-        const mediaGeral = (engajamento + pertencimento + relacionamento + lideranca + reconhecimento) / 5
-        
-        // Calcular resultado percentual (média / 5 * 100)
-        const resultadoPercentual = (mediaGeral / 5) * 100
+        console.log(`✅ ${registros.length} registros processados`)
 
-        const registro: PesquisaFelicidadeRow = {
-          bar_id: 3,
-          data_pesquisa: dataFormatada,
-          setor: row[1] || 'TODOS',
-          quorum: parseInt(row[2]) || 0,
-          eu_comigo_engajamento: engajamento,
-          eu_com_empresa_pertencimento: pertencimento,
-          eu_com_colega_relacionamento: relacionamento,
-          eu_com_gestor_lideranca: lideranca,
-          justica_reconhecimento: reconhecimento,
-          media_geral: parseFloat(mediaGeral.toFixed(2)),
-          resultado_percentual: parseFloat(resultadoPercentual.toFixed(2)),
-          funcionario_nome: 'Equipe',
+        if (registros.length === 0) {
+          resultadosPorBar.push({
+            bar_id: bar.id,
+            bar_nome: bar.nome,
+            success: true,
+            processados: 0,
+            inseridos: 0,
+            message: 'Nenhum registro para importar'
+          })
+          continue
         }
 
-        registros.push(registro)
-      } catch (error) {
-        console.error(`⚠️ Erro ao processar linha ${i + 1}:`, error)
+        // 5. Inserir no Supabase
+        const { data: insertedData, error: insertError } = await supabaseClient
+          .from('pesquisa_felicidade')
+          .upsert(registros, {
+            onConflict: 'bar_id,data_pesquisa,funcionario_nome,setor',
+            ignoreDuplicates: false
+          })
+          .select()
+
+        if (insertError) {
+          throw insertError
+        }
+
+        console.log(`✅ ${bar.nome}: ${insertedData?.length || 0} registros inseridos/atualizados`)
+        
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: true,
+          processados: registros.length,
+          inseridos: insertedData?.length || 0
+        })
+      } catch (barError) {
+        console.error(`❌ Erro ao processar ${bar.nome}:`, barError)
+        resultadosPorBar.push({
+          bar_id: bar.id,
+          bar_nome: bar.nome,
+          success: false,
+          error: barError.message
+        })
       }
     }
+    // ====== FIM DO LOOP DE BARES ======
 
-    console.log(`✅ ${registros.length} registros processados`)
-
-    if (registros.length === 0) {
-      return new Response(
-        JSON.stringify({ 
-          success: true, 
-          message: 'Nenhum registro novo para importar',
-          total: 0 
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // 5. Inserir no Supabase
-    console.log('💾 Inserindo no Supabase...')
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
-
-    const { data: insertedData, error: insertError } = await supabaseClient
-      .from('pesquisa_felicidade')
-      .upsert(registros, {
-        onConflict: 'bar_id,data_pesquisa,funcionario_nome,setor',
-        ignoreDuplicates: false
-      })
-      .select()
-
-    if (insertError) {
-      console.error('❌ Erro ao inserir dados:', insertError)
-      throw insertError
-    }
-
-    console.log(`✅ ${insertedData?.length || 0} registros inseridos/atualizados`)
+    const totalProcessados = resultadosPorBar.reduce((acc, r) => acc + (r.processados || 0), 0)
+    const totalInseridos = resultadosPorBar.reduce((acc, r) => acc + (r.inseridos || 0), 0)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `${registros.length} registros processados, ${insertedData?.length || 0} inseridos/atualizados`,
-        total: registros.length,
-        inserted: insertedData?.length || 0
+        message: `Pesquisa Felicidade: ${baresParaProcessar.length} bar(es), ${totalProcessados} processados, ${totalInseridos} inseridos`,
+        bares_processados: baresParaProcessar.length,
+        resultados_por_bar: resultadosPorBar,
+        totais: {
+          processados: totalProcessados,
+          inseridos: totalInseridos
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

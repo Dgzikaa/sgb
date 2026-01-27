@@ -1,21 +1,18 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
-import { cookies } from 'next/headers'
+import { getUserAuth } from '@/lib/auth-helper'
 
-const SUPABASE_FUNCTIONS_URL = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(
-  'https://',
-  'https://'
-).replace('.supabase.co', '.supabase.co/functions/v1')
+const SUPABASE_FUNCTIONS_URL = 'https://uqtgsvujwcbymjmvkjhy.supabase.co/functions/v1'
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    // Autenticar usando o sistema de cookies/headers do projeto
+    const user = await getUserAuth(request)
     
-    // Verificar autenticação
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Não autenticado' },
+        { error: 'Não autenticado', help: 'Faça login para acessar o agente' },
         { status: 401 }
       )
     }
@@ -23,45 +20,43 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { bar_id, mensagem } = body
 
-    if (!bar_id || !mensagem) {
+    // Usar bar_id do usuário se não for informado
+    const barIdFinal = bar_id || user.bar_id
+
+    if (!barIdFinal) {
       return NextResponse.json(
-        { error: 'bar_id e mensagem são obrigatórios' },
+        { error: 'bar_id é obrigatório' },
         { status: 400 }
       )
     }
 
-    // Verificar acesso ao bar
-    const { data: acesso } = await supabase
-      .from('usuarios_bar')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('bar_id', bar_id)
-      .single()
-
-    if (!acesso) {
+    if (!mensagem || !mensagem.trim()) {
       return NextResponse.json(
-        { error: 'Sem acesso a este bar' },
-        { status: 403 }
+        { error: 'Mensagem é obrigatória' },
+        { status: 400 }
       )
     }
 
-    // Chamar Edge Function de chat
+    console.log(`🤖 Agente Chat - User: ${user.nome}, Bar: ${barIdFinal}, Msg: ${mensagem.substring(0, 50)}...`)
+
+    // Chamar Edge Function de chat usando service role key
     const response = await fetch(`${SUPABASE_FUNCTIONS_URL}/agente-chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${session.access_token}`
+        'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`
       },
       body: JSON.stringify({
-        bar_id,
-        usuario_id: session.user.id,
-        mensagem
+        bar_id: barIdFinal,
+        usuario_id: user.user_id || user.id.toString(),
+        mensagem: mensagem.trim()
       })
     })
 
     if (!response.ok) {
       const errorText = await response.text()
-      throw new Error(`Edge Function error: ${errorText}`)
+      console.error('❌ Erro Edge Function:', errorText)
+      throw new Error(`Erro ao processar: ${response.status}`)
     }
 
     const data = await response.json()
@@ -69,21 +64,25 @@ export async function POST(request: Request) {
     return NextResponse.json(data)
 
   } catch (error: any) {
-    console.error('Erro na API /api/agente/chat:', error)
+    console.error('❌ Erro na API /api/agente/chat:', error)
     return NextResponse.json(
-      { error: error.message || 'Erro ao processar chat' },
+      { 
+        success: false,
+        error: error.message || 'Erro ao processar chat',
+        resposta: 'Desculpe, houve um erro ao processar sua mensagem. Tente novamente.'
+      },
       { status: 500 }
     )
   }
 }
 
 // Buscar histórico de conversas
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    // Autenticar usando o sistema de cookies/headers do projeto
+    const user = await getUserAuth(request)
     
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Não autenticado' },
         { status: 401 }
@@ -91,7 +90,7 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url)
-    const bar_id = searchParams.get('bar_id')
+    const bar_id = searchParams.get('bar_id') || user.bar_id?.toString()
     const limit = parseInt(searchParams.get('limit') || '50')
 
     if (!bar_id) {
@@ -101,20 +100,7 @@ export async function GET(request: Request) {
       )
     }
 
-    // Verificar acesso
-    const { data: acesso } = await supabase
-      .from('usuarios_bar')
-      .select('*')
-      .eq('user_id', session.user.id)
-      .eq('bar_id', parseInt(bar_id))
-      .single()
-
-    if (!acesso) {
-      return NextResponse.json(
-        { error: 'Sem acesso a este bar' },
-        { status: 403 }
-      )
-    }
+    const supabase = createServerClient()
 
     // Buscar conversas
     const { data: conversas, error } = await supabase
@@ -125,6 +111,7 @@ export async function GET(request: Request) {
       .limit(limit)
 
     if (error) {
+      console.error('❌ Erro ao buscar conversas:', error)
       throw error
     }
 
@@ -134,7 +121,7 @@ export async function GET(request: Request) {
     })
 
   } catch (error: any) {
-    console.error('Erro ao buscar conversas:', error)
+    console.error('❌ Erro ao buscar conversas:', error)
     return NextResponse.json(
       { error: error.message || 'Erro ao buscar conversas' },
       { status: 500 }

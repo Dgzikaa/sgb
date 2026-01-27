@@ -14,7 +14,17 @@ const NIBO_BASE_URL = 'https://api.nibo.com.br/empresas/v1';
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const barId = searchParams.get('bar_id') || '3'; // Default: Ordinário Bar
+    const barId = searchParams.get('bar_id');
+
+    // Validar bar_id - OBRIGATÓRIO para separar dados por bar
+    if (!barId) {
+      return NextResponse.json({
+        success: false,
+        error: 'bar_id é obrigatório',
+        centrosCusto: [],
+        total: 0
+      }, { status: 400 });
+    }
 
     console.log(`[NIBO-CENTROS-CUSTO] Buscando centros de custo para bar_id=${barId}`);
 
@@ -87,12 +97,35 @@ export async function GET(request: NextRequest) {
       // Formatar resposta do NIBO
       const centrosCusto = (niboData.items || niboData || []).map((item: any) => ({
         id: item.id || item.costCenterId,
+        nibo_id: item.id || item.costCenterId,
         nome: item.name || item.description || 'Sem nome',
         codigo: item.code || null,
-        ativo: item.isActive !== false
+        ativo: item.isActive !== false,
+        bar_id: parseInt(barId)
       }));
 
       console.log(`[NIBO-CENTROS-CUSTO] ${centrosCusto.length} centros de custo encontrados via API NIBO`);
+
+      // Salvar/atualizar centros de custo na tabela local para cache
+      for (const centro of centrosCusto) {
+        const { error: upsertError } = await supabase
+          .from('nibo_centros_custo')
+          .upsert({
+            nibo_id: centro.nibo_id,
+            bar_id: parseInt(barId),
+            nome: centro.nome,
+            codigo: centro.codigo,
+            ativo: centro.ativo,
+            atualizado_em: new Date().toISOString()
+          }, {
+            onConflict: 'nibo_id,bar_id',
+            ignoreDuplicates: false
+          });
+
+        if (upsertError) {
+          console.warn(`[NIBO-CENTROS-CUSTO] Erro ao salvar centro ${centro.nome}:`, upsertError);
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -104,18 +137,36 @@ export async function GET(request: NextRequest) {
     } catch (niboError) {
       console.error('[NIBO-CENTROS-CUSTO] Erro na API NIBO:', niboError);
       
-      // Fallback: retornar lista padrão baseada nos bares
-      const centrosCustoPadrao = [
-        { id: 'ordinario', nome: 'Ordinário Bar' },
-        { id: 'deboche', nome: 'Deboche Bar' },
-        { id: 'geral', nome: 'Geral' }
-      ];
+      // Fallback: buscar do banco local
+      const { data: centrosLocais } = await supabase
+        .from('nibo_centros_custo')
+        .select('*')
+        .eq('bar_id', parseInt(barId))
+        .eq('ativo', true)
+        .order('nome');
+
+      if (centrosLocais && centrosLocais.length > 0) {
+        return NextResponse.json({
+          success: true,
+          centrosCusto: centrosLocais.map(c => ({
+            id: c.nibo_id || c.id,
+            nibo_id: c.nibo_id,
+            nome: c.nome,
+            codigo: c.codigo,
+            ativo: c.ativo,
+            bar_id: c.bar_id
+          })),
+          total: centrosLocais.length,
+          source: 'database_cache'
+        });
+      }
 
       return NextResponse.json({
         success: true,
-        centrosCusto: centrosCustoPadrao,
-        total: centrosCustoPadrao.length,
-        source: 'fallback'
+        centrosCusto: [],
+        total: 0,
+        source: 'empty',
+        aviso: 'Não foi possível buscar centros de custo da API NIBO e não há cache local'
       });
     }
 
