@@ -34,8 +34,9 @@ export async function GET(request: NextRequest) {
     const barId = parseInt(searchParams.get('bar_id') || '3');
     const criadoApos = searchParams.get('criado_apos'); // Data mínima de criação (createDate)
     const competenciaAntes = searchParams.get('competencia_antes'); // Data máxima de competência (accrualDate)
-    const competenciaApos = searchParams.get('competencia_apos'); // Data mínima de competência (opcional)
+    let competenciaApos = searchParams.get('competencia_apos'); // Data mínima de competência (opcional)
     const criadoAntes = searchParams.get('criado_antes'); // Data máxima de criação (opcional)
+    const mesesRetroativos = parseInt(searchParams.get('meses_retroativos') || '3'); // Limite de meses (padrão: 3 para maior velocidade)
 
     console.log(`[NIBO-CONSULTAS] Buscando lançamentos retroativos, bar_id=${barId}`);
     console.log(`[NIBO-CONSULTAS] Filtros: criado_apos=${criadoApos}, competencia_antes=${competenciaAntes}`);
@@ -59,35 +60,37 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Buscar schedules da API NIBO com paginação
-    // Filtrar por accrualDate (competência) primeiro, depois filtrar createDate no código
-    const allSchedules: any[] = [];
-    let skip = 0;
-    const top = 200;
-    let hasMore = true;
-    let pageCount = 0;
-    const maxPages = 50; // Limite de segurança
-
-    // Montar filtro OData para competência
-    let odataFilter = `accrualDate lt ${competenciaAntes}T00:00:00Z`;
-    
-    if (competenciaApos) {
-      odataFilter += ` and accrualDate ge ${competenciaApos}T00:00:00Z`;
+    // OTIMIZAÇÃO: Se competencia_apos não foi informado, limitar automaticamente aos últimos X meses
+    // Isso evita buscar TODO o histórico da empresa e torna a consulta muito mais rápida
+    let limiteAplicado = false;
+    if (!competenciaApos) {
+      const competenciaAntesDate = new Date(competenciaAntes);
+      const limiteInferior = new Date(competenciaAntesDate);
+      limiteInferior.setMonth(limiteInferior.getMonth() - mesesRetroativos);
+      competenciaApos = limiteInferior.toISOString().split('T')[0];
+      limiteAplicado = true;
+      console.log(`[NIBO-CONSULTAS] OTIMIZAÇÃO: Aplicado limite automático de ${mesesRetroativos} meses. competencia_apos=${competenciaApos}`);
     }
+
+    // Buscar schedules da API NIBO com paginação PARALELA para máxima velocidade
+    const allSchedules: any[] = [];
+    const top = 200;
+    const maxPages = 15; // Reduzido para 15 páginas (3.000 registros máx)
+    const parallelBatch = 4; // Buscar 4 páginas em paralelo
+
+    // Montar filtro OData para competência - SEMPRE com limite inferior
+    const odataFilter = `accrualDate lt ${competenciaAntes}T00:00:00Z and accrualDate ge ${competenciaApos}T00:00:00Z`;
 
     console.log(`[NIBO-CONSULTAS] Filtro OData: ${odataFilter}`);
 
-    while (hasMore && pageCount < maxPages) {
-      pageCount++;
-      
+    // Função para buscar uma página específica
+    const fetchPage = async (skip: number): Promise<any[]> => {
       const url = new URL(`${NIBO_BASE_URL}/schedules`);
       url.searchParams.set('apitoken', credencial.api_token);
       url.searchParams.set('$filter', odataFilter);
       url.searchParams.set('$orderby', 'createDate desc');
       url.searchParams.set('$top', top.toString());
       url.searchParams.set('$skip', skip.toString());
-
-      console.log(`[NIBO-CONSULTAS] Buscando página ${pageCount}...`);
 
       const response = await fetch(url.toString(), {
         method: 'GET',
@@ -98,32 +101,53 @@ export async function GET(request: NextRequest) {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('[NIBO-CONSULTAS] Erro API:', response.status, errorText);
-        throw new Error(`Erro NIBO: ${response.status} - ${errorText}`);
+        console.error('[NIBO-CONSULTAS] Erro página skip=' + skip);
+        return [];
       }
 
       const data = await response.json();
-      const items = data?.items || [];
+      return data?.items || [];
+    };
 
-      if (items.length === 0) {
-        hasMore = false;
-        break;
+    // Buscar páginas em lotes paralelos
+    let pageCount = 0;
+    let hasMore = true;
+
+    while (hasMore && pageCount < maxPages) {
+      // Criar batch de requisições paralelas
+      const batchPromises: Promise<any[]>[] = [];
+      const batchStart = pageCount;
+      
+      for (let i = 0; i < parallelBatch && (pageCount + i) < maxPages; i++) {
+        const skip = (batchStart + i) * top;
+        batchPromises.push(fetchPage(skip));
       }
 
-      allSchedules.push(...items);
-      console.log(`[NIBO-CONSULTAS] Página ${pageCount}: ${items.length} registros (total: ${allSchedules.length})`);
-
-      skip += top;
-      if (items.length < top) {
-        hasMore = false;
+      console.log(`[NIBO-CONSULTAS] Buscando ${batchPromises.length} páginas em paralelo (${pageCount + 1}-${pageCount + batchPromises.length})...`);
+      
+      // Executar todas as requisições em paralelo
+      const results = await Promise.all(batchPromises);
+      
+      // Processar resultados
+      let totalItemsInBatch = 0;
+      for (const items of results) {
+        if (items.length > 0) {
+          allSchedules.push(...items);
+          totalItemsInBatch += items.length;
+        }
       }
 
-      // Pequena pausa para não sobrecarregar a API
-      await new Promise(resolve => setTimeout(resolve, 100));
+      pageCount += batchPromises.length;
+      console.log(`[NIBO-CONSULTAS] Batch concluído: ${totalItemsInBatch} registros (total: ${allSchedules.length})`);
+
+      // Verificar se deve continuar (se alguma página veio vazia ou incompleta)
+      const lastResult = results[results.length - 1];
+      if (!lastResult || lastResult.length < top) {
+        hasMore = false;
+      }
     }
 
-    console.log(`[NIBO-CONSULTAS] Total de registros da API: ${allSchedules.length}`);
+    console.log(`[NIBO-CONSULTAS] Total de registros da API: ${allSchedules.length} (${pageCount} páginas)`);
 
     // Filtrar por createDate (data de criação) no código
     // A API NIBO pode não suportar filtro por createDate no OData
@@ -239,11 +263,15 @@ export async function GET(request: NextRequest) {
         criadoAntes: criadoAntes || null,
         competenciaAntes,
         competenciaApos: competenciaApos || null,
-        barId
+        barId,
+        mesesRetroativos,
+        limiteAutoAplicado: limiteAplicado
       },
       estatisticas,
       data: resultado,
-      total: resultado.length
+      total: resultado.length,
+      paginasConsultadas: pageCount,
+      registrosApiOriginal: allSchedules.length
     });
 
   } catch (error) {

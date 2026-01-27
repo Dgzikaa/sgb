@@ -71,10 +71,14 @@ interface ConsultaResult {
     competenciaAntes: string;
     competenciaApos: string | null;
     barId: number;
+    mesesRetroativos: number;
+    limiteAutoAplicado: boolean;
   };
   estatisticas: Estatisticas;
   data: LancamentoRetroativo[];
   total: number;
+  paginasConsultadas: number;
+  registrosApiOriginal: number;
 }
 
 const formatCurrency = (value: number) => {
@@ -102,6 +106,7 @@ export default function ConsultasPage() {
   const [criadoAntes, setCriadoAntes] = useState('');
   const [competenciaAntes, setCompetenciaAntes] = useState('');
   const [competenciaApos, setCompetenciaApos] = useState('');
+  const [mesesRetroativos, setMesesRetroativos] = useState('3'); // Limite de meses para buscar (3 = mais rápido)
   
   // Estados de resultado
   const [resultado, setResultado] = useState<ConsultaResult | null>(null);
@@ -131,7 +136,8 @@ export default function ConsultasPage() {
       const params = new URLSearchParams({
         bar_id: selectedBar.id.toString(),
         criado_apos: criadoApos,
-        competencia_antes: competenciaAntes
+        competencia_antes: competenciaAntes,
+        meses_retroativos: mesesRetroativos
       });
 
       if (criadoAntes) {
@@ -158,7 +164,7 @@ export default function ConsultasPage() {
     } finally {
       setLoading(false);
     }
-  }, [criadoApos, criadoAntes, competenciaAntes, competenciaApos, selectedBar?.id, barLoading]);
+  }, [criadoApos, criadoAntes, competenciaAntes, competenciaApos, mesesRetroativos, selectedBar?.id, barLoading]);
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => {
@@ -352,6 +358,37 @@ export default function ConsultasPage() {
               </div>
             </div>
 
+            {/* Limite de meses - para otimização */}
+            <div className="flex flex-col sm:flex-row sm:items-end gap-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex-1">
+                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  Limite de meses retroativos
+                </label>
+                <select
+                  value={mesesRetroativos}
+                  onChange={(e) => setMesesRetroativos(e.target.value)}
+                  disabled={!!competenciaApos}
+                  className="w-full sm:w-48 px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="3">Últimos 3 meses</option>
+                  <option value="6">Últimos 6 meses</option>
+                  <option value="9">Últimos 9 meses</option>
+                  <option value="12">Últimos 12 meses</option>
+                  <option value="18">Últimos 18 meses</option>
+                  <option value="24">Últimos 24 meses</option>
+                </select>
+                {competenciaApos ? (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Desabilitado quando "Competência após" é preenchido
+                  </p>
+                ) : (
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    Busca automática limitada a {mesesRetroativos} meses antes da data de competência
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Botão de busca */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
@@ -399,6 +436,21 @@ export default function ConsultasPage() {
         {/* Resultados */}
         {resultado && (
           <div className="space-y-6">
+            {/* Info sobre o limite aplicado */}
+            {resultado.filtros.limiteAutoAplicado && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-blue-800 dark:text-blue-200">
+                    <p className="font-medium">Otimização aplicada</p>
+                    <p>A busca foi limitada aos últimos <strong>{resultado.filtros.mesesRetroativos} meses</strong> (a partir de {formatDate(resultado.filtros.competenciaApos)}) para maior velocidade. 
+                    Consultadas <strong>{resultado.paginasConsultadas}</strong> páginas ({resultado.registrosApiOriginal} registros da API). 
+                    Se precisar buscar mais histórico, aumente o limite ou preencha o campo "Competência após".</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Cards de Estatísticas */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg">
