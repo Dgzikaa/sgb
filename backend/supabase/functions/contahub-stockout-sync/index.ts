@@ -197,7 +197,8 @@ async function processStockoutData(supabase: any, rawData: any, dataDate: string
   const stockoutRecords = [];
 
   // Lista de termos a serem excluídos do stockout (case insensitive)
-  const termosExcluidos = ['happy hour', 'happyhour', 'happy-hour'];
+  // Inclui: Happy Hour (não disponíveis às 20h) e Dose Dupla (variações que não devem contar)
+  const termosExcluidos = ['happy hour', 'happyhour', 'happy-hour', 'dose dupla', 'dose dulpa'];
 
   for (const item of rawData.list) {
     // Verificar se o produto deve ser excluído
@@ -380,11 +381,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
     // Processar e salvar dados
     const result = await processStockoutData(supabase, rawData, data_date, bar_id);
     
-    // Calcular estatísticas (excluindo produtos Happy Hour)
-    const termosExcluidos = ['happy hour', 'happyhour', 'happy-hour'];
+    // Calcular estatísticas (excluindo produtos Happy Hour e Dose Dupla)
+    const termosExcluidosStats = ['happy hour', 'happyhour', 'happy-hour', 'dose dupla', 'dose dulpa'];
     const produtosFiltrados = rawData?.list?.filter((item: any) => {
       const prdDesc = (item.prd_desc || '').toLowerCase();
-      return !termosExcluidos.some(termo => prdDesc.includes(termo));
+      return !termosExcluidosStats.some(termo => prdDesc.includes(termo));
     }) || [];
     
     const totalProdutos = produtosFiltrados.length;

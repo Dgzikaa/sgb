@@ -86,6 +86,12 @@ export async function POST(request: NextRequest) {
         .not('prd_desc', 'ilike', '%HappyHour%')
         .not('prd_desc', 'ilike', '%Happy-Hour%');
       
+      // PRODUTOS DOSE DUPLA (excluir - são variações que não devem contar no stockout)
+      // Inclui "Dose Dulpa" que é um typo comum
+      query = query
+        .not('prd_desc', 'ilike', '%Dose Dupla%')
+        .not('prd_desc', 'ilike', '%Dose Dulpa%');
+      
       // CATEGORIAS A IGNORAR (por descrição do produto)
       query = query
         .not('prd_desc', 'ilike', '%Balde%')     // Baldes
