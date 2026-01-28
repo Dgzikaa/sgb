@@ -132,16 +132,21 @@ export async function GET(
     });
 
     // 5. Buscar reservas do Getin para esses telefones
-    // Definir período de busca (campanha até agora, ou período especificado)
+    // IMPORTANTE: Usar horário exato do disparo para verificar conversões reais
+    // Uma reserva só conta como conversão se foi CRIADA após o disparo da campanha
+    const timestampDisparo = campanha.iniciado_em || campanha.created_at;
     const dataInicioReserva = dataInicio || campanha.created_at?.split('T')[0];
     const dataFimReserva = dataFim || new Date().toISOString().split('T')[0];
 
+    console.log(`📊 Análise campanha ${campanhaId}: disparo em ${timestampDisparo}`);
+
     const { data: reservas } = await supabase
       .from('getin_reservas')
-      .select('customer_phone, status, reservation_date, no_show')
+      .select('customer_phone, status, reservation_date, no_show, created_at')
       .eq('bar_id', barId)
       .gte('reservation_date', dataInicioReserva)
       .lte('reservation_date', dataFimReserva)
+      .gte('created_at', timestampDisparo) // ← NOVA LÓGICA: só reservas criadas APÓS o disparo
       .not('customer_phone', 'is', null);
 
     // Mapear reservas por telefone normalizado

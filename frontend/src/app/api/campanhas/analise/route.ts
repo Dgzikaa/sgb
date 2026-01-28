@@ -160,6 +160,8 @@ export async function GET(request: NextRequest) {
 async function calcularAnaliseResumida(campanha: CampanhaUnificada, barId: number) {
   try {
     // Definir período de busca (data da campanha até hoje)
+    // IMPORTANTE: Usar timestamp completo para verificar conversões reais
+    const timestampDisparo = campanha.created_at; // Timestamp completo do disparo
     const dataInicio = campanha.created_at.split('T')[0];
     const dataFim = new Date().toISOString().split('T')[0];
 
@@ -206,12 +208,14 @@ async function calcularAnaliseResumida(campanha: CampanhaUnificada, barId: numbe
     }
 
     // Buscar reservas do Getin
+    // IMPORTANTE: Só conta reservas criadas APÓS o disparo da campanha
     const { data: reservas } = await supabase
       .from('getin_reservas')
-      .select('customer_phone, status, reservation_date')
+      .select('customer_phone, status, reservation_date, created_at')
       .eq('bar_id', barId)
       .gte('reservation_date', dataInicio)
       .lte('reservation_date', dataFim)
+      .gte('created_at', timestampDisparo) // ← Só reservas criadas após disparo
       .not('customer_phone', 'is', null);
 
     // Cruzar telefones com reservas
@@ -377,6 +381,8 @@ async function getAnaliseDetalhada(
     }
 
     // Definir período
+    // IMPORTANTE: Usar timestamp completo para verificar conversões reais
+    const timestampDisparo = campanha.created_at; // Timestamp completo do disparo
     const dataInicio = campanha.created_at.split('T')[0];
     const dataFim = new Date().toISOString().split('T')[0];
 
@@ -390,12 +396,14 @@ async function getAnaliseDetalhada(
     const telefonesParaBusca = Array.from(telefonesNormalizados.values());
 
     // Buscar reservas
+    // IMPORTANTE: Só conta reservas criadas APÓS o disparo da campanha
     const { data: reservas } = await supabase
       .from('getin_reservas')
-      .select('customer_phone, status, reservation_date')
+      .select('customer_phone, status, reservation_date, created_at')
       .eq('bar_id', barId)
       .gte('reservation_date', dataInicio)
       .lte('reservation_date', dataFim)
+      .gte('created_at', timestampDisparo) // ← Só reservas criadas após disparo
       .not('customer_phone', 'is', null);
 
     const reservasPorTelefone = new Map<string, { status: string; data: string }>();
